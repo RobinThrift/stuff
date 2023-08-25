@@ -49,8 +49,7 @@ func (rt *Router) handleLoginPost(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	if len(validationErrs) != 0 {
-		renderLoginPage(w, r, validationErrs)
-		return nil
+		return renderLoginPage(w, r, validationErrs)
 	}
 
 	if user.RequiresPasswordChange {
