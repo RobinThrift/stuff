@@ -1,0 +1,58 @@
+package views
+
+templ button(_type string, classname string) {
+	<button type={ _type } class={ 
+			templ.SafeClass("px-3 py-4 text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 focus:outline-none rounded-md"),
+			templ.SafeClass(classname),
+		 }>
+		{ children... }
+	</button>
+}
+
+templ buttonLink(href string, classname string) {
+	<a href={ templ.SafeURL(href) } class={ 
+			templ.SafeClass("px-3 py-4 text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 focus:outline-none rounded-md"),
+			templ.SafeClass(classname),
+		 }>
+		{ children... }
+	</a>
+}
+
+templ logo(classname string) {
+	<div class={ "flex justify-center items-center rainbow", templ.SafeClass(classname) }>
+		<svg xmlns="http://www.w3.org/2000/svg" class="h-20 mr-2" viewBox="0 0 256 256"><defs><linearGradient id="gradient" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:var(--tw-gradient-from);"></stop><stop offset="100%" style="stop-color:var(--tw-gradient-to);"></stop></linearGradient></defs><path style="fill: url(#gradient);" d="M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z"></path></svg>
+		<h2 class="font-extrabold text-transparent text-8xl bg-clip-text bg-gradient-to-bl">Stuff</h2>
+	</div>
+}
+
+type inputProps struct {
+	_type string
+	label string
+	name string
+	placeholder string
+	class string
+	required bool
+	autoComplete string
+	icon templ.Component
+	validationErr string
+	}
+
+templ input(props inputProps) {
+	<div class={ templ.SafeClass(props.class) }>
+		<label for={ props.name } class="block mb-2 text-sm text-gray-600">{ props.label }</label>
+		<div class="relative">
+			if props.icon != nil {
+				<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+					<div class="h-4 w-4">
+						{! props.icon }
+					</div>
+				</span>
+			}
+			<input required?={ props.required } type={ props._type } name={ props.name } id={ props.name } placeholder={ props.placeholder } auto-complete={ props.autoComplete } class="w-full px-3 py-2 pl-11 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300"/>
+			if props.validationErr != "" {
+				<span class="text-red-500">{ props.validationErr }</span>
+			}
+		</div>
+	</div>
+}
+

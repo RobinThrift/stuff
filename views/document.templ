@@ -1,0 +1,16 @@
+package views
+
+templ Document(title string, body templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<title>Stuff – { title }</title>
+			<link rel="stylesheet" href="/static/styles.css"/>
+		</head>
+		<body>
+			{! body }
+		</body>
+	</html>
+}
+
