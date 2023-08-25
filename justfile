@@ -1,4 +1,9 @@
 export PATH := "./node_modules/.bin:" + env_var('PATH')
+export STUFF_LOG_LEVEL := "debug"
+export STUFF_LOG_FORMAT := "console"
+export STUFF_ADDRESS := "localhost:8080"
+export STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD := "admin"
+
 staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.54.2"
 sql_migrate_version := "v1.5.2"
