@@ -25,6 +25,7 @@ func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 	mux.Post("/auth/changepassword", views.HTTPHandlerFuncErr(rt.handleChangePasswordPost))
 }
 
+// [GET] /login
 func (rt *Router) handleLoginGet(w http.ResponseWriter, r *http.Request) error {
 	_, ok := session.Get[any](r.Context(), userForPasswordChangeKey)
 	if ok {
@@ -35,6 +36,7 @@ func (rt *Router) handleLoginGet(w http.ResponseWriter, r *http.Request) error {
 	return renderLoginPage(w, r, map[string]string{})
 }
 
+// [POST] /login
 func (rt *Router) handleLoginPost(w http.ResponseWriter, r *http.Request) error {
 	user, validationErrs, err := rt.Control.getUserForCredentials(r.Context(), r.PostForm.Get("username"), r.PostForm.Get("password"))
 	if err != nil {
@@ -63,6 +65,7 @@ func (rt *Router) handleLoginPost(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
+// [GET] /logout
 func (rt *Router) handleLogoutGet(w http.ResponseWriter, r *http.Request) error {
 	err := session.Destroy(r.Context())
 	if err != nil {
@@ -73,6 +76,7 @@ func (rt *Router) handleLogoutGet(w http.ResponseWriter, r *http.Request) error 
 	return nil
 }
 
+// [GET] /auth/changepassword
 func (rt *Router) handleChangePasswordGet(w http.ResponseWriter, r *http.Request) error {
 	_, ok := session.Get[*users.User](r.Context(), userForPasswordChangeKey)
 	if !ok {
@@ -83,6 +87,7 @@ func (rt *Router) handleChangePasswordGet(w http.ResponseWriter, r *http.Request
 	return renderChangePasswordPage(w, r, map[string]string{})
 }
 
+// [POST] /auth/changepassword
 func (rt *Router) handleChangePasswordPost(w http.ResponseWriter, r *http.Request) error {
 	user, ok := session.Get[*users.User](r.Context(), userForPasswordChangeKey)
 	if !ok {
