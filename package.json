@@ -1,0 +1,8 @@
+{
+    "name": "@kodeshack/stuff",
+    "version": "1.0.0",
+    "public": true,
+    "devDependencies": {
+        "tailwindcss": "^3.3.3"
+    }
+}

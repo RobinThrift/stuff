@@ -23,6 +23,12 @@ lint:
 	go run honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ./...
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} run ./...
 
+build: _gen-templ tailwind-build
+    go build ./bin/stuff
+
+run: _gen-templ tailwind-build
+    go run ./bin/stuff
+
 watch:
     go run github.com/bokwoon95/wgo@{{wgo_version}} \
         -xdir node_modules \
@@ -31,6 +37,18 @@ watch:
         -xfile 'justfile' \
         -xfile 'stuff.db' \
         just _watch-run
+
+_watch-run: _gen-templ
+    go run -tags dev ./bin/stuff
+
+tailwind-build:
+    tailwindcss -i ./views/styles.css -o ./build/styles.css
+
+alias tw := tailwind
+tailwind:
+    tailwindcss -i ./views/styles.css -o ./build/styles.css --watch
+
+
 alias gen := generate
 generate:
     rm -f _stuff.db
