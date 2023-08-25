@@ -1,4 +1,12 @@
 -- +migrate Up
+CREATE TABLE sessions (
+    id         INTEGER PRIMARY KEY,
+    token      TEXT NOT NULL,
+    data       BLOB NOT NULL,
+    expires_at TEXT NOT NULL
+);
+CREATE UNIQUE INDEX unique_session_token ON sessions(token);
+
 CREATE TABLE local_auth_users (
     id                       INTEGER PRIMARY KEY,
     username                 TEXT    NOT NULL,
@@ -113,3 +121,6 @@ DROP TABLE users;
 
 DROP INDEX unique_usernames_auth_method_local;
 DROP TABLE local_auth_users;
+
+DROP INDEX unique_session_token;
+DROP TABLE sessions;

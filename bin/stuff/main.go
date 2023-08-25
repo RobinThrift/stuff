@@ -5,9 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
+	"github.com/kodeshack/stuff/assets"
 	"github.com/kodeshack/stuff/auth"
 	"github.com/kodeshack/stuff/config"
 	"github.com/kodeshack/stuff/log"
@@ -70,6 +73,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		LocalAuthRepo: localAuthRepo,
 		Argon2Params:  auth.Argon2Params(config.Auth.Local.Argon2Params),
 	}
+	assetsCtrl := &assets.Control{DB: database}
 
 	err = authCtrl.RunInitSetup(ctx, "admin", config.Auth.Local.InitialAdminPassword)
 	if err != nil {
@@ -77,8 +81,16 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	}
 
 	authRouter := &auth.Router{Control: authCtrl}
+	assetsRouter := &assets.Router{Control: assetsCtrl}
 
-	srv, err := server.NewServer(config.Addr, authRouter.RegisterRoutes)
+	sm := scs.New()
+	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
+	sm.Lifetime = 24 * time.Hour
+	sm.Cookie.HttpOnly = true
+	sm.Cookie.Persist = true
+	sm.Cookie.SameSite = http.SameSiteStrictMode
+
+	srv, err := server.NewServer(config.Addr, sm, authRouter.RegisterRoutes, assetsRouter.RegisterRoutes)
 	if err != nil {
 		return nil, err
 	}

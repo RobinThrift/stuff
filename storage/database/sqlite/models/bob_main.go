@@ -14,6 +14,7 @@ var TableNames = struct {
 	AssetFiles       string
 	Assets           string
 	LocalAuthUsers   string
+	Sessions         string
 	Tags             string
 	Users            string
 	CustomAttrNames  string
@@ -25,6 +26,7 @@ var TableNames = struct {
 	AssetFiles:       "asset_files",
 	Assets:           "assets",
 	LocalAuthUsers:   "local_auth_users",
+	Sessions:         "sessions",
 	Tags:             "tags",
 	Users:            "users",
 	CustomAttrNames:  "custom_attr_names",
@@ -38,6 +40,7 @@ var ColumnNames = struct {
 	AssetFiles       assetFileColumnNames
 	Assets           assetColumnNames
 	LocalAuthUsers   localAuthUserColumnNames
+	Sessions         sessionColumnNames
 	Tags             tagColumnNames
 	Users            userColumnNames
 	CustomAttrNames  customAttrNameColumnNames
@@ -93,6 +96,12 @@ var ColumnNames = struct {
 		CreatedAt:              "created_at",
 		UpdatedAt:              "updated_at",
 	},
+	Sessions: sessionColumnNames{
+		ID:        "id",
+		Token:     "token",
+		Data:      "data",
+		ExpiresAt: "expires_at",
+	},
 	Tags: tagColumnNames{
 		ID:        "id",
 		Tag:       "tag",
@@ -137,6 +146,7 @@ func Where[Q sqlite.Filterable]() struct {
 	AssetFiles       assetFileWhere[Q]
 	Assets           assetWhere[Q]
 	LocalAuthUsers   localAuthUserWhere[Q]
+	Sessions         sessionWhere[Q]
 	Tags             tagWhere[Q]
 	Users            userWhere[Q]
 	CustomAttrNames  customAttrNameWhere[Q]
@@ -149,6 +159,7 @@ func Where[Q sqlite.Filterable]() struct {
 		AssetFiles       assetFileWhere[Q]
 		Assets           assetWhere[Q]
 		LocalAuthUsers   localAuthUserWhere[Q]
+		Sessions         sessionWhere[Q]
 		Tags             tagWhere[Q]
 		Users            userWhere[Q]
 		CustomAttrNames  customAttrNameWhere[Q]
@@ -160,6 +171,7 @@ func Where[Q sqlite.Filterable]() struct {
 		AssetFiles:       AssetFileWhere[Q](),
 		Assets:           AssetWhere[Q](),
 		LocalAuthUsers:   LocalAuthUserWhere[Q](),
+		Sessions:         SessionWhere[Q](),
 		Tags:             TagWhere[Q](),
 		Users:            UserWhere[Q](),
 		CustomAttrNames:  CustomAttrNameWhere[Q](),

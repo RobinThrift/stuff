@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
@@ -19,21 +18,15 @@ type Server struct {
 
 type RegisterRoutes func(mux *chi.Mux)
 
-func NewServer(addr string, routes ...RegisterRoutes) (*Server, error) {
+func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*Server, error) {
 	srv := &Server{}
-
-	sessionManager := scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
-	sessionManager.Cookie.HttpOnly = true
-	sessionManager.Cookie.Persist = true
-	sessionManager.Cookie.SameSite = http.SameSiteStrictMode
 
 	mux := chi.NewMux()
 
 	mux.Use(
 		requestIDMiddleware,
 		logReqMiddleware,
-		sessionMiddleware(sessionManager),
+		sessionMiddleware(sm),
 		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/"}),
 	)
 

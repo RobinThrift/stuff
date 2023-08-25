@@ -17,6 +17,7 @@ type Factory struct {
 	baseAssetFileMods       AssetFileModSlice
 	baseAssetMods           AssetModSlice
 	baseLocalAuthUserMods   LocalAuthUserModSlice
+	baseSessionMods         SessionModSlice
 	baseTagMods             TagModSlice
 	baseUserMods            UserModSlice
 	baseCustomAttrNameMods  CustomAttrNameModSlice
@@ -62,6 +63,18 @@ func (f *Factory) NewLocalAuthUser(mods ...LocalAuthUserMod) *LocalAuthUserTempl
 	}
 
 	LocalAuthUserModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewSession(mods ...SessionMod) *SessionTemplate {
+	o := &SessionTemplate{f: f}
+
+	if f != nil {
+		f.baseSessionMods.Apply(o)
+	}
+
+	SessionModSlice(mods).Apply(o)
 
 	return o
 }
@@ -174,6 +187,14 @@ func (f *Factory) AddBaseLocalAuthUserMod(mods ...LocalAuthUserMod) {
 	f.baseLocalAuthUserMods = append(f.baseLocalAuthUserMods, mods...)
 }
 
+func (f *Factory) ClearBaseSessionMods() {
+	f.baseSessionMods = nil
+}
+
+func (f *Factory) AddBaseSessionMod(mods ...SessionMod) {
+	f.baseSessionMods = append(f.baseSessionMods, mods...)
+}
+
 func (f *Factory) ClearBaseTagMods() {
 	f.baseTagMods = nil
 }
@@ -236,6 +257,7 @@ var (
 	assetFileCtx       = newContextual[*models.AssetFile]("assetFile")
 	assetCtx           = newContextual[*models.Asset]("asset")
 	localAuthUserCtx   = newContextual[*models.LocalAuthUser]("localAuthUser")
+	sessionCtx         = newContextual[*models.Session]("session")
 	tagCtx             = newContextual[*models.Tag]("tag")
 	userCtx            = newContextual[*models.User]("user")
 	customAttrNameCtx  = newContextual[*models.CustomAttrName]("customAttrName")

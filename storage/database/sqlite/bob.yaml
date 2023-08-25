@@ -17,6 +17,15 @@ replacements:
     type: "types.SQLiteDatetime"
     imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
 
+- match:
+    name: "expires_at"
+    db_type: "TEXT"
+
+  replace:
+    type: "types.SQLiteDatetime"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+
+
 sqlite:
   dsn: "_stuff.db"
 
