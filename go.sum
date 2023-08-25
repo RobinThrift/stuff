@@ -4,6 +4,8 @@ github.com/Masterminds/semver/v3 v3.2.0 h1:3MEsd0SM6jqZojhjLWWeBY+Kcjy9i6MQAeY7Y
 github.com/Masterminds/semver/v3 v3.2.0/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/Masterminds/sprig/v3 v3.2.3 h1:eL2fZNezLomi0uOLqjQoN6BfsDD+fyLtgbJMAj9n6YA=
 github.com/Masterminds/sprig/v3 v3.2.3/go.mod h1:rXcFaZ2zZbLRJv/xSysmlgIM1u11eBaRMhvYXJNkGuM=
+github.com/a-h/templ v0.2.316 h1:s52MtlmUG9vg2xDSWTR/cnc5VbukVjCJyNvprCNFp0Q=
+github.com/a-h/templ v0.2.316/go.mod h1:3oc37WS5rpDvFGi6yeknvTKt50xCu67ywQsM43Wr4PU=
 github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf h1:+edM69bH/X6JpYPmJYBRLanAMe1V5yRXYU3hHUovGcE=
 github.com/aarondl/json v0.0.0-20221020222930-8b0db17ef1bf/go.mod h1:FZqLhJSj2tg0ZN48GB1zvj00+ZYcHPqgsC7yzcgCq6k=
 github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0 h1:vLrhbOWVPxtHao/QthU8pcpI4DbtSGnWgH7qIJf8F6k=

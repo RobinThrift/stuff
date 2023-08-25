@@ -3,6 +3,7 @@ module github.com/kodeshack/stuff
 go 1.21.0
 
 require (
+	github.com/a-h/templ v0.2.316
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/gorilla/csrf v1.7.1
