@@ -1,0 +1,52 @@
+linters-settings:
+  varnamelen:
+    max-distance: 30
+    check-receiver: false
+    check-return: false
+    check-type-param: false
+    ignore-type-assert-ok: true
+    ignore-map-index-ok: true
+    ignore-chan-recv-ok: true
+    ignore-names:
+    - err
+    - id
+    - tx
+    - db
+    - tt
+    ignore-decls:
+    - t testing.T
+    - e error
+    - i int
+    - T any
+    - w http.ResponseWriter
+    - r *http.Request
+
+linters:
+  disable:
+  - staticcheck
+  enable:
+  - errcheck
+  - gosimple
+  - govet
+  - ineffassign
+  - typecheck
+  - unused
+  - asciicheck
+  - asasalint
+  - contextcheck
+  - containedctx
+  - exhaustive
+  - exportloopref
+  - gocheckcompilerdirectives
+  - gocognit
+  - nestif
+  - prealloc
+  - predeclared
+  - reassign
+  - unconvert
+  - unparam
+  - varnamelen
+  - goconst
+  - misspell
+  - gocritic
+  - gocyclo

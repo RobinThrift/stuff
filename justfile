@@ -1,4 +1,6 @@
 export PATH := "./node_modules/.bin:" + env_var('PATH')
+staticcheck_version := "2023.1.5"
+golangci_lint_version := "v1.54.2"
 
 sql_migrate_config := "./storage/database/sqlite/sqlmigrate.yaml"
 
@@ -8,6 +10,9 @@ _default:
 fmt:
     go fmt ./...
     go run github.com/a-h/templ/cmd/templ@0.2.316 fmt .
+lint:
+	go run honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ./...
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} run ./...
 
 alias gen := generate
 generate:
