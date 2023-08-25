@@ -67,7 +67,7 @@ func (*LocalAuthRepo) CreateLocalUser(ctx context.Context, tx bob.Executor, user
 	}, nil
 }
 
-func (*LocalAuthRepo) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) (error) {
+func (*LocalAuthRepo) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) error {
 	_, err := models.LocalAuthUsers.UpdateQ(ctx, tx, &models.LocalAuthUserSetter{
 		Algorithm:              omit.From(user.Algorithm),
 		Params:                 omit.From(user.Params),
