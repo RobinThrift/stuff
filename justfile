@@ -11,6 +11,10 @@ sql_migrate_config := "./storage/database/sqlite/sqlmigrate.yaml"
 _default:
     @just --list
 
+clean:
+    rm -rf node_modules stuff.db build
+    go clean -cache
+
 fmt:
     go fmt ./...
     go run github.com/a-h/templ/cmd/templ@{{templ_version}} fmt ./views
