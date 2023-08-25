@@ -1,5 +1,5 @@
 production:
   dialect: sqlite3
-  datasource: stuff.db
+  datasource: _stuff.db
   dir: storage/database/sqlite/migrations
   table: migrations

@@ -1,0 +1,32 @@
+replacements:
+- match: 
+    name: "created_at"
+    db_type: "TEXT"
+    default: "(strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))"
+
+  replace:
+    type: "types.SQLiteDatetime"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+
+- match: 
+    name: "updated_at"
+    db_type: "TEXT"
+    default: "(strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))"
+
+  replace:
+    type: "types.SQLiteDatetime"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+
+sqlite:
+  dsn: "_stuff.db"
+
+  output: "storage/database/sqlite/models"
+  pkgname: "models"
+
+  no_factory: true
+  no_tests: true
+  no_back_referencing: true
+
+
+  except:
+    migrations:
