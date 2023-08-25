@@ -1,5 +1,5 @@
 replacements:
-- match: 
+- match:
     name: "created_at"
     db_type: "TEXT"
     default: "(strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))"
@@ -8,7 +8,7 @@ replacements:
     type: "types.SQLiteDatetime"
     imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
 
-- match: 
+- match:
     name: "updated_at"
     db_type: "TEXT"
     default: "(strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))"

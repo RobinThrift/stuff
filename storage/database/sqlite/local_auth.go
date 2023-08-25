@@ -14,8 +14,7 @@ import (
 	"github.com/stephenafamo/bob"
 )
 
-type LocalAuthRepo struct {
-}
+type LocalAuthRepo struct{}
 
 func (*LocalAuthRepo) GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*database.LocalAuthUser, error) {
 	query := models.LocalAuthUsers.Query(ctx, tx, models.SelectWhere.LocalAuthUsers.Username.EQ(username))
