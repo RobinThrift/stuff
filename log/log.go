@@ -29,7 +29,11 @@ func SetupLogger(loglevel string, format string) error {
 	switch format {
 	case "console":
 		noColor := determineNoColor()
-		handler = &consoleHandler{level: level, out: os.Stdout, errout: os.Stderr, noColor: noColor}
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		handler = &consoleHandler{level: level, out: os.Stdout, errout: os.Stderr, noColor: noColor, cwd: cwd}
 	case "json":
 		handler = slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: level})
 	default:

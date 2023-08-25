@@ -15,6 +15,8 @@ import (
 )
 
 type consoleHandler struct {
+	cwd string
+
 	level  slog.Level
 	out    io.Writer
 	errout io.Writer
@@ -38,48 +40,69 @@ func (h *consoleHandler) Handle(_ context.Context, record slog.Record) error {
 
 	var msg bytes.Buffer
 
-	color := ""
-	if record.Level == slog.LevelWarn && !h.noColor {
-		color = "\x1b[33m" // yellow
-	}
-
-	if record.Level >= slog.LevelError && !h.noColor {
-		color = "\x1b[31m" // red
-	}
-
-	if record.Level == slog.LevelDebug && !h.noColor {
-		color = "\x1b[34m" // blue
-	}
-
-	msg.WriteString(color)
-
 	if h.level <= slog.LevelDebug {
 		msg.WriteString(record.Time.Format(time.TimeOnly))
 		msg.WriteString(" ")
+	}
+
+	if !h.noColor {
+		color := ""
+		switch record.Level {
+		case slog.LevelDebug:
+			color = "\x1b[34m" // blue
+		case slog.LevelInfo:
+			color = "\x1b[32m" // green
+		case slog.LevelWarn:
+			color = "\x1b[33m" // yellow
+		case slog.LevelError:
+			color = "\x1b[31m" // red
+		}
+
+		msg.WriteString(color)
+		msg.WriteString(record.Level.String())
+		msg.WriteString("\x1b[0m ") // reset
 	}
 
 	if h.level <= slog.LevelDebug && record.PC != 0 {
 		f := runtime.FuncForPC(record.PC)
 		file, line := f.FileLine(record.PC)
 
-		file = strings.Replace(file, "github.com/kodeshack/stuff/", "", 1)
+		file = strings.Replace(file, h.cwd+"/", "", 1)
+
+		if !h.noColor {
+			msg.WriteString("\x1b[90m") // reset
+		}
 
 		msg.WriteString(file)
 		msg.WriteString(":")
 		msg.WriteString(fmt.Sprint(line))
 		msg.WriteString(" ")
+
+		if !h.noColor {
+			msg.WriteString("\x1b[0m") // reset
+		}
 	}
 
 	msg.WriteString(record.Message)
 
-	msg.WriteString("\n")
-
-	if color != "" && !h.noColor {
-		_, err := msg.WriteString("\x1b[0m") // reset
-		if err != nil {
-			return err
+	record.Attrs(func(a slog.Attr) bool {
+		msg.WriteRune(' ')
+		if a.Key == "error" && !h.noColor {
+			msg.WriteString("\x1b[31m")
+			msg.WriteString(a.Key)
+			msg.WriteString("\x1b[0m")
+		} else {
+			msg.WriteString(a.Key)
 		}
-	}
+
+		msg.WriteString(`="`)
+		msg.WriteString(a.Value.String())
+		msg.WriteRune('"')
+
+		return true
+	})
+
+	msg.WriteString("\n")
 
 	_, err := out.Write(msg.Bytes())
 	return err
@@ -116,12 +139,8 @@ func (h *consoleHandler) WithGroup(name string) slog.Handler {
 }
 
 func determineNoColor() bool {
-	if asBool, err := strconv.ParseBool(os.Getenv("CLICOLOR")); err == nil {
-		return !asBool
-	}
-
-	if asBool, err := strconv.ParseBool(os.Getenv("SF_CLI_NO_COLOR")); err == nil {
-		return !asBool
+	if asBool, err := strconv.ParseBool(os.Getenv("NO_COLOR")); err == nil {
+		return asBool
 	}
 
 	return false
