@@ -22,19 +22,18 @@ clean:
 
 fmt:
     go fmt ./...
-    go run github.com/a-h/templ/cmd/templ@{{templ_version}} fmt ./views
 
 lint:
 	go run honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ./...
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} run ./...
 
-build: _gen-templ tailwind-build
+build: _gen-templ tailwind-build _copy-js-libs
     go build ./bin/stuff
 
-run: _gen-templ tailwind-build
+run: _gen-templ tailwind-build _copy-js-libs
     go run ./bin/stuff
 
-watch:
+watch: _copy-js-libs
     go run github.com/bokwoon95/wgo@{{wgo_version}} \
         -xdir node_modules \
         -xdir build \
@@ -59,12 +58,16 @@ generate:
     rm -f _stuff.db
     go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} up -env production -config={{sql_migrate_config}}
     go run github.com/stephenafamo/bob/gen/bobgen-sqlite@{{bobgen_version}} -c ./storage/database/sqlite/bob.yaml
+    go fmt ./...
     rm _stuff.db
     just _gen-templ
 
 
 _gen-templ:
-    go run github.com/a-h/templ/cmd/templ@{{templ_version}} generate -path ./views
+    go run github.com/a-h/templ/cmd/templ@{{templ_version}} generate -path .
 
 new-migration name:
     go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} new -env production -config={{sql_migrate_config}} {{name}}
+
+_copy-js-libs:
+    cp node_modules/alpinejs/dist/cdn.min.js build/alpine.min.js
