@@ -10,6 +10,8 @@ type Config struct {
 
 	Database Database `json:"database"`
 
+	DefaultCurrency string `json:"defaultCurrency"`
+
 	Auth Auth `json:"auth"`
 
 	LogLevel  string `json:"logLevel"`
@@ -45,8 +47,7 @@ func NewConfigFromEnv() (*Config, error) {
 			Path: getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),
 		},
 
-		LogLevel:  getEnvDefault("STUFF_LOG_LEVEL", "info"),
-		LogFormat: getEnvDefault("STUFF_LOG_FORMAT", "json"),
+		DefaultCurrency: getEnvDefault("STUFF_DEFAULT_CURRENCY", "EUR"),
 
 		Auth: Auth{
 			Local: LocalAuth{
@@ -61,6 +62,9 @@ func NewConfigFromEnv() (*Config, error) {
 				},
 			},
 		},
+
+		LogLevel:  getEnvDefault("STUFF_LOG_LEVEL", "info"),
+		LogFormat: getEnvDefault("STUFF_LOG_FORMAT", "json"),
 	}, nil
 }
 
