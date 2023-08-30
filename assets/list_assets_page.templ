@@ -1,0 +1,149 @@
+package assets
+
+import "fmt"
+import "github.com/kodeshack/stuff/views"
+
+type listAssetsPageProps struct {
+	assets []*Asset
+	total int
+	query listAssetsQuery
+	infomsg string
+}
+
+templ listAssetsPage(props listAssetsPageProps) {
+	@views.Layout() {
+		<header class="my-5 flex items-end">
+			<h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
+			@views.ButtonLink("/assets/new", "ml-8") { New Asset }
+		</header>
+
+		<table class="min-w-full divide-y divide-neutral-200">
+			<thead>
+				<tr class="text-neutral-500">
+					<th class="first:pl-0 last:pr-0 py-3 text-xs font-medium text-left uppercase">
+						<div class="flex items-center">
+							<input id="selected_all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+							<label for="selected_all" class="sr-only">checkbox</label>
+						</div>
+					</th>
+					<th class="first:pl-0 last:pr-0 py-3 text-xs font-medium text-left uppercase"></th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Tag</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Image</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Name</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Category</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Location</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">Status</th>
+					<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-right uppercase">Actions</th>
+				</tr>
+			</thead>
+
+			<tbody class="divide-y divide-neutral-200" x-data="{ open: {} }">
+				for _, asset := range props.assets {
+					<tr class="text-neutral-800">
+						<td class="first:pl-0 last:pr-0 py-4 text-sm whitespace-nowrap">
+							<div class="flex items-center">
+								<input id={fmt.Sprintf("selected_%s", asset.ID)} name={fmt.Sprintf("selected_%s", asset.ID)} type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+								<label for={fmt.Sprintf("selected_%s", asset.ID)} class="sr-only">{fmt.Sprintf("selectk%s", asset.ID)}</label>
+							</div>
+						</td>
+						<td class="py-4 text-sm whitespace-nowrap">
+							<button
+								class="border-0 bg-transparent text-blue-400 hover:text-purple-500"
+								@click={fmt.Sprintf("open['%d'] = !open['%d'];", asset.ID, asset.ID)}
+								hx-trigger="click once"
+ 								hx-get={fmt.Sprintf("/assets/%d", asset.ID)}
+								hx-target={fmt.Sprintf("#view-%d", asset.ID)}
+								hx-select="#main"
+							>
+								<span x-bind:class={fmt.Sprintf("open['%d'] ? 'rotate-90' : ''", asset.ID)} class="transition-transform inline-block">
+									@views.Icon("caret-right", "w-[16px] h-[16px]")
+								</span>
+							</button>
+						</td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{ asset.Tag }</strong></td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">
+							if asset.ThumbnailURL != "" {
+								<img class="h-[50px]" src={ asset.ThumbnailURL } />
+							}
+						</td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">{ asset.Name }</td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">{ asset.Category }</td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">
+							{ asset.Location }
+							if asset.PositionCode != "" {
+								({asset.PositionCode})
+							}
+						</td>
+						<td class="py-4 text-sm whitespace-nowrap">
+							@statusBadge(asset.Status, "")
+						</td>
+						<td class="last:pr-0 px-5 py-4 text-sm font-medium text-right whitespace-nowrap">
+							<a class="text-blue-400 hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))}>
+								View
+							</a>
+							{" "}
+							<a class="text-blue-400 hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v/edit", asset.ID))}>
+								Edit
+							</a>
+						</td>
+					</tr>
+					<tr x-show={fmt.Sprintf("open['%d']", asset.ID)}>
+						<td id={fmt.Sprintf("view-%d", asset.ID)} colspan="9"></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+
+		if len(props.assets) != 0 {
+			<div class="flex items-center justify-between w-full h-16 px-3 border-t border-neutral-200">
+				<p class="pl-2 text-sm text-gray-700">
+					Showing <span class="font-medium">{ fmt.Sprint(props.query.offset+1) }</span> to <span class="font-medium">{ fmt.Sprint(props.query.offset+props.total) }</span> of <span class="font-medium">{ fmt.Sprint(props.total) }</span> assets
+				</p>
+				<nav>
+					<ul class="flex items-center text-sm leading-tight bg-white border divide-x rounded h-9 text-neutral-500 divide-neutral-200 border-neutral-200">
+						<li class="h-full">
+							<a href="#" class="relative inline-flex items-center h-full px-3 ml-0 rounded-l group hover:text-blue-500">
+								<span>Previous</span>
+							</a>
+						</li>
+						<li class="hidden h-full md:block">
+							<a href="#" class="relative inline-flex items-center h-full px-3 text-neutral-900 group bg-gray-50">
+								<span>1</span>
+								<span class="box-content absolute bottom-0 left-0 w-full h-px -mx-px translate-y-px border-l border-r bg-blue-500 border-blue-500"></span>
+							</a>
+						</li>
+						<li class="hidden h-full md:block">
+							<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+								<span>2</span>
+								<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+							</a>
+						</li>
+						<li class="hidden h-full md:block">
+							<div class="relative inline-flex items-center h-full px-2.5 group">
+								<span>...</span>
+							</div>
+						</li>
+						<li class="hidden h-full md:block">
+							<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+								<span>6</span>
+								<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+							</a>
+						</li>
+						<li class="hidden h-full md:block">
+							<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+								<span>7</span>
+								<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+							</a>
+						</li>
+						<li class="h-full">
+							<a href="#" class="relative inline-flex items-center h-full px-3 ml-0 rounded-l group hover:text-blue-500">
+								<span>Next</span>
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		} 
+	}
+}
+

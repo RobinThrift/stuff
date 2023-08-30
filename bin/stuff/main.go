@@ -17,6 +17,7 @@ import (
 	"github.com/kodeshack/stuff/server"
 	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite"
+	"github.com/kodeshack/stuff/tags"
 	"github.com/kodeshack/stuff/users"
 	"github.com/stephenafamo/bob"
 )
@@ -65,7 +66,10 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 
 	localAuthRepo := &sqlite.LocalAuthRepo{}
 	userRepo := &sqlite.UserRepo{}
+	assetRepo := &sqlite.AssetRepo{}
+	tagRepo := &sqlite.TagRepo{}
 
+	tagCtrl := &tags.Control{Algorithm: config.TagAlgorithm, DB: database, TagRepo: tagRepo}
 	userCtrl := &users.Control{DB: database, UserRepo: userRepo}
 	authCtrl := &auth.Control{
 		DB:            database,
@@ -73,7 +77,12 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		LocalAuthRepo: localAuthRepo,
 		Argon2Params:  auth.Argon2Params(config.Auth.Local.Argon2Params),
 	}
-	assetsCtrl := &assets.Control{DB: database}
+	assetsCtrl := &assets.Control{
+		DB:        database,
+		AssetRepo: assetRepo,
+		TagCtrl:   tagCtrl,
+		FileDir:   config.FileDir,
+	}
 
 	err = authCtrl.RunInitSetup(ctx, "admin", config.Auth.Local.InitialAdminPassword)
 	if err != nil {
@@ -81,7 +90,13 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	}
 
 	authRouter := &auth.Router{Control: authCtrl}
-	assetsRouter := &assets.Router{Control: assetsCtrl}
+	assetsRouter := &assets.Router{
+		Control:          assetsCtrl,
+		Decoder:          assets.NewDecoder(config.DecimalSeparator),
+		DefaultCurrency:  config.DefaultCurrency,
+		DecimalSeparator: config.DecimalSeparator,
+		FileDir:          config.FileDir,
+	}
 
 	sm := scs.New()
 	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO

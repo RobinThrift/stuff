@@ -22,7 +22,7 @@ func Document(title string, body templ.Component) templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>")
+		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, minimum-scale=1\"><title>")
 		if err != nil {
 			return err
 		}
@@ -36,7 +36,25 @@ func Document(title string, body templ.Component) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</title><link rel=\"stylesheet\" href=\"/static/styles.css\"></head><body>")
+		_, err = templBuffer.WriteString("</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><script defer src=\"/static/alpine.min.js\">")
+		if err != nil {
+			return err
+		}
+		var_4 := ``
+		_, err = templBuffer.WriteString(var_4)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script><script defer src=\"/static/htmx.min.js\">")
+		if err != nil {
+			return err
+		}
+		var_5 := ``
+		_, err = templBuffer.WriteString(var_5)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</script></head><body>")
 		if err != nil {
 			return err
 		}

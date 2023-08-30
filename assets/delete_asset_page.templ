@@ -1,0 +1,35 @@
+package assets
+
+import "fmt"
+import "github.com/kodeshack/stuff/views"
+
+type deleteAssetPageProps struct {
+	asset *Asset
+	errMsg string
+	csrfToken string
+}
+
+templ deleteAssetPage(props deleteAssetPageProps) {
+	@views.Layout() {
+		<h1 class="my-5 font-extrabold md:text-2xl lg:text-4xl text-center">
+			Are you sure you want to delete "{ props.asset.Name }"?
+		</h1>
+
+		<form method="post" action={fmt.Sprintf("/assets/%d/delete", props.asset.ID)}>
+			<input type="hidden" name="stuff.csrf.token" value={ props.csrfToken } />
+
+			<div class="flex w-full items-center justify-center">
+				@views.Button(views.ButtonProps{
+					Type: "submit",
+					Class: "btn-danger",
+				}) {
+					Delete
+				}
+
+				@views.ButtonLink("/assets", "ms-5 btn-muted") {
+					Cancel
+				}
+			</div>
+		</form>
+	}
+}

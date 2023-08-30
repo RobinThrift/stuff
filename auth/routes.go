@@ -20,14 +20,20 @@ const userForPasswordChangeKey = "user_for_password_change"
 func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 	mux.Get("/login", views.HTTPHandlerFuncErr(rt.handleLoginGet))
 	mux.Post("/login", views.HTTPHandlerFuncErr(rt.handleLoginPost))
-	mux.Post("/logout", views.HTTPHandlerFuncErr(rt.handleLogoutGet))
+	mux.Get("/logout", views.HTTPHandlerFuncErr(rt.handleLogoutGet))
 	mux.Get("/auth/changepassword", views.HTTPHandlerFuncErr(rt.handleChangePasswordGet))
 	mux.Post("/auth/changepassword", views.HTTPHandlerFuncErr(rt.handleChangePasswordPost))
 }
 
 // [GET] /login
 func (rt *Router) handleLoginGet(w http.ResponseWriter, r *http.Request) error {
-	_, ok := session.Get[any](r.Context(), userForPasswordChangeKey)
+	_, ok := session.Get[*users.User](r.Context(), "user")
+	if ok {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return nil
+	}
+
+	_, ok = session.Get[any](r.Context(), userForPasswordChangeKey)
 	if ok {
 		http.Redirect(w, r, "/auth/changepassword", http.StatusFound)
 		return nil
@@ -125,6 +131,11 @@ func (rt *Router) handleChangePasswordPost(w http.ResponseWriter, r *http.Reques
 }
 
 func renderLoginPage(w http.ResponseWriter, r *http.Request, validationErrors map[string]string) error {
+	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
+	if ok {
+		validationErrors["general"] = csrfErr
+	}
+
 	loginPage := views.LoginPage(csrf.Token(r), validationErrors)
 	page := views.Document("Login", loginPage)
 
@@ -137,6 +148,11 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request, validationErrors ma
 }
 
 func renderChangePasswordPage(w http.ResponseWriter, r *http.Request, validationErrors map[string]string) error {
+	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
+	if ok {
+		validationErrors["general"] = csrfErr
+	}
+
 	changePasswordPage := views.ChangePasswordPage(csrf.Token(r), validationErrors)
 	page := views.Document("Change Password", changePasswordPage)
 

@@ -37,6 +37,7 @@ type AssetFileTemplate struct {
 	ID        func() int64
 	AssetID   func() int64
 	Name      func() string
+	Filetype  func() string
 	Sha256    func() []byte
 	SizeBytes func() int64
 	CreatedBy func() int64
@@ -75,6 +76,9 @@ func (o AssetFileTemplate) toModel() *models.AssetFile {
 	}
 	if o.Name != nil {
 		m.Name = o.Name()
+	}
+	if o.Filetype != nil {
+		m.Filetype = o.Filetype()
 	}
 	if o.Sha256 != nil {
 		m.Sha256 = o.Sha256()
@@ -132,6 +136,9 @@ func (o AssetFileTemplate) BuildSetter() *models.AssetFileSetter {
 	}
 	if o.Name != nil {
 		m.Name = omit.From(o.Name())
+	}
+	if o.Filetype != nil {
+		m.Filetype = omit.From(o.Filetype())
 	}
 	if o.Sha256 != nil {
 		m.Sha256 = omit.From(o.Sha256())
@@ -193,6 +200,9 @@ func ensureCreatableAssetFile(m *models.AssetFileSetter) {
 	}
 	if m.Name.IsUnset() {
 		m.Name = omit.From(random[string](nil))
+	}
+	if m.Filetype.IsUnset() {
+		m.Filetype = omit.From(random[string](nil))
 	}
 	if m.Sha256.IsUnset() {
 		m.Sha256 = omit.From(random[[]byte](nil))
@@ -291,6 +301,7 @@ func (m assetFileMods) RandomizeAllColumns(f *faker.Faker) AssetFileMod {
 		AssetFileMods.RandomID(f),
 		AssetFileMods.RandomAssetID(f),
 		AssetFileMods.RandomName(f),
+		AssetFileMods.RandomFiletype(f),
 		AssetFileMods.RandomSha256(f),
 		AssetFileMods.RandomSizeBytes(f),
 		AssetFileMods.RandomCreatedBy(f),
@@ -423,6 +434,49 @@ func (m assetFileMods) ensureName(f *faker.Faker) AssetFileMod {
 		}
 
 		o.Name = func() string {
+			return random[string](f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m assetFileMods) Filetype(val string) AssetFileMod {
+	return AssetFileModFunc(func(o *AssetFileTemplate) {
+		o.Filetype = func() string { return val }
+	})
+}
+
+// Set the Column from the function
+func (m assetFileMods) FiletypeFunc(f func() string) AssetFileMod {
+	return AssetFileModFunc(func(o *AssetFileTemplate) {
+		o.Filetype = f
+	})
+}
+
+// Clear any values for the column
+func (m assetFileMods) UnsetFiletype() AssetFileMod {
+	return AssetFileModFunc(func(o *AssetFileTemplate) {
+		o.Filetype = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m assetFileMods) RandomFiletype(f *faker.Faker) AssetFileMod {
+	return AssetFileModFunc(func(o *AssetFileTemplate) {
+		o.Filetype = func() string {
+			return random[string](f)
+		}
+	})
+}
+
+func (m assetFileMods) ensureFiletype(f *faker.Faker) AssetFileMod {
+	return AssetFileModFunc(func(o *AssetFileTemplate) {
+		if o.Filetype != nil {
+			return
+		}
+
+		o.Filetype = func() string {
 			return random[string](f)
 		}
 	})

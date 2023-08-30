@@ -26,7 +26,7 @@ func ChangePasswordPage(csrfToken string, validationErrs map[string]string) temp
 		if err != nil {
 			return err
 		}
-		err = logo("mt-6 text-6xl").Render(ctx, templBuffer)
+		err = logo("mt-6 text-6xl", "h-20").Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -42,44 +42,44 @@ func ChangePasswordPage(csrfToken string, validationErrs map[string]string) temp
 		if err != nil {
 			return err
 		}
-		err = input(inputProps{
-			class:         "mb-6",
-			_type:         "password",
-			name:          "current_password",
-			placeholder:   "Current Password",
-			label:         "Current Password",
-			icon:          lockIcon(),
-			required:      true,
-			autoComplete:  "current-password",
-			validationErr: validationErrs["current_password"],
+		err = Input(InputProps{
+			Class:         "mb-6",
+			Type:          "password",
+			Name:          "current_password",
+			Placeholder:   "Current Password",
+			Label:         "Current Password",
+			Icon:          Icon("password", "w-[24px] h-[24px]"),
+			Required:      true,
+			AutoComplete:  "current-password",
+			ValidationErr: validationErrs["current_password"],
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		err = input(inputProps{
-			class:         "mb-6",
-			_type:         "password",
-			name:          "new_password",
-			placeholder:   "New Password",
-			label:         "New Password",
-			icon:          lockIcon(),
-			required:      true,
-			autoComplete:  "new-password",
-			validationErr: validationErrs["new_password"],
+		err = Input(InputProps{
+			Class:         "mb-6",
+			Type:          "password",
+			Name:          "new_password",
+			Placeholder:   "New Password",
+			Label:         "New Password",
+			Icon:          Icon("password", "w-[24px] h-[24px]"),
+			Required:      true,
+			AutoComplete:  "new-password",
+			ValidationErr: validationErrs["new_password"],
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		err = input(inputProps{
-			class:         "mb-6",
-			_type:         "password",
-			name:          "new_password_repeat",
-			placeholder:   "Repeat New Password",
-			label:         "Password",
-			icon:          lockIcon(),
-			required:      true,
-			autoComplete:  "repeat-new-password",
-			validationErr: validationErrs["new_password_repeat"],
+		err = Input(InputProps{
+			Class:         "mb-6",
+			Type:          "password",
+			Name:          "new_password_repeat",
+			Placeholder:   "Repeat New Password",
+			Label:         "Password",
+			Icon:          Icon("password", "w-[24px] h-[24px]"),
+			Required:      true,
+			AutoComplete:  "repeat-new-password",
+			ValidationErr: validationErrs["new_password_repeat"],
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
@@ -100,7 +100,7 @@ func ChangePasswordPage(csrfToken string, validationErrs map[string]string) temp
 			}
 			return err
 		})
-		err = button("submit", "w-full").Render(templ.WithChildren(ctx, var_2), templBuffer)
+		err = Button(ButtonProps{Type: "submit", Class: "w-full py-4"}).Render(templ.WithChildren(ctx, var_2), templBuffer)
 		if err != nil {
 			return err
 		}

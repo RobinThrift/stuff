@@ -26,7 +26,7 @@ func LoginPage(csrfToken string, validationErrs map[string]string) templ.Compone
 		if err != nil {
 			return err
 		}
-		err = logo("mt-6 text-6xl").Render(ctx, templBuffer)
+		err = logo("mt-6 text-8xl", "h-20").Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -42,29 +42,29 @@ func LoginPage(csrfToken string, validationErrs map[string]string) templ.Compone
 		if err != nil {
 			return err
 		}
-		err = input(inputProps{
-			class:         "mb-6",
-			_type:         "text",
-			name:          "username",
-			placeholder:   "Username",
-			label:         "Username",
-			required:      true,
-			icon:          userIcon(),
-			validationErr: validationErrs["username"],
+		err = Input(InputProps{
+			Class:         "mb-6",
+			Type:          "text",
+			Name:          "username",
+			Placeholder:   "Username",
+			Label:         "Username",
+			Required:      true,
+			Icon:          Icon("user", "w-[24px] h-[24px]"),
+			ValidationErr: validationErrs["username"],
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		err = input(inputProps{
-			class:         "mb-6",
-			_type:         "password",
-			name:          "password",
-			placeholder:   "Password",
-			label:         "Password",
-			icon:          lockIcon(),
-			required:      true,
-			autoComplete:  "current-password",
-			validationErr: validationErrs["password"],
+		err = Input(InputProps{
+			Class:         "mb-6",
+			Type:          "password",
+			Name:          "password",
+			Placeholder:   "Password",
+			Label:         "Password",
+			Icon:          Icon("password", "w-[24px] h-[24px]"),
+			Required:      true,
+			AutoComplete:  "current-password",
+			ValidationErr: validationErrs["password"],
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
@@ -85,7 +85,7 @@ func LoginPage(csrfToken string, validationErrs map[string]string) templ.Compone
 			}
 			return err
 		})
-		err = button("submit", "w-full").Render(templ.WithChildren(ctx, var_2), templBuffer)
+		err = Button(ButtonProps{Type: "submit", Class: "w-full py-4"}).Render(templ.WithChildren(ctx, var_2), templBuffer)
 		if err != nil {
 			return err
 		}
@@ -105,54 +105,6 @@ func LoginPage(csrfToken string, validationErrs map[string]string) templ.Compone
 			}
 		}
 		_, err = templBuffer.WriteString("</form></div></div></div></div>")
-		if err != nil {
-			return err
-		}
-		if !templIsBuffer {
-			_, err = io.Copy(w, templBuffer)
-		}
-		return err
-	})
-}
-
-func userIcon() templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
-		templBuffer, templIsBuffer := w.(*bytes.Buffer)
-		if !templIsBuffer {
-			templBuffer = templ.GetBuffer()
-			defer templ.ReleaseBuffer(templBuffer)
-		}
-		ctx = templ.InitializeContext(ctx)
-		var_5 := templ.GetChildren(ctx)
-		if var_5 == nil {
-			var_5 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\" viewBox=\"0 0 256 256\"><path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z\"></path></svg>")
-		if err != nil {
-			return err
-		}
-		if !templIsBuffer {
-			_, err = io.Copy(w, templBuffer)
-		}
-		return err
-	})
-}
-
-func lockIcon() templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
-		templBuffer, templIsBuffer := w.(*bytes.Buffer)
-		if !templIsBuffer {
-			templBuffer = templ.GetBuffer()
-			defer templ.ReleaseBuffer(templBuffer)
-		}
-		ctx = templ.InitializeContext(ctx)
-		var_6 := templ.GetChildren(ctx)
-		if var_6 == nil {
-			var_6 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\" viewBox=\"0 0 256 256\"><path d=\"M48,56V200a8,8,0,0,1-16,0V56a8,8,0,0,1,16,0Zm84,54.5L112,117V96a8,8,0,0,0-16,0v21L76,110.5a8,8,0,0,0-5,15.22l20,6.49-12.34,17a8,8,0,1,0,12.94,9.4l12.34-17,12.34,17a8,8,0,1,0,12.94-9.4l-12.34-17,20-6.49A8,8,0,0,0,132,110.5ZM238,115.64A8,8,0,0,0,228,110.5L208,117V96a8,8,0,0,0-16,0v21l-20-6.49a8,8,0,0,0-4.95,15.22l20,6.49-12.34,17a8,8,0,1,0,12.94,9.4l12.34-17,12.34,17a8,8,0,1,0,12.94-9.4l-12.34-17,20-6.49A8,8,0,0,0,238,115.64Z\"></path></svg>")
 		if err != nil {
 			return err
 		}

@@ -30,6 +30,10 @@ func (sdt *SQLiteDatetime) Scan(src any) error {
 		return fmt.Errorf("invalid input type for converting to time %T", src)
 	}
 
+	if str == "" {
+		return nil
+	}
+
 	str = strings.TrimSuffix(str, "Z")
 
 	parsed, err := time.ParseInLocation(sqliteTimestampFormat, str, time.UTC)

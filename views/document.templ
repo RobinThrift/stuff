@@ -4,9 +4,13 @@ templ Document(title string, body templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
-			<meta charset="utf-8"/>
+			<meta charset="utf-8" />
+			<meta name="viewport" content="width=device-width" />
+			<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 			<title>Stuff – { title }</title>
-			<link rel="stylesheet" href="/static/styles.css"/>
+			<link rel="stylesheet" href="/static/styles.css" />
+			<script defer src="/static/alpine.min.js"></script>
+			<script defer src="/static/htmx.min.js"></script>
 		</head>
 		<body>
 			{! body }

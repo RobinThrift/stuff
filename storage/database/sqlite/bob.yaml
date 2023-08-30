@@ -25,6 +25,36 @@ replacements:
     type: "types.SQLiteDatetime"
     imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
 
+- match:
+    name: "warranty_until"
+    db_type: "TEXT"
+    default: "NULL"
+    nullable: true
+
+  replace:
+    type: "types.SQLiteDatetime"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+
+- match:
+    name: "purchase_date"
+    db_type: "TEXT"
+    default: "NULL"
+    nullable: true
+
+  replace:
+    type: "types.SQLiteDatetime"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+
+- tables: ["assets"]
+  match:
+    name: "custom_attrs"
+    db_type: "TEXT"
+    default: "NULL"
+    nullable: true
+
+  replace:
+    type: "types.SQLiteJSON[map[string]any]"
+    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
 
 sqlite:
   dsn: "_stuff.db"

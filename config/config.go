@@ -9,8 +9,12 @@ type Config struct {
 	Addr string `json:"address"`
 
 	Database Database `json:"database"`
+	FileDir  string   `json:"fileDir"`
 
-	DefaultCurrency string `json:"defaultCurrency"`
+	TagAlgorithm string `json:"tagAlgorithm"`
+
+	DefaultCurrency  string `json:"defaultCurrency"`
+	DecimalSeparator string `json:"decimalSeparator"`
 
 	Auth Auth `json:"auth"`
 
@@ -47,7 +51,12 @@ func NewConfigFromEnv() (*Config, error) {
 			Path: getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),
 		},
 
-		DefaultCurrency: getEnvDefault("STUFF_DEFAULT_CURRENCY", "EUR"),
+		FileDir: getEnvDefault("STUFF_FILE_DIR", "files"),
+
+		TagAlgorithm: getEnvDefault("STUFF_TAG_ALGORITHM", "nanoid"),
+
+		DefaultCurrency:  getEnvDefault("STUFF_DEFAULT_CURRENCY", "EUR"),
+		DecimalSeparator: getEnvDefault("STUFF_DECIMAL_SEPARATOR", ","),
 
 		Auth: Auth{
 			Local: LocalAuth{

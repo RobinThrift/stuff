@@ -9,7 +9,12 @@ import "context"
 import "io"
 import "bytes"
 
-func button(_type string, classname string) templ.Component {
+type ButtonProps struct {
+	Type  string
+	Class string
+}
+
+func Button(props ButtonProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -22,10 +27,7 @@ func button(_type string, classname string) templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_2 = []any{
-			templ.SafeClass("px-3 py-4 text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 focus:outline-none rounded-md"),
-			templ.SafeClass(classname),
-		}
+		var var_2 = []any{"btn btn-primary", templ.SafeClass(props.Class)}
 		err = templ.RenderCSSItems(ctx, templBuffer, var_2...)
 		if err != nil {
 			return err
@@ -34,7 +36,7 @@ func button(_type string, classname string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(_type))
+		_, err = templBuffer.WriteString(templ.EscapeString(props.Type))
 		if err != nil {
 			return err
 		}
@@ -65,7 +67,7 @@ func button(_type string, classname string) templ.Component {
 	})
 }
 
-func buttonLink(href string, classname string) templ.Component {
+func ButtonLink(href string, classname string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -78,10 +80,7 @@ func buttonLink(href string, classname string) templ.Component {
 			var_3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_4 = []any{
-			templ.SafeClass("px-3 py-4 text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700 focus:outline-none rounded-md"),
-			templ.SafeClass(classname),
-		}
+		var var_4 = []any{"btn btn-primary inline-block", templ.SafeClass(classname)}
 		err = templ.RenderCSSItems(ctx, templBuffer, var_4...)
 		if err != nil {
 			return err
@@ -122,7 +121,13 @@ func buttonLink(href string, classname string) templ.Component {
 	})
 }
 
-func logo(classname string) templ.Component {
+type DropdownButtonProps struct {
+	Class       string
+	ButtonClass string
+	ButtonText  string
+}
+
+func DropdownButton(props DropdownButtonProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -135,7 +140,7 @@ func logo(classname string) templ.Component {
 			var_6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_7 = []any{"flex justify-center items-center rainbow", templ.SafeClass(classname)}
+		var var_7 = []any{templ.SafeClass(props.Class)}
 		err = templ.RenderCSSItems(ctx, templBuffer, var_7...)
 		if err != nil {
 			return err
@@ -148,16 +153,45 @@ func logo(classname string) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-20 mr-2\" viewBox=\"0 0 256 256\"><defs><linearGradient id=\"gradient\" x1=\"0%\" y1=\"100%\" x2=\"100%\" y2=\"0%\"><stop offset=\"0%\" style=\"stop-color:var(--tw-gradient-from);\"></stop><stop offset=\"100%\" style=\"stop-color:var(--tw-gradient-to);\"></stop></linearGradient></defs><path style=\"fill: url(#gradient);\" d=\"M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z\"></path></svg><h2 class=\"font-extrabold text-transparent text-8xl bg-clip-text bg-gradient-to-bl\">")
+		_, err = templBuffer.WriteString("\" x-data=\"{\n			open: false,\n			position(el) {\n				let pos = el.getBoundingClientRect()\n				let top = pos.top + window.scrollY\n				let left = pos.left + window.scrollX\n				this.$refs.dropdown.style.left = left + &#39;px&#39;;\n				this.$refs.dropdown.style.top = top + el.offsetHeight + &#39;px&#39;;\n				this.$refs.dropdown.style.minWidth = el.offsetWidth + &#39;px&#39;;\n			},\n		}\">")
 		if err != nil {
 			return err
 		}
-		var_8 := `Stuff`
-		_, err = templBuffer.WriteString(var_8)
+		var var_8 = []any{"btn btn-primary flex items-center", templ.SafeClass(props.ButtonClass)}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_8...)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</h2></div>")
+		_, err = templBuffer.WriteString("<button type=\"button\" class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_8).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" @click=\"position($el); open = !open\">")
+		if err != nil {
+			return err
+		}
+		var var_9 string = props.ButtonText
+		_, err = templBuffer.WriteString(templ.EscapeString(var_9))
+		if err != nil {
+			return err
+		}
+		err = Icon("caret-down", "w-[16px] h-[16px] ml-2").Render(ctx, templBuffer)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</button><template x-teleport=\"body\"><div x-ref=\"dropdown\" x-show=\"open\" class=\"absolute top-0\" @click.outside=\"open = false\"><div class=\"flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70\">")
+		if err != nil {
+			return err
+		}
+		err = var_6.Render(ctx, templBuffer)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</div></div></template></div>")
 		if err != nil {
 			return err
 		}
@@ -168,19 +202,7 @@ func logo(classname string) templ.Component {
 	})
 }
 
-type inputProps struct {
-	_type         string
-	label         string
-	name          string
-	placeholder   string
-	class         string
-	required      bool
-	autoComplete  string
-	icon          templ.Component
-	validationErr string
-}
-
-func input(props inputProps) templ.Component {
+func logo(class string, iconClass string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
 		if !templIsBuffer {
@@ -188,13 +210,16 @@ func input(props inputProps) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_9 := templ.GetChildren(ctx)
-		if var_9 == nil {
-			var_9 = templ.NopComponent
+		var_10 := templ.GetChildren(ctx)
+		if var_10 == nil {
+			var_10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_10 = []any{templ.SafeClass(props.class)}
-		err = templ.RenderCSSItems(ctx, templBuffer, var_10...)
+		var var_11 = []any{
+			"flex justify-center items-center rainbow",
+			templ.SafeClass(class),
+		}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_11...)
 		if err != nil {
 			return err
 		}
@@ -202,115 +227,37 @@ func input(props inputProps) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_10).String()))
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_11).String()))
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><label for=\"")
+		_, err = templBuffer.WriteString("\">")
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props.name))
+		var var_12 = []any{"mr-2", templ.SafeClass(iconClass)}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_12...)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\" class=\"block mb-2 text-sm text-gray-600\">")
+		_, err = templBuffer.WriteString("<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"")
 		if err != nil {
 			return err
 		}
-		var var_11 string = props.label
-		_, err = templBuffer.WriteString(templ.EscapeString(var_11))
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_12).String()))
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</label><div class=\"relative\">")
+		_, err = templBuffer.WriteString("\" viewBox=\"0 0 256 256\"><defs><linearGradient id=\"gradient\" x1=\"0%\" y1=\"100%\" x2=\"100%\" y2=\"0%\"><stop offset=\"0%\" style=\"stop-color:var(--tw-gradient-from);\"></stop><stop offset=\"100%\" style=\"stop-color:var(--tw-gradient-to);\"></stop></linearGradient></defs><path style=\"fill: url(#gradient);\" d=\"M223.68,66.15,135.68,18a15.88,15.88,0,0,0-15.36,0l-88,48.17a16,16,0,0,0-8.32,14v95.64a16,16,0,0,0,8.32,14l88,48.17a15.88,15.88,0,0,0,15.36,0l88-48.17a16,16,0,0,0,8.32-14V80.18A16,16,0,0,0,223.68,66.15ZM128,32l80.34,44-29.77,16.3-80.35-44ZM128,120,47.66,76l33.9-18.56,80.34,44ZM40,90l80,43.78v85.79L40,175.82Zm176,85.78h0l-80,43.79V133.82l32-17.51V152a8,8,0,0,0,16,0V107.55L216,90v85.77Z\"></path></svg><h2 class=\"font-extrabold text-transparent bg-clip-text bg-gradient-to-bl\">")
 		if err != nil {
 			return err
 		}
-		if props.icon != nil {
-			_, err = templBuffer.WriteString("<span class=\"pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500\"><div class=\"h-4 w-4\">")
-			if err != nil {
-				return err
-			}
-			err = props.icon.Render(ctx, templBuffer)
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("</div></span>")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString("<input")
+		var_13 := `Stuff`
+		_, err = templBuffer.WriteString(var_13)
 		if err != nil {
 			return err
 		}
-		if props.required {
-			_, err = templBuffer.WriteString(" required")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString(" type=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props._type))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\" name=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props.name))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\" id=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props.name))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\" placeholder=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props.placeholder))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\" auto-complete=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(props.autoComplete))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\" class=\"w-full px-3 py-2 pl-11 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300\">")
-		if err != nil {
-			return err
-		}
-		if props.validationErr != "" {
-			_, err = templBuffer.WriteString("<span class=\"text-red-500\">")
-			if err != nil {
-				return err
-			}
-			var var_12 string = props.validationErr
-			_, err = templBuffer.WriteString(templ.EscapeString(var_12))
-			if err != nil {
-				return err
-			}
-			_, err = templBuffer.WriteString("</span>")
-			if err != nil {
-				return err
-			}
-		}
-		_, err = templBuffer.WriteString("</div></div>")
+		_, err = templBuffer.WriteString("</h2></div>")
 		if err != nil {
 			return err
 		}

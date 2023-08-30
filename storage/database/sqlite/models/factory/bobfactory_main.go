@@ -14,17 +14,18 @@ import (
 )
 
 type Factory struct {
-	baseAssetFileMods       AssetFileModSlice
-	baseAssetMods           AssetModSlice
-	baseLocalAuthUserMods   LocalAuthUserModSlice
-	baseSessionMods         SessionModSlice
-	baseTagMods             TagModSlice
-	baseUserMods            UserModSlice
-	baseCustomAttrNameMods  CustomAttrNameModSlice
-	baseManufacturerMods    ManufacturerModSlice
-	baseStatusNameMods      StatusNameModSlice
-	baseStorageLocationMods StorageLocationModSlice
-	baseSupplierMods        SupplierModSlice
+	baseAssetFileMods      AssetFileModSlice
+	baseAssetMods          AssetModSlice
+	baseLocalAuthUserMods  LocalAuthUserModSlice
+	baseSessionMods        SessionModSlice
+	baseTagMods            TagModSlice
+	baseUserMods           UserModSlice
+	baseCategoryMods       CategoryModSlice
+	baseCustomAttrNameMods CustomAttrNameModSlice
+	baseLocationMods       LocationModSlice
+	baseManufacturerMods   ManufacturerModSlice
+	basePositionCodeMods   PositionCodeModSlice
+	baseSupplierMods       SupplierModSlice
 }
 
 func New() *Factory {
@@ -103,6 +104,18 @@ func (f *Factory) NewUser(mods ...UserMod) *UserTemplate {
 	return o
 }
 
+func (f *Factory) NewCategory(mods ...CategoryMod) *CategoryTemplate {
+	o := &CategoryTemplate{f: f}
+
+	if f != nil {
+		f.baseCategoryMods.Apply(o)
+	}
+
+	CategoryModSlice(mods).Apply(o)
+
+	return o
+}
+
 func (f *Factory) NewCustomAttrName(mods ...CustomAttrNameMod) *CustomAttrNameTemplate {
 	o := &CustomAttrNameTemplate{f: f}
 
@@ -111,6 +124,18 @@ func (f *Factory) NewCustomAttrName(mods ...CustomAttrNameMod) *CustomAttrNameTe
 	}
 
 	CustomAttrNameModSlice(mods).Apply(o)
+
+	return o
+}
+
+func (f *Factory) NewLocation(mods ...LocationMod) *LocationTemplate {
+	o := &LocationTemplate{f: f}
+
+	if f != nil {
+		f.baseLocationMods.Apply(o)
+	}
+
+	LocationModSlice(mods).Apply(o)
 
 	return o
 }
@@ -127,26 +152,14 @@ func (f *Factory) NewManufacturer(mods ...ManufacturerMod) *ManufacturerTemplate
 	return o
 }
 
-func (f *Factory) NewStatusName(mods ...StatusNameMod) *StatusNameTemplate {
-	o := &StatusNameTemplate{f: f}
+func (f *Factory) NewPositionCode(mods ...PositionCodeMod) *PositionCodeTemplate {
+	o := &PositionCodeTemplate{f: f}
 
 	if f != nil {
-		f.baseStatusNameMods.Apply(o)
+		f.basePositionCodeMods.Apply(o)
 	}
 
-	StatusNameModSlice(mods).Apply(o)
-
-	return o
-}
-
-func (f *Factory) NewStorageLocation(mods ...StorageLocationMod) *StorageLocationTemplate {
-	o := &StorageLocationTemplate{f: f}
-
-	if f != nil {
-		f.baseStorageLocationMods.Apply(o)
-	}
-
-	StorageLocationModSlice(mods).Apply(o)
+	PositionCodeModSlice(mods).Apply(o)
 
 	return o
 }
@@ -211,12 +224,28 @@ func (f *Factory) AddBaseUserMod(mods ...UserMod) {
 	f.baseUserMods = append(f.baseUserMods, mods...)
 }
 
+func (f *Factory) ClearBaseCategoryMods() {
+	f.baseCategoryMods = nil
+}
+
+func (f *Factory) AddBaseCategoryMod(mods ...CategoryMod) {
+	f.baseCategoryMods = append(f.baseCategoryMods, mods...)
+}
+
 func (f *Factory) ClearBaseCustomAttrNameMods() {
 	f.baseCustomAttrNameMods = nil
 }
 
 func (f *Factory) AddBaseCustomAttrNameMod(mods ...CustomAttrNameMod) {
 	f.baseCustomAttrNameMods = append(f.baseCustomAttrNameMods, mods...)
+}
+
+func (f *Factory) ClearBaseLocationMods() {
+	f.baseLocationMods = nil
+}
+
+func (f *Factory) AddBaseLocationMod(mods ...LocationMod) {
+	f.baseLocationMods = append(f.baseLocationMods, mods...)
 }
 
 func (f *Factory) ClearBaseManufacturerMods() {
@@ -227,20 +256,12 @@ func (f *Factory) AddBaseManufacturerMod(mods ...ManufacturerMod) {
 	f.baseManufacturerMods = append(f.baseManufacturerMods, mods...)
 }
 
-func (f *Factory) ClearBaseStatusNameMods() {
-	f.baseStatusNameMods = nil
+func (f *Factory) ClearBasePositionCodeMods() {
+	f.basePositionCodeMods = nil
 }
 
-func (f *Factory) AddBaseStatusNameMod(mods ...StatusNameMod) {
-	f.baseStatusNameMods = append(f.baseStatusNameMods, mods...)
-}
-
-func (f *Factory) ClearBaseStorageLocationMods() {
-	f.baseStorageLocationMods = nil
-}
-
-func (f *Factory) AddBaseStorageLocationMod(mods ...StorageLocationMod) {
-	f.baseStorageLocationMods = append(f.baseStorageLocationMods, mods...)
+func (f *Factory) AddBasePositionCodeMod(mods ...PositionCodeMod) {
+	f.basePositionCodeMods = append(f.basePositionCodeMods, mods...)
 }
 
 func (f *Factory) ClearBaseSupplierMods() {
@@ -254,17 +275,18 @@ func (f *Factory) AddBaseSupplierMod(mods ...SupplierMod) {
 type contextKey string
 
 var (
-	assetFileCtx       = newContextual[*models.AssetFile]("assetFile")
-	assetCtx           = newContextual[*models.Asset]("asset")
-	localAuthUserCtx   = newContextual[*models.LocalAuthUser]("localAuthUser")
-	sessionCtx         = newContextual[*models.Session]("session")
-	tagCtx             = newContextual[*models.Tag]("tag")
-	userCtx            = newContextual[*models.User]("user")
-	customAttrNameCtx  = newContextual[*models.CustomAttrName]("customAttrName")
-	manufacturerCtx    = newContextual[*models.Manufacturer]("manufacturer")
-	statusNameCtx      = newContextual[*models.StatusName]("statusName")
-	storageLocationCtx = newContextual[*models.StorageLocation]("storageLocation")
-	supplierCtx        = newContextual[*models.Supplier]("supplier")
+	assetFileCtx      = newContextual[*models.AssetFile]("assetFile")
+	assetCtx          = newContextual[*models.Asset]("asset")
+	localAuthUserCtx  = newContextual[*models.LocalAuthUser]("localAuthUser")
+	sessionCtx        = newContextual[*models.Session]("session")
+	tagCtx            = newContextual[*models.Tag]("tag")
+	userCtx           = newContextual[*models.User]("user")
+	categoryCtx       = newContextual[*models.Category]("category")
+	customAttrNameCtx = newContextual[*models.CustomAttrName]("customAttrName")
+	locationCtx       = newContextual[*models.Location]("location")
+	manufacturerCtx   = newContextual[*models.Manufacturer]("manufacturer")
+	positionCodeCtx   = newContextual[*models.PositionCode]("positionCode")
+	supplierCtx       = newContextual[*models.Supplier]("supplier")
 )
 
 type contextual[V any] struct {
@@ -315,6 +337,9 @@ func random[T any](f *faker.Faker) T {
 		return val
 
 	case types.SQLiteDatetime:
+		return val
+
+	case types.SQLiteJSON[map[string]any]:
 		return val
 
 	}

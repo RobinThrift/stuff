@@ -39,23 +39,25 @@ type AssetTemplate struct {
 	ID               func() int64
 	ParentAssetID    func() null.Val[int64]
 	Status           func() string
+	Tag              func() null.Val[string]
 	Name             func() string
-	SerialNo         func() null.Val[string]
+	Category         func() string
+	Model            func() null.Val[string]
 	ModelNo          func() null.Val[string]
+	SerialNo         func() null.Val[string]
 	Manufacturer     func() null.Val[string]
 	Notes            func() null.Val[string]
 	ImageURL         func() null.Val[string]
 	ThumbnailURL     func() null.Val[string]
-	WarrantyUntil    func() null.Val[string]
-	CustomAttrs      func() null.Val[string]
-	TagID            func() null.Val[int64]
+	WarrantyUntil    func() null.Val[types.SQLiteDatetime]
+	CustomAttrs      func() null.Val[types.SQLiteJSON[map[string]any]]
 	CheckedOutTo     func() null.Val[int64]
-	StorageLocation  func() null.Val[string]
-	StorageShelf     func() null.Val[string]
+	Location         func() null.Val[string]
+	PositionCode     func() null.Val[string]
 	PurchaseSupplier func() null.Val[string]
 	PurchaseOrderNo  func() null.Val[string]
-	PurchaseDate     func() null.Val[string]
-	PurchaseAmount   func() null.Val[string]
+	PurchaseDate     func() null.Val[types.SQLiteDatetime]
+	PurchaseAmount   func() null.Val[int64]
 	PurchaseCurrency func() null.Val[string]
 	CreatedBy        func() int64
 	CreatedAt        func() types.SQLiteDatetime
@@ -111,14 +113,23 @@ func (o AssetTemplate) toModel() *models.Asset {
 	if o.Status != nil {
 		m.Status = o.Status()
 	}
+	if o.Tag != nil {
+		m.Tag = o.Tag()
+	}
 	if o.Name != nil {
 		m.Name = o.Name()
 	}
-	if o.SerialNo != nil {
-		m.SerialNo = o.SerialNo()
+	if o.Category != nil {
+		m.Category = o.Category()
+	}
+	if o.Model != nil {
+		m.Model = o.Model()
 	}
 	if o.ModelNo != nil {
 		m.ModelNo = o.ModelNo()
+	}
+	if o.SerialNo != nil {
+		m.SerialNo = o.SerialNo()
 	}
 	if o.Manufacturer != nil {
 		m.Manufacturer = o.Manufacturer()
@@ -138,17 +149,14 @@ func (o AssetTemplate) toModel() *models.Asset {
 	if o.CustomAttrs != nil {
 		m.CustomAttrs = o.CustomAttrs()
 	}
-	if o.TagID != nil {
-		m.TagID = o.TagID()
-	}
 	if o.CheckedOutTo != nil {
 		m.CheckedOutTo = o.CheckedOutTo()
 	}
-	if o.StorageLocation != nil {
-		m.StorageLocation = o.StorageLocation()
+	if o.Location != nil {
+		m.Location = o.Location()
 	}
-	if o.StorageShelf != nil {
-		m.StorageShelf = o.StorageShelf()
+	if o.PositionCode != nil {
+		m.PositionCode = o.PositionCode()
 	}
 	if o.PurchaseSupplier != nil {
 		m.PurchaseSupplier = o.PurchaseSupplier()
@@ -210,7 +218,7 @@ func (t AssetTemplate) setModelRels(o *models.Asset) {
 	if t.r.Tag != nil {
 		rel := t.r.Tag.o.toModel()
 		rel.R.Assets = append(rel.R.Assets, o)
-		o.TagID = null.From(rel.ID)
+		o.Tag = null.From(rel.Tag)
 		o.R.Tag = rel
 	}
 
@@ -250,14 +258,23 @@ func (o AssetTemplate) BuildSetter() *models.AssetSetter {
 	if o.Status != nil {
 		m.Status = omit.From(o.Status())
 	}
+	if o.Tag != nil {
+		m.Tag = omitnull.FromNull(o.Tag())
+	}
 	if o.Name != nil {
 		m.Name = omit.From(o.Name())
 	}
-	if o.SerialNo != nil {
-		m.SerialNo = omitnull.FromNull(o.SerialNo())
+	if o.Category != nil {
+		m.Category = omit.From(o.Category())
+	}
+	if o.Model != nil {
+		m.Model = omitnull.FromNull(o.Model())
 	}
 	if o.ModelNo != nil {
 		m.ModelNo = omitnull.FromNull(o.ModelNo())
+	}
+	if o.SerialNo != nil {
+		m.SerialNo = omitnull.FromNull(o.SerialNo())
 	}
 	if o.Manufacturer != nil {
 		m.Manufacturer = omitnull.FromNull(o.Manufacturer())
@@ -277,17 +294,14 @@ func (o AssetTemplate) BuildSetter() *models.AssetSetter {
 	if o.CustomAttrs != nil {
 		m.CustomAttrs = omitnull.FromNull(o.CustomAttrs())
 	}
-	if o.TagID != nil {
-		m.TagID = omitnull.FromNull(o.TagID())
-	}
 	if o.CheckedOutTo != nil {
 		m.CheckedOutTo = omitnull.FromNull(o.CheckedOutTo())
 	}
-	if o.StorageLocation != nil {
-		m.StorageLocation = omitnull.FromNull(o.StorageLocation())
+	if o.Location != nil {
+		m.Location = omitnull.FromNull(o.Location())
 	}
-	if o.StorageShelf != nil {
-		m.StorageShelf = omitnull.FromNull(o.StorageShelf())
+	if o.PositionCode != nil {
+		m.PositionCode = omitnull.FromNull(o.PositionCode())
 	}
 	if o.PurchaseSupplier != nil {
 		m.PurchaseSupplier = omitnull.FromNull(o.PurchaseSupplier())
@@ -353,11 +367,11 @@ func (o AssetTemplate) BuildMany(number int) models.AssetSlice {
 }
 
 func ensureCreatableAsset(m *models.AssetSetter) {
-	if m.Status.IsUnset() {
-		m.Status = omit.From(random[string](nil))
-	}
 	if m.Name.IsUnset() {
 		m.Name = omit.From(random[string](nil))
+	}
+	if m.Category.IsUnset() {
+		m.Category = omit.From(random[string](nil))
 	}
 	if m.CreatedBy.IsUnset() {
 		m.CreatedBy = omit.From(random[int64](nil))
@@ -501,19 +515,21 @@ func (m assetMods) RandomizeAllColumns(f *faker.Faker) AssetMod {
 		AssetMods.RandomID(f),
 		AssetMods.RandomParentAssetID(f),
 		AssetMods.RandomStatus(f),
+		AssetMods.RandomTag(f),
 		AssetMods.RandomName(f),
-		AssetMods.RandomSerialNo(f),
+		AssetMods.RandomCategory(f),
+		AssetMods.RandomModel(f),
 		AssetMods.RandomModelNo(f),
+		AssetMods.RandomSerialNo(f),
 		AssetMods.RandomManufacturer(f),
 		AssetMods.RandomNotes(f),
 		AssetMods.RandomImageURL(f),
 		AssetMods.RandomThumbnailURL(f),
 		AssetMods.RandomWarrantyUntil(f),
 		AssetMods.RandomCustomAttrs(f),
-		AssetMods.RandomTagID(f),
 		AssetMods.RandomCheckedOutTo(f),
-		AssetMods.RandomStorageLocation(f),
-		AssetMods.RandomStorageShelf(f),
+		AssetMods.RandomLocation(f),
+		AssetMods.RandomPositionCode(f),
 		AssetMods.RandomPurchaseSupplier(f),
 		AssetMods.RandomPurchaseOrderNo(f),
 		AssetMods.RandomPurchaseDate(f),
@@ -655,6 +671,49 @@ func (m assetMods) ensureStatus(f *faker.Faker) AssetMod {
 }
 
 // Set the model columns to this value
+func (m assetMods) Tag(val null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Tag = func() null.Val[string] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m assetMods) TagFunc(f func() null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Tag = f
+	})
+}
+
+// Clear any values for the column
+func (m assetMods) UnsetTag() AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Tag = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m assetMods) RandomTag(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Tag = func() null.Val[string] {
+			return randomNull[string](f)
+		}
+	})
+}
+
+func (m assetMods) ensureTag(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		if o.Tag != nil {
+			return
+		}
+
+		o.Tag = func() null.Val[string] {
+			return randomNull[string](f)
+		}
+	})
+}
+
+// Set the model columns to this value
 func (m assetMods) Name(val string) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
 		o.Name = func() string { return val }
@@ -698,43 +757,86 @@ func (m assetMods) ensureName(f *faker.Faker) AssetMod {
 }
 
 // Set the model columns to this value
-func (m assetMods) SerialNo(val null.Val[string]) AssetMod {
+func (m assetMods) Category(val string) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.SerialNo = func() null.Val[string] { return val }
+		o.Category = func() string { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) SerialNoFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) CategoryFunc(f func() string) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.SerialNo = f
+		o.Category = f
 	})
 }
 
 // Clear any values for the column
-func (m assetMods) UnsetSerialNo() AssetMod {
+func (m assetMods) UnsetCategory() AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.SerialNo = nil
+		o.Category = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m assetMods) RandomSerialNo(f *faker.Faker) AssetMod {
+func (m assetMods) RandomCategory(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.SerialNo = func() null.Val[string] {
+		o.Category = func() string {
+			return random[string](f)
+		}
+	})
+}
+
+func (m assetMods) ensureCategory(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		if o.Category != nil {
+			return
+		}
+
+		o.Category = func() string {
+			return random[string](f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m assetMods) Model(val null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Model = func() null.Val[string] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m assetMods) ModelFunc(f func() null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Model = f
+	})
+}
+
+// Clear any values for the column
+func (m assetMods) UnsetModel() AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Model = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m assetMods) RandomModel(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.Model = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
 }
 
-func (m assetMods) ensureSerialNo(f *faker.Faker) AssetMod {
+func (m assetMods) ensureModel(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		if o.SerialNo != nil {
+		if o.Model != nil {
 			return
 		}
 
-		o.SerialNo = func() null.Val[string] {
+		o.Model = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
@@ -778,6 +880,49 @@ func (m assetMods) ensureModelNo(f *faker.Faker) AssetMod {
 		}
 
 		o.ModelNo = func() null.Val[string] {
+			return randomNull[string](f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m assetMods) SerialNo(val null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.SerialNo = func() null.Val[string] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m assetMods) SerialNoFunc(f func() null.Val[string]) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.SerialNo = f
+	})
+}
+
+// Clear any values for the column
+func (m assetMods) UnsetSerialNo() AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.SerialNo = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m assetMods) RandomSerialNo(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		o.SerialNo = func() null.Val[string] {
+			return randomNull[string](f)
+		}
+	})
+}
+
+func (m assetMods) ensureSerialNo(f *faker.Faker) AssetMod {
+	return AssetModFunc(func(o *AssetTemplate) {
+		if o.SerialNo != nil {
+			return
+		}
+
+		o.SerialNo = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
@@ -956,14 +1101,14 @@ func (m assetMods) ensureThumbnailURL(f *faker.Faker) AssetMod {
 }
 
 // Set the model columns to this value
-func (m assetMods) WarrantyUntil(val null.Val[string]) AssetMod {
+func (m assetMods) WarrantyUntil(val null.Val[types.SQLiteDatetime]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.WarrantyUntil = func() null.Val[string] { return val }
+		o.WarrantyUntil = func() null.Val[types.SQLiteDatetime] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) WarrantyUntilFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) WarrantyUntilFunc(f func() null.Val[types.SQLiteDatetime]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
 		o.WarrantyUntil = f
 	})
@@ -980,8 +1125,8 @@ func (m assetMods) UnsetWarrantyUntil() AssetMod {
 // if faker is nil, a default faker is used
 func (m assetMods) RandomWarrantyUntil(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.WarrantyUntil = func() null.Val[string] {
-			return randomNull[string](f)
+		o.WarrantyUntil = func() null.Val[types.SQLiteDatetime] {
+			return randomNull[types.SQLiteDatetime](f)
 		}
 	})
 }
@@ -992,21 +1137,21 @@ func (m assetMods) ensureWarrantyUntil(f *faker.Faker) AssetMod {
 			return
 		}
 
-		o.WarrantyUntil = func() null.Val[string] {
-			return randomNull[string](f)
+		o.WarrantyUntil = func() null.Val[types.SQLiteDatetime] {
+			return randomNull[types.SQLiteDatetime](f)
 		}
 	})
 }
 
 // Set the model columns to this value
-func (m assetMods) CustomAttrs(val null.Val[string]) AssetMod {
+func (m assetMods) CustomAttrs(val null.Val[types.SQLiteJSON[map[string]any]]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.CustomAttrs = func() null.Val[string] { return val }
+		o.CustomAttrs = func() null.Val[types.SQLiteJSON[map[string]any]] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) CustomAttrsFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) CustomAttrsFunc(f func() null.Val[types.SQLiteJSON[map[string]any]]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
 		o.CustomAttrs = f
 	})
@@ -1023,8 +1168,8 @@ func (m assetMods) UnsetCustomAttrs() AssetMod {
 // if faker is nil, a default faker is used
 func (m assetMods) RandomCustomAttrs(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.CustomAttrs = func() null.Val[string] {
-			return randomNull[string](f)
+		o.CustomAttrs = func() null.Val[types.SQLiteJSON[map[string]any]] {
+			return randomNull[types.SQLiteJSON[map[string]any]](f)
 		}
 	})
 }
@@ -1035,51 +1180,8 @@ func (m assetMods) ensureCustomAttrs(f *faker.Faker) AssetMod {
 			return
 		}
 
-		o.CustomAttrs = func() null.Val[string] {
-			return randomNull[string](f)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m assetMods) TagID(val null.Val[int64]) AssetMod {
-	return AssetModFunc(func(o *AssetTemplate) {
-		o.TagID = func() null.Val[int64] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m assetMods) TagIDFunc(f func() null.Val[int64]) AssetMod {
-	return AssetModFunc(func(o *AssetTemplate) {
-		o.TagID = f
-	})
-}
-
-// Clear any values for the column
-func (m assetMods) UnsetTagID() AssetMod {
-	return AssetModFunc(func(o *AssetTemplate) {
-		o.TagID = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m assetMods) RandomTagID(f *faker.Faker) AssetMod {
-	return AssetModFunc(func(o *AssetTemplate) {
-		o.TagID = func() null.Val[int64] {
-			return randomNull[int64](f)
-		}
-	})
-}
-
-func (m assetMods) ensureTagID(f *faker.Faker) AssetMod {
-	return AssetModFunc(func(o *AssetTemplate) {
-		if o.TagID != nil {
-			return
-		}
-
-		o.TagID = func() null.Val[int64] {
-			return randomNull[int64](f)
+		o.CustomAttrs = func() null.Val[types.SQLiteJSON[map[string]any]] {
+			return randomNull[types.SQLiteJSON[map[string]any]](f)
 		}
 	})
 }
@@ -1128,86 +1230,86 @@ func (m assetMods) ensureCheckedOutTo(f *faker.Faker) AssetMod {
 }
 
 // Set the model columns to this value
-func (m assetMods) StorageLocation(val null.Val[string]) AssetMod {
+func (m assetMods) Location(val null.Val[string]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageLocation = func() null.Val[string] { return val }
+		o.Location = func() null.Val[string] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) StorageLocationFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) LocationFunc(f func() null.Val[string]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageLocation = f
+		o.Location = f
 	})
 }
 
 // Clear any values for the column
-func (m assetMods) UnsetStorageLocation() AssetMod {
+func (m assetMods) UnsetLocation() AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageLocation = nil
+		o.Location = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m assetMods) RandomStorageLocation(f *faker.Faker) AssetMod {
+func (m assetMods) RandomLocation(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageLocation = func() null.Val[string] {
+		o.Location = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
 }
 
-func (m assetMods) ensureStorageLocation(f *faker.Faker) AssetMod {
+func (m assetMods) ensureLocation(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		if o.StorageLocation != nil {
+		if o.Location != nil {
 			return
 		}
 
-		o.StorageLocation = func() null.Val[string] {
+		o.Location = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
 }
 
 // Set the model columns to this value
-func (m assetMods) StorageShelf(val null.Val[string]) AssetMod {
+func (m assetMods) PositionCode(val null.Val[string]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageShelf = func() null.Val[string] { return val }
+		o.PositionCode = func() null.Val[string] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) StorageShelfFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) PositionCodeFunc(f func() null.Val[string]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageShelf = f
+		o.PositionCode = f
 	})
 }
 
 // Clear any values for the column
-func (m assetMods) UnsetStorageShelf() AssetMod {
+func (m assetMods) UnsetPositionCode() AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageShelf = nil
+		o.PositionCode = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m assetMods) RandomStorageShelf(f *faker.Faker) AssetMod {
+func (m assetMods) RandomPositionCode(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.StorageShelf = func() null.Val[string] {
+		o.PositionCode = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
 }
 
-func (m assetMods) ensureStorageShelf(f *faker.Faker) AssetMod {
+func (m assetMods) ensurePositionCode(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		if o.StorageShelf != nil {
+		if o.PositionCode != nil {
 			return
 		}
 
-		o.StorageShelf = func() null.Val[string] {
+		o.PositionCode = func() null.Val[string] {
 			return randomNull[string](f)
 		}
 	})
@@ -1300,14 +1402,14 @@ func (m assetMods) ensurePurchaseOrderNo(f *faker.Faker) AssetMod {
 }
 
 // Set the model columns to this value
-func (m assetMods) PurchaseDate(val null.Val[string]) AssetMod {
+func (m assetMods) PurchaseDate(val null.Val[types.SQLiteDatetime]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.PurchaseDate = func() null.Val[string] { return val }
+		o.PurchaseDate = func() null.Val[types.SQLiteDatetime] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) PurchaseDateFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) PurchaseDateFunc(f func() null.Val[types.SQLiteDatetime]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
 		o.PurchaseDate = f
 	})
@@ -1324,8 +1426,8 @@ func (m assetMods) UnsetPurchaseDate() AssetMod {
 // if faker is nil, a default faker is used
 func (m assetMods) RandomPurchaseDate(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.PurchaseDate = func() null.Val[string] {
-			return randomNull[string](f)
+		o.PurchaseDate = func() null.Val[types.SQLiteDatetime] {
+			return randomNull[types.SQLiteDatetime](f)
 		}
 	})
 }
@@ -1336,21 +1438,21 @@ func (m assetMods) ensurePurchaseDate(f *faker.Faker) AssetMod {
 			return
 		}
 
-		o.PurchaseDate = func() null.Val[string] {
-			return randomNull[string](f)
+		o.PurchaseDate = func() null.Val[types.SQLiteDatetime] {
+			return randomNull[types.SQLiteDatetime](f)
 		}
 	})
 }
 
 // Set the model columns to this value
-func (m assetMods) PurchaseAmount(val null.Val[string]) AssetMod {
+func (m assetMods) PurchaseAmount(val null.Val[int64]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.PurchaseAmount = func() null.Val[string] { return val }
+		o.PurchaseAmount = func() null.Val[int64] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m assetMods) PurchaseAmountFunc(f func() null.Val[string]) AssetMod {
+func (m assetMods) PurchaseAmountFunc(f func() null.Val[int64]) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
 		o.PurchaseAmount = f
 	})
@@ -1367,8 +1469,8 @@ func (m assetMods) UnsetPurchaseAmount() AssetMod {
 // if faker is nil, a default faker is used
 func (m assetMods) RandomPurchaseAmount(f *faker.Faker) AssetMod {
 	return AssetModFunc(func(o *AssetTemplate) {
-		o.PurchaseAmount = func() null.Val[string] {
-			return randomNull[string](f)
+		o.PurchaseAmount = func() null.Val[int64] {
+			return randomNull[int64](f)
 		}
 	})
 }
@@ -1379,8 +1481,8 @@ func (m assetMods) ensurePurchaseAmount(f *faker.Faker) AssetMod {
 			return
 		}
 
-		o.PurchaseAmount = func() null.Val[string] {
-			return randomNull[string](f)
+		o.PurchaseAmount = func() null.Val[int64] {
+			return randomNull[int64](f)
 		}
 	})
 }

@@ -71,7 +71,7 @@ func ErrorPage(code int, title string, message string) templ.Component {
 			}
 			return err
 		})
-		err = buttonLink("/", "inline-block mt-6").Render(templ.WithChildren(ctx, var_5), templBuffer)
+		err = ButtonLink("/", "inline-block mt-6 py-4 md:text-base").Render(templ.WithChildren(ctx, var_5), templBuffer)
 		if err != nil {
 			return err
 		}

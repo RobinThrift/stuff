@@ -26,30 +26,32 @@ import (
 
 // Asset is an object representing the database table.
 type Asset struct {
-	ID               int64                `db:"id,pk" `
-	ParentAssetID    null.Val[int64]      `db:"parent_asset_id" `
-	Status           string               `db:"status" `
-	Name             string               `db:"name" `
-	SerialNo         null.Val[string]     `db:"serial_no" `
-	ModelNo          null.Val[string]     `db:"model_no" `
-	Manufacturer     null.Val[string]     `db:"manufacturer" `
-	Notes            null.Val[string]     `db:"notes" `
-	ImageURL         null.Val[string]     `db:"image_url" `
-	ThumbnailURL     null.Val[string]     `db:"thumbnail_url" `
-	WarrantyUntil    null.Val[string]     `db:"warranty_until" `
-	CustomAttrs      null.Val[string]     `db:"custom_attrs" `
-	TagID            null.Val[int64]      `db:"tag_id" `
-	CheckedOutTo     null.Val[int64]      `db:"checked_out_to" `
-	StorageLocation  null.Val[string]     `db:"storage_location" `
-	StorageShelf     null.Val[string]     `db:"storage_shelf" `
-	PurchaseSupplier null.Val[string]     `db:"purchase_supplier" `
-	PurchaseOrderNo  null.Val[string]     `db:"purchase_order_no" `
-	PurchaseDate     null.Val[string]     `db:"purchase_date" `
-	PurchaseAmount   null.Val[string]     `db:"purchase_amount" `
-	PurchaseCurrency null.Val[string]     `db:"purchase_currency" `
-	CreatedBy        int64                `db:"created_by" `
-	CreatedAt        types.SQLiteDatetime `db:"created_at" `
-	UpdatedAt        types.SQLiteDatetime `db:"updated_at" `
+	ID               int64                                      `db:"id,pk" `
+	ParentAssetID    null.Val[int64]                            `db:"parent_asset_id" `
+	Status           string                                     `db:"status" `
+	Tag              null.Val[string]                           `db:"tag" `
+	Name             string                                     `db:"name" `
+	Category         string                                     `db:"category" `
+	Model            null.Val[string]                           `db:"model" `
+	ModelNo          null.Val[string]                           `db:"model_no" `
+	SerialNo         null.Val[string]                           `db:"serial_no" `
+	Manufacturer     null.Val[string]                           `db:"manufacturer" `
+	Notes            null.Val[string]                           `db:"notes" `
+	ImageURL         null.Val[string]                           `db:"image_url" `
+	ThumbnailURL     null.Val[string]                           `db:"thumbnail_url" `
+	WarrantyUntil    null.Val[types.SQLiteDatetime]             `db:"warranty_until" `
+	CustomAttrs      null.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs" `
+	CheckedOutTo     null.Val[int64]                            `db:"checked_out_to" `
+	Location         null.Val[string]                           `db:"location" `
+	PositionCode     null.Val[string]                           `db:"position_code" `
+	PurchaseSupplier null.Val[string]                           `db:"purchase_supplier" `
+	PurchaseOrderNo  null.Val[string]                           `db:"purchase_order_no" `
+	PurchaseDate     null.Val[types.SQLiteDatetime]             `db:"purchase_date" `
+	PurchaseAmount   null.Val[int64]                            `db:"purchase_amount" `
+	PurchaseCurrency null.Val[string]                           `db:"purchase_currency" `
+	CreatedBy        int64                                      `db:"created_by" `
+	CreatedAt        types.SQLiteDatetime                       `db:"created_at" `
+	UpdatedAt        types.SQLiteDatetime                       `db:"updated_at" `
 
 	R assetR `db:"-" `
 }
@@ -80,34 +82,36 @@ type assetR struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AssetSetter struct {
-	ID               omit.Val[int64]                `db:"id,pk"`
-	ParentAssetID    omitnull.Val[int64]            `db:"parent_asset_id"`
-	Status           omit.Val[string]               `db:"status"`
-	Name             omit.Val[string]               `db:"name"`
-	SerialNo         omitnull.Val[string]           `db:"serial_no"`
-	ModelNo          omitnull.Val[string]           `db:"model_no"`
-	Manufacturer     omitnull.Val[string]           `db:"manufacturer"`
-	Notes            omitnull.Val[string]           `db:"notes"`
-	ImageURL         omitnull.Val[string]           `db:"image_url"`
-	ThumbnailURL     omitnull.Val[string]           `db:"thumbnail_url"`
-	WarrantyUntil    omitnull.Val[string]           `db:"warranty_until"`
-	CustomAttrs      omitnull.Val[string]           `db:"custom_attrs"`
-	TagID            omitnull.Val[int64]            `db:"tag_id"`
-	CheckedOutTo     omitnull.Val[int64]            `db:"checked_out_to"`
-	StorageLocation  omitnull.Val[string]           `db:"storage_location"`
-	StorageShelf     omitnull.Val[string]           `db:"storage_shelf"`
-	PurchaseSupplier omitnull.Val[string]           `db:"purchase_supplier"`
-	PurchaseOrderNo  omitnull.Val[string]           `db:"purchase_order_no"`
-	PurchaseDate     omitnull.Val[string]           `db:"purchase_date"`
-	PurchaseAmount   omitnull.Val[string]           `db:"purchase_amount"`
-	PurchaseCurrency omitnull.Val[string]           `db:"purchase_currency"`
-	CreatedBy        omit.Val[int64]                `db:"created_by"`
-	CreatedAt        omit.Val[types.SQLiteDatetime] `db:"created_at"`
-	UpdatedAt        omit.Val[types.SQLiteDatetime] `db:"updated_at"`
+	ID               omit.Val[int64]                                `db:"id,pk"`
+	ParentAssetID    omitnull.Val[int64]                            `db:"parent_asset_id"`
+	Status           omit.Val[string]                               `db:"status"`
+	Tag              omitnull.Val[string]                           `db:"tag"`
+	Name             omit.Val[string]                               `db:"name"`
+	Category         omit.Val[string]                               `db:"category"`
+	Model            omitnull.Val[string]                           `db:"model"`
+	ModelNo          omitnull.Val[string]                           `db:"model_no"`
+	SerialNo         omitnull.Val[string]                           `db:"serial_no"`
+	Manufacturer     omitnull.Val[string]                           `db:"manufacturer"`
+	Notes            omitnull.Val[string]                           `db:"notes"`
+	ImageURL         omitnull.Val[string]                           `db:"image_url"`
+	ThumbnailURL     omitnull.Val[string]                           `db:"thumbnail_url"`
+	WarrantyUntil    omitnull.Val[types.SQLiteDatetime]             `db:"warranty_until"`
+	CustomAttrs      omitnull.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs"`
+	CheckedOutTo     omitnull.Val[int64]                            `db:"checked_out_to"`
+	Location         omitnull.Val[string]                           `db:"location"`
+	PositionCode     omitnull.Val[string]                           `db:"position_code"`
+	PurchaseSupplier omitnull.Val[string]                           `db:"purchase_supplier"`
+	PurchaseOrderNo  omitnull.Val[string]                           `db:"purchase_order_no"`
+	PurchaseDate     omitnull.Val[types.SQLiteDatetime]             `db:"purchase_date"`
+	PurchaseAmount   omitnull.Val[int64]                            `db:"purchase_amount"`
+	PurchaseCurrency omitnull.Val[string]                           `db:"purchase_currency"`
+	CreatedBy        omit.Val[int64]                                `db:"created_by"`
+	CreatedAt        omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
+	UpdatedAt        omit.Val[types.SQLiteDatetime]                 `db:"updated_at"`
 }
 
 func (s AssetSetter) SetColumns() []string {
-	vals := make([]string, 0, 24)
+	vals := make([]string, 0, 26)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -120,16 +124,28 @@ func (s AssetSetter) SetColumns() []string {
 		vals = append(vals, "status")
 	}
 
+	if !s.Tag.IsUnset() {
+		vals = append(vals, "tag")
+	}
+
 	if !s.Name.IsUnset() {
 		vals = append(vals, "name")
 	}
 
-	if !s.SerialNo.IsUnset() {
-		vals = append(vals, "serial_no")
+	if !s.Category.IsUnset() {
+		vals = append(vals, "category")
+	}
+
+	if !s.Model.IsUnset() {
+		vals = append(vals, "model")
 	}
 
 	if !s.ModelNo.IsUnset() {
 		vals = append(vals, "model_no")
+	}
+
+	if !s.SerialNo.IsUnset() {
+		vals = append(vals, "serial_no")
 	}
 
 	if !s.Manufacturer.IsUnset() {
@@ -156,20 +172,16 @@ func (s AssetSetter) SetColumns() []string {
 		vals = append(vals, "custom_attrs")
 	}
 
-	if !s.TagID.IsUnset() {
-		vals = append(vals, "tag_id")
-	}
-
 	if !s.CheckedOutTo.IsUnset() {
 		vals = append(vals, "checked_out_to")
 	}
 
-	if !s.StorageLocation.IsUnset() {
-		vals = append(vals, "storage_location")
+	if !s.Location.IsUnset() {
+		vals = append(vals, "location")
 	}
 
-	if !s.StorageShelf.IsUnset() {
-		vals = append(vals, "storage_shelf")
+	if !s.PositionCode.IsUnset() {
+		vals = append(vals, "position_code")
 	}
 
 	if !s.PurchaseSupplier.IsUnset() {
@@ -217,14 +229,23 @@ func (s AssetSetter) Overwrite(t *Asset) {
 	if !s.Status.IsUnset() {
 		t.Status, _ = s.Status.Get()
 	}
+	if !s.Tag.IsUnset() {
+		t.Tag, _ = s.Tag.GetNull()
+	}
 	if !s.Name.IsUnset() {
 		t.Name, _ = s.Name.Get()
 	}
-	if !s.SerialNo.IsUnset() {
-		t.SerialNo, _ = s.SerialNo.GetNull()
+	if !s.Category.IsUnset() {
+		t.Category, _ = s.Category.Get()
+	}
+	if !s.Model.IsUnset() {
+		t.Model, _ = s.Model.GetNull()
 	}
 	if !s.ModelNo.IsUnset() {
 		t.ModelNo, _ = s.ModelNo.GetNull()
+	}
+	if !s.SerialNo.IsUnset() {
+		t.SerialNo, _ = s.SerialNo.GetNull()
 	}
 	if !s.Manufacturer.IsUnset() {
 		t.Manufacturer, _ = s.Manufacturer.GetNull()
@@ -244,17 +265,14 @@ func (s AssetSetter) Overwrite(t *Asset) {
 	if !s.CustomAttrs.IsUnset() {
 		t.CustomAttrs, _ = s.CustomAttrs.GetNull()
 	}
-	if !s.TagID.IsUnset() {
-		t.TagID, _ = s.TagID.GetNull()
-	}
 	if !s.CheckedOutTo.IsUnset() {
 		t.CheckedOutTo, _ = s.CheckedOutTo.GetNull()
 	}
-	if !s.StorageLocation.IsUnset() {
-		t.StorageLocation, _ = s.StorageLocation.GetNull()
+	if !s.Location.IsUnset() {
+		t.Location, _ = s.Location.GetNull()
 	}
-	if !s.StorageShelf.IsUnset() {
-		t.StorageShelf, _ = s.StorageShelf.GetNull()
+	if !s.PositionCode.IsUnset() {
+		t.PositionCode, _ = s.PositionCode.GetNull()
 	}
 	if !s.PurchaseSupplier.IsUnset() {
 		t.PurchaseSupplier, _ = s.PurchaseSupplier.GetNull()
@@ -292,14 +310,23 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.Status.IsUnset() {
 		um.Set("status").ToArg(s.Status).Apply(q)
 	}
+	if !s.Tag.IsUnset() {
+		um.Set("tag").ToArg(s.Tag).Apply(q)
+	}
 	if !s.Name.IsUnset() {
 		um.Set("name").ToArg(s.Name).Apply(q)
 	}
-	if !s.SerialNo.IsUnset() {
-		um.Set("serial_no").ToArg(s.SerialNo).Apply(q)
+	if !s.Category.IsUnset() {
+		um.Set("category").ToArg(s.Category).Apply(q)
+	}
+	if !s.Model.IsUnset() {
+		um.Set("model").ToArg(s.Model).Apply(q)
 	}
 	if !s.ModelNo.IsUnset() {
 		um.Set("model_no").ToArg(s.ModelNo).Apply(q)
+	}
+	if !s.SerialNo.IsUnset() {
+		um.Set("serial_no").ToArg(s.SerialNo).Apply(q)
 	}
 	if !s.Manufacturer.IsUnset() {
 		um.Set("manufacturer").ToArg(s.Manufacturer).Apply(q)
@@ -319,17 +346,14 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.CustomAttrs.IsUnset() {
 		um.Set("custom_attrs").ToArg(s.CustomAttrs).Apply(q)
 	}
-	if !s.TagID.IsUnset() {
-		um.Set("tag_id").ToArg(s.TagID).Apply(q)
-	}
 	if !s.CheckedOutTo.IsUnset() {
 		um.Set("checked_out_to").ToArg(s.CheckedOutTo).Apply(q)
 	}
-	if !s.StorageLocation.IsUnset() {
-		um.Set("storage_location").ToArg(s.StorageLocation).Apply(q)
+	if !s.Location.IsUnset() {
+		um.Set("location").ToArg(s.Location).Apply(q)
 	}
-	if !s.StorageShelf.IsUnset() {
-		um.Set("storage_shelf").ToArg(s.StorageShelf).Apply(q)
+	if !s.PositionCode.IsUnset() {
+		um.Set("position_code").ToArg(s.PositionCode).Apply(q)
 	}
 	if !s.PurchaseSupplier.IsUnset() {
 		um.Set("purchase_supplier").ToArg(s.PurchaseSupplier).Apply(q)
@@ -358,7 +382,7 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 }
 
 func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 24)
+	vals := make([]bob.Expression, 0, 26)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -371,16 +395,28 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.Status))
 	}
 
+	if !s.Tag.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Tag))
+	}
+
 	if !s.Name.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.Name))
 	}
 
-	if !s.SerialNo.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.SerialNo))
+	if !s.Category.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Category))
+	}
+
+	if !s.Model.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Model))
 	}
 
 	if !s.ModelNo.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ModelNo))
+	}
+
+	if !s.SerialNo.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.SerialNo))
 	}
 
 	if !s.Manufacturer.IsUnset() {
@@ -407,20 +443,16 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.CustomAttrs))
 	}
 
-	if !s.TagID.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.TagID))
-	}
-
 	if !s.CheckedOutTo.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.CheckedOutTo))
 	}
 
-	if !s.StorageLocation.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.StorageLocation))
+	if !s.Location.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Location))
 	}
 
-	if !s.StorageShelf.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.StorageShelf))
+	if !s.PositionCode.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.PositionCode))
 	}
 
 	if !s.PurchaseSupplier.IsUnset() {
@@ -462,19 +494,21 @@ type assetColumnNames struct {
 	ID               string
 	ParentAssetID    string
 	Status           string
+	Tag              string
 	Name             string
-	SerialNo         string
+	Category         string
+	Model            string
 	ModelNo          string
+	SerialNo         string
 	Manufacturer     string
 	Notes            string
 	ImageURL         string
 	ThumbnailURL     string
 	WarrantyUntil    string
 	CustomAttrs      string
-	TagID            string
 	CheckedOutTo     string
-	StorageLocation  string
-	StorageShelf     string
+	Location         string
+	PositionCode     string
 	PurchaseSupplier string
 	PurchaseOrderNo  string
 	PurchaseDate     string
@@ -515,19 +549,21 @@ var AssetColumns = struct {
 	ID               sqlite.Expression
 	ParentAssetID    sqlite.Expression
 	Status           sqlite.Expression
+	Tag              sqlite.Expression
 	Name             sqlite.Expression
-	SerialNo         sqlite.Expression
+	Category         sqlite.Expression
+	Model            sqlite.Expression
 	ModelNo          sqlite.Expression
+	SerialNo         sqlite.Expression
 	Manufacturer     sqlite.Expression
 	Notes            sqlite.Expression
 	ImageURL         sqlite.Expression
 	ThumbnailURL     sqlite.Expression
 	WarrantyUntil    sqlite.Expression
 	CustomAttrs      sqlite.Expression
-	TagID            sqlite.Expression
 	CheckedOutTo     sqlite.Expression
-	StorageLocation  sqlite.Expression
-	StorageShelf     sqlite.Expression
+	Location         sqlite.Expression
+	PositionCode     sqlite.Expression
 	PurchaseSupplier sqlite.Expression
 	PurchaseOrderNo  sqlite.Expression
 	PurchaseDate     sqlite.Expression
@@ -540,19 +576,21 @@ var AssetColumns = struct {
 	ID:               sqlite.Quote("assets", "id"),
 	ParentAssetID:    sqlite.Quote("assets", "parent_asset_id"),
 	Status:           sqlite.Quote("assets", "status"),
+	Tag:              sqlite.Quote("assets", "tag"),
 	Name:             sqlite.Quote("assets", "name"),
-	SerialNo:         sqlite.Quote("assets", "serial_no"),
+	Category:         sqlite.Quote("assets", "category"),
+	Model:            sqlite.Quote("assets", "model"),
 	ModelNo:          sqlite.Quote("assets", "model_no"),
+	SerialNo:         sqlite.Quote("assets", "serial_no"),
 	Manufacturer:     sqlite.Quote("assets", "manufacturer"),
 	Notes:            sqlite.Quote("assets", "notes"),
 	ImageURL:         sqlite.Quote("assets", "image_url"),
 	ThumbnailURL:     sqlite.Quote("assets", "thumbnail_url"),
 	WarrantyUntil:    sqlite.Quote("assets", "warranty_until"),
 	CustomAttrs:      sqlite.Quote("assets", "custom_attrs"),
-	TagID:            sqlite.Quote("assets", "tag_id"),
 	CheckedOutTo:     sqlite.Quote("assets", "checked_out_to"),
-	StorageLocation:  sqlite.Quote("assets", "storage_location"),
-	StorageShelf:     sqlite.Quote("assets", "storage_shelf"),
+	Location:         sqlite.Quote("assets", "location"),
+	PositionCode:     sqlite.Quote("assets", "position_code"),
 	PurchaseSupplier: sqlite.Quote("assets", "purchase_supplier"),
 	PurchaseOrderNo:  sqlite.Quote("assets", "purchase_order_no"),
 	PurchaseDate:     sqlite.Quote("assets", "purchase_date"),
@@ -567,23 +605,25 @@ type assetWhere[Q sqlite.Filterable] struct {
 	ID               sqlite.WhereMod[Q, int64]
 	ParentAssetID    sqlite.WhereNullMod[Q, int64]
 	Status           sqlite.WhereMod[Q, string]
+	Tag              sqlite.WhereNullMod[Q, string]
 	Name             sqlite.WhereMod[Q, string]
-	SerialNo         sqlite.WhereNullMod[Q, string]
+	Category         sqlite.WhereMod[Q, string]
+	Model            sqlite.WhereNullMod[Q, string]
 	ModelNo          sqlite.WhereNullMod[Q, string]
+	SerialNo         sqlite.WhereNullMod[Q, string]
 	Manufacturer     sqlite.WhereNullMod[Q, string]
 	Notes            sqlite.WhereNullMod[Q, string]
 	ImageURL         sqlite.WhereNullMod[Q, string]
 	ThumbnailURL     sqlite.WhereNullMod[Q, string]
-	WarrantyUntil    sqlite.WhereNullMod[Q, string]
-	CustomAttrs      sqlite.WhereNullMod[Q, string]
-	TagID            sqlite.WhereNullMod[Q, int64]
+	WarrantyUntil    sqlite.WhereNullMod[Q, types.SQLiteDatetime]
+	CustomAttrs      sqlite.WhereNullMod[Q, types.SQLiteJSON[map[string]any]]
 	CheckedOutTo     sqlite.WhereNullMod[Q, int64]
-	StorageLocation  sqlite.WhereNullMod[Q, string]
-	StorageShelf     sqlite.WhereNullMod[Q, string]
+	Location         sqlite.WhereNullMod[Q, string]
+	PositionCode     sqlite.WhereNullMod[Q, string]
 	PurchaseSupplier sqlite.WhereNullMod[Q, string]
 	PurchaseOrderNo  sqlite.WhereNullMod[Q, string]
-	PurchaseDate     sqlite.WhereNullMod[Q, string]
-	PurchaseAmount   sqlite.WhereNullMod[Q, string]
+	PurchaseDate     sqlite.WhereNullMod[Q, types.SQLiteDatetime]
+	PurchaseAmount   sqlite.WhereNullMod[Q, int64]
 	PurchaseCurrency sqlite.WhereNullMod[Q, string]
 	CreatedBy        sqlite.WhereMod[Q, int64]
 	CreatedAt        sqlite.WhereMod[Q, types.SQLiteDatetime]
@@ -595,23 +635,25 @@ func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
 		ID:               sqlite.Where[Q, int64](AssetColumns.ID),
 		ParentAssetID:    sqlite.WhereNull[Q, int64](AssetColumns.ParentAssetID),
 		Status:           sqlite.Where[Q, string](AssetColumns.Status),
+		Tag:              sqlite.WhereNull[Q, string](AssetColumns.Tag),
 		Name:             sqlite.Where[Q, string](AssetColumns.Name),
-		SerialNo:         sqlite.WhereNull[Q, string](AssetColumns.SerialNo),
+		Category:         sqlite.Where[Q, string](AssetColumns.Category),
+		Model:            sqlite.WhereNull[Q, string](AssetColumns.Model),
 		ModelNo:          sqlite.WhereNull[Q, string](AssetColumns.ModelNo),
+		SerialNo:         sqlite.WhereNull[Q, string](AssetColumns.SerialNo),
 		Manufacturer:     sqlite.WhereNull[Q, string](AssetColumns.Manufacturer),
 		Notes:            sqlite.WhereNull[Q, string](AssetColumns.Notes),
 		ImageURL:         sqlite.WhereNull[Q, string](AssetColumns.ImageURL),
 		ThumbnailURL:     sqlite.WhereNull[Q, string](AssetColumns.ThumbnailURL),
-		WarrantyUntil:    sqlite.WhereNull[Q, string](AssetColumns.WarrantyUntil),
-		CustomAttrs:      sqlite.WhereNull[Q, string](AssetColumns.CustomAttrs),
-		TagID:            sqlite.WhereNull[Q, int64](AssetColumns.TagID),
+		WarrantyUntil:    sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.WarrantyUntil),
+		CustomAttrs:      sqlite.WhereNull[Q, types.SQLiteJSON[map[string]any]](AssetColumns.CustomAttrs),
 		CheckedOutTo:     sqlite.WhereNull[Q, int64](AssetColumns.CheckedOutTo),
-		StorageLocation:  sqlite.WhereNull[Q, string](AssetColumns.StorageLocation),
-		StorageShelf:     sqlite.WhereNull[Q, string](AssetColumns.StorageShelf),
+		Location:         sqlite.WhereNull[Q, string](AssetColumns.Location),
+		PositionCode:     sqlite.WhereNull[Q, string](AssetColumns.PositionCode),
 		PurchaseSupplier: sqlite.WhereNull[Q, string](AssetColumns.PurchaseSupplier),
 		PurchaseOrderNo:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseOrderNo),
-		PurchaseDate:     sqlite.WhereNull[Q, string](AssetColumns.PurchaseDate),
-		PurchaseAmount:   sqlite.WhereNull[Q, string](AssetColumns.PurchaseAmount),
+		PurchaseDate:     sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.PurchaseDate),
+		PurchaseAmount:   sqlite.WhereNull[Q, int64](AssetColumns.PurchaseAmount),
 		PurchaseCurrency: sqlite.WhereNull[Q, string](AssetColumns.PurchaseCurrency),
 		CreatedBy:        sqlite.Where[Q, int64](AssetColumns.CreatedBy),
 		CreatedAt:        sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.CreatedAt),
@@ -731,7 +773,7 @@ func assetsJoinCheckedOutToUser[Q dialect.Joinable](ctx context.Context, typ str
 func assetsJoinTag[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Tags.Name(ctx)).On(
-			TagColumns.ID.EQ(AssetColumns.TagID),
+			TagColumns.Tag.EQ(AssetColumns.Tag),
 		),
 	}
 }
@@ -787,20 +829,20 @@ func (os AssetSlice) CheckedOutToUser(ctx context.Context, exec bob.Executor, mo
 }
 
 // Tag starts a query for related objects on tags
-func (o *Asset) Tag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
+func (o *Asset) RelatedTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
 	return Tags.Query(ctx, exec, append(mods,
-		sm.Where(TagColumns.ID.EQ(sqlite.Arg(o.TagID))),
+		sm.Where(TagColumns.Tag.EQ(sqlite.Arg(o.Tag))),
 	)...)
 }
 
-func (os AssetSlice) Tag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
+func (os AssetSlice) RelatedTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
 	PKArgs := make([]bob.Expression, len(os))
 	for i, o := range os {
-		PKArgs[i] = sqlite.ArgGroup(o.TagID)
+		PKArgs[i] = sqlite.ArgGroup(o.Tag)
 	}
 
 	return Tags.Query(ctx, exec, append(mods,
-		sm.Where(sqlite.Group(TagColumns.ID).In(PKArgs...)),
+		sm.Where(sqlite.Group(TagColumns.Tag).In(PKArgs...)),
 	)...)
 }
 
@@ -1100,10 +1142,10 @@ func PreloadAssetTag(opts ...sqlite.PreloadOption) sqlite.Preloader {
 					return Tags.Name(ctx)
 				},
 				FromColumns: []string{
-					ColumnNames.Assets.TagID,
+					ColumnNames.Assets.Tag,
 				},
 				ToColumns: []string{
-					ColumnNames.Tags.ID,
+					ColumnNames.Tags.Tag,
 				},
 			},
 		},
@@ -1139,7 +1181,7 @@ func (o *Asset) LoadAssetTag(ctx context.Context, exec bob.Executor, mods ...bob
 	// Reset the relationship
 	o.R.Tag = nil
 
-	related, err := o.Tag(ctx, exec, mods...).One()
+	related, err := o.RelatedTag(ctx, exec, mods...).One()
 	if err != nil {
 		return err
 	}
@@ -1156,14 +1198,14 @@ func (os AssetSlice) LoadAssetTag(ctx context.Context, exec bob.Executor, mods .
 		return nil
 	}
 
-	tags, err := os.Tag(ctx, exec, mods...).All()
+	tags, err := os.RelatedTag(ctx, exec, mods...).All()
 	if err != nil {
 		return err
 	}
 
 	for _, o := range os {
 		for _, rel := range tags {
-			if o.TagID.GetOrZero() != rel.ID {
+			if o.Tag.GetOrZero() != rel.Tag {
 				continue
 			}
 
@@ -1431,7 +1473,7 @@ func (asset0 *Asset) AttachCheckedOutToUser(ctx context.Context, exec bob.Execut
 
 func attachAssetTag0(ctx context.Context, exec bob.Executor, asset0 *Asset, tag1 *Tag) error {
 	setter := &AssetSetter{
-		TagID: omitnull.From(tag1.ID),
+		Tag: omitnull.From(tag1.Tag),
 	}
 
 	err := Assets.Update(ctx, exec, setter, asset0)

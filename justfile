@@ -3,6 +3,7 @@ export STUFF_LOG_LEVEL := "debug"
 export STUFF_LOG_FORMAT := "console"
 export STUFF_ADDRESS := "localhost:8080"
 export STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD := "admin"
+export STUFF_FILE_DIR := "files_dev_run"
 
 staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.54.2"
@@ -16,10 +17,6 @@ sql_migrate_config := "./storage/database/sqlite/sqlmigrate.yaml"
 _default:
     @just --list
 
-clean:
-    rm -rf node_modules stuff.db build
-    go clean -cache
-
 fmt:
     go fmt ./...
 
@@ -27,31 +24,45 @@ lint:
 	go run honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ./...
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} run ./...
 
-build: _gen-templ tailwind-build _copy-js-libs
-    go build ./bin/stuff
-
-run: _gen-templ tailwind-build _copy-js-libs
+run: _gen-templ _copy-js-libs icons
     go run ./bin/stuff
 
-watch: _copy-js-libs
-    go run github.com/bokwoon95/wgo@{{wgo_version}} \
-        -xdir node_modules \
-        -xdir build \
-        -xfile '.*_templ.go' \
-        -xfile 'justfile' \
-        -xfile 'stuff.db' \
-        just _watch-run
+build: _gen-templ _copy-js-libs styles icons
+    go build ./bin/stuff
 
-_watch-run: _gen-templ
+styles:
+    postcss ./views/styles.css -o ./build/styles.css --no-map
+
+icons:
+    rm -f build/*.svg
+    svg-sprite \
+        --symbol --symbol-dest="" \
+        --symbol-prefix=".icon-%s" --symbol-sprite=icons.svg \
+        --dest=build views/icons/*.svg
+
+watch:
+    concurrently "just _watch-go" "just _watch-styles" "just _watch-icons"
+
+_watch-go: _copy-js-libs
+    go run github.com/bokwoon95/wgo@{{wgo_version}} \
+        -xfile '.*_templ.go' \
+        -file '.*\.go' \
+        -file '.*\.templ' \
+        just _run-watch
+
+_run-watch: _gen-templ
     go run -tags dev ./bin/stuff
 
-tailwind-build:
-    tailwindcss -i ./views/styles.css -o ./build/styles.css
+_watch-styles:
+    postcss ./views/styles.css -o ./build/styles.css --watch
 
-alias tw := tailwind
-tailwind:
-    tailwindcss -i ./views/styles.css -o ./build/styles.css --watch
+_watch-icons:
+    go run github.com/bokwoon95/wgo@{{wgo_version}} \
+        -file 'views\/icons\/.*\.svg' \
+        just icons
 
+new-migration name:
+    go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} new -env production -config={{sql_migrate_config}} {{name}}
 
 alias gen := generate
 generate:
@@ -62,12 +73,15 @@ generate:
     rm _stuff.db
     just _gen-templ
 
-
 _gen-templ:
     go run github.com/a-h/templ/cmd/templ@{{templ_version}} generate -path .
 
-new-migration name:
-    go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} new -env production -config={{sql_migrate_config}} {{name}}
-
 _copy-js-libs:
     cp node_modules/alpinejs/dist/cdn.min.js build/alpine.min.js
+    cp node_modules/flatpickr/dist/flatpickr.min.js build/flatpickr.min.js
+    cp node_modules/htmx.org/dist/htmx.min.js build/htmx.min.js
+
+clean:
+    rm -rf node_modules stuff.db build
+    go clean -cache
+

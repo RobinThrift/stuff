@@ -11,48 +11,52 @@ import (
 )
 
 var TableNames = struct {
-	AssetFiles       string
-	Assets           string
-	LocalAuthUsers   string
-	Sessions         string
-	Tags             string
-	Users            string
-	CustomAttrNames  string
-	Manufacturers    string
-	StatusNames      string
-	StorageLocations string
-	Suppliers        string
+	AssetFiles      string
+	Assets          string
+	LocalAuthUsers  string
+	Sessions        string
+	Tags            string
+	Users           string
+	Categories      string
+	CustomAttrNames string
+	Locations       string
+	Manufacturers   string
+	PositionCodes   string
+	Suppliers       string
 }{
-	AssetFiles:       "asset_files",
-	Assets:           "assets",
-	LocalAuthUsers:   "local_auth_users",
-	Sessions:         "sessions",
-	Tags:             "tags",
-	Users:            "users",
-	CustomAttrNames:  "custom_attr_names",
-	Manufacturers:    "manufacturers",
-	StatusNames:      "status_names",
-	StorageLocations: "storage_locations",
-	Suppliers:        "suppliers",
+	AssetFiles:      "asset_files",
+	Assets:          "assets",
+	LocalAuthUsers:  "local_auth_users",
+	Sessions:        "sessions",
+	Tags:            "tags",
+	Users:           "users",
+	Categories:      "categories",
+	CustomAttrNames: "custom_attr_names",
+	Locations:       "locations",
+	Manufacturers:   "manufacturers",
+	PositionCodes:   "position_codes",
+	Suppliers:       "suppliers",
 }
 
 var ColumnNames = struct {
-	AssetFiles       assetFileColumnNames
-	Assets           assetColumnNames
-	LocalAuthUsers   localAuthUserColumnNames
-	Sessions         sessionColumnNames
-	Tags             tagColumnNames
-	Users            userColumnNames
-	CustomAttrNames  customAttrNameColumnNames
-	Manufacturers    manufacturerColumnNames
-	StatusNames      statusNameColumnNames
-	StorageLocations storageLocationColumnNames
-	Suppliers        supplierColumnNames
+	AssetFiles      assetFileColumnNames
+	Assets          assetColumnNames
+	LocalAuthUsers  localAuthUserColumnNames
+	Sessions        sessionColumnNames
+	Tags            tagColumnNames
+	Users           userColumnNames
+	Categories      categoryColumnNames
+	CustomAttrNames customAttrNameColumnNames
+	Locations       locationColumnNames
+	Manufacturers   manufacturerColumnNames
+	PositionCodes   positionCodeColumnNames
+	Suppliers       supplierColumnNames
 }{
 	AssetFiles: assetFileColumnNames{
 		ID:        "id",
 		AssetID:   "asset_id",
 		Name:      "name",
+		Filetype:  "filetype",
 		Sha256:    "sha256",
 		SizeBytes: "size_bytes",
 		CreatedBy: "created_by",
@@ -63,19 +67,21 @@ var ColumnNames = struct {
 		ID:               "id",
 		ParentAssetID:    "parent_asset_id",
 		Status:           "status",
+		Tag:              "tag",
 		Name:             "name",
-		SerialNo:         "serial_no",
+		Category:         "category",
+		Model:            "model",
 		ModelNo:          "model_no",
+		SerialNo:         "serial_no",
 		Manufacturer:     "manufacturer",
 		Notes:            "notes",
 		ImageURL:         "image_url",
 		ThumbnailURL:     "thumbnail_url",
 		WarrantyUntil:    "warranty_until",
 		CustomAttrs:      "custom_attrs",
-		TagID:            "tag_id",
 		CheckedOutTo:     "checked_out_to",
-		StorageLocation:  "storage_location",
-		StorageShelf:     "storage_shelf",
+		Location:         "location",
+		PositionCode:     "position_code",
 		PurchaseSupplier: "purchase_supplier",
 		PurchaseOrderNo:  "purchase_order_no",
 		PurchaseDate:     "purchase_date",
@@ -117,18 +123,21 @@ var ColumnNames = struct {
 		CreatedAt:   "created_at",
 		UpdatedAt:   "updated_at",
 	},
+	Categories: categoryColumnNames{
+		Name: "name",
+	},
 	CustomAttrNames: customAttrNameColumnNames{
 		Name: "name",
 		Type: "type",
 	},
+	Locations: locationColumnNames{
+		Name: "name",
+	},
 	Manufacturers: manufacturerColumnNames{
 		Name: "name",
 	},
-	StatusNames: statusNameColumnNames{
-		Name: "name",
-	},
-	StorageLocations: storageLocationColumnNames{
-		Name: "name",
+	PositionCodes: positionCodeColumnNames{
+		Code: "code",
 	},
 	Suppliers: supplierColumnNames{
 		Name: "name",
@@ -143,42 +152,45 @@ var (
 )
 
 func Where[Q sqlite.Filterable]() struct {
-	AssetFiles       assetFileWhere[Q]
-	Assets           assetWhere[Q]
-	LocalAuthUsers   localAuthUserWhere[Q]
-	Sessions         sessionWhere[Q]
-	Tags             tagWhere[Q]
-	Users            userWhere[Q]
-	CustomAttrNames  customAttrNameWhere[Q]
-	Manufacturers    manufacturerWhere[Q]
-	StatusNames      statusNameWhere[Q]
-	StorageLocations storageLocationWhere[Q]
-	Suppliers        supplierWhere[Q]
+	AssetFiles      assetFileWhere[Q]
+	Assets          assetWhere[Q]
+	LocalAuthUsers  localAuthUserWhere[Q]
+	Sessions        sessionWhere[Q]
+	Tags            tagWhere[Q]
+	Users           userWhere[Q]
+	Categories      categoryWhere[Q]
+	CustomAttrNames customAttrNameWhere[Q]
+	Locations       locationWhere[Q]
+	Manufacturers   manufacturerWhere[Q]
+	PositionCodes   positionCodeWhere[Q]
+	Suppliers       supplierWhere[Q]
 } {
 	return struct {
-		AssetFiles       assetFileWhere[Q]
-		Assets           assetWhere[Q]
-		LocalAuthUsers   localAuthUserWhere[Q]
-		Sessions         sessionWhere[Q]
-		Tags             tagWhere[Q]
-		Users            userWhere[Q]
-		CustomAttrNames  customAttrNameWhere[Q]
-		Manufacturers    manufacturerWhere[Q]
-		StatusNames      statusNameWhere[Q]
-		StorageLocations storageLocationWhere[Q]
-		Suppliers        supplierWhere[Q]
+		AssetFiles      assetFileWhere[Q]
+		Assets          assetWhere[Q]
+		LocalAuthUsers  localAuthUserWhere[Q]
+		Sessions        sessionWhere[Q]
+		Tags            tagWhere[Q]
+		Users           userWhere[Q]
+		Categories      categoryWhere[Q]
+		CustomAttrNames customAttrNameWhere[Q]
+		Locations       locationWhere[Q]
+		Manufacturers   manufacturerWhere[Q]
+		PositionCodes   positionCodeWhere[Q]
+		Suppliers       supplierWhere[Q]
 	}{
-		AssetFiles:       AssetFileWhere[Q](),
-		Assets:           AssetWhere[Q](),
-		LocalAuthUsers:   LocalAuthUserWhere[Q](),
-		Sessions:         SessionWhere[Q](),
-		Tags:             TagWhere[Q](),
-		Users:            UserWhere[Q](),
-		CustomAttrNames:  CustomAttrNameWhere[Q](),
-		Manufacturers:    ManufacturerWhere[Q](),
-		StatusNames:      StatusNameWhere[Q](),
-		StorageLocations: StorageLocationWhere[Q](),
-		Suppliers:        SupplierWhere[Q](),
+		AssetFiles:      AssetFileWhere[Q](),
+		Assets:          AssetWhere[Q](),
+		LocalAuthUsers:  LocalAuthUserWhere[Q](),
+		Sessions:        SessionWhere[Q](),
+		Tags:            TagWhere[Q](),
+		Users:           UserWhere[Q](),
+		Categories:      CategoryWhere[Q](),
+		CustomAttrNames: CustomAttrNameWhere[Q](),
+		Locations:       LocationWhere[Q](),
+		Manufacturers:   ManufacturerWhere[Q](),
+		PositionCodes:   PositionCodeWhere[Q](),
+		Suppliers:       SupplierWhere[Q](),
 	}
 }
 

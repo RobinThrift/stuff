@@ -1,0 +1,236 @@
+package assets
+
+import "fmt"
+import "github.com/kodeshack/stuff/views"
+
+type editAssetPageProps struct {
+	isNewAsset bool
+	asset *Asset
+	validationErrs map[string]string
+	postTarget string
+	csrfToken string
+	decimalSeparator string
+}
+
+templ editAssetPage(props editAssetPageProps) {
+	@views.Layout() {
+		<div class="container mx-auto">
+			<header class="my-5 flex items-end">
+				<h1 class="font-extrabold md:text-2xl lg:text-4xl">
+				if props.isNewAsset {
+					New Asset
+				} else {
+					Edit { props.asset.Name }
+				}
+				</h1>
+			</header>
+
+
+			if props.validationErrs["general"] != "" {
+				<span class="text-red-500">{ props.validationErrs["general"] }</span>
+			}
+
+			@views.Form(views.FormProps{
+				Action: props.postTarget,
+				Method: "post",
+				EncType: "multipart/form-data",
+				SubmitButtonText: "Save Asset",
+			}) {
+				<input type="hidden" name="stuff.csrf.token" value={ props.csrfToken } />
+
+				<div class="grid grid-cols-4 gap-5">
+					<div class="col-span-3 gap-5 grid grid-cols-4">
+						@views.Input(views.InputProps{
+							Class: "col-span-3", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "name", Label: "Name", Required: true,
+							Value: props.asset.Name,
+							ValidationErr: props.validationErrs["name"],
+						})
+
+						@views.Select(views.SelectProps{
+							Class: "col-span-1",
+							Name: "status",
+							Label: "Status",
+							Selected: string(props.asset.Status),
+							Options: [][]string{
+								{"In Storage", "IN_STORAGE"},
+								{"In Use", "IN_USE"},
+								{"Archived", "ARCHIVED"},
+							},
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "tag", Label: "Tag", Required: true,
+							Value: props.asset.Tag,
+							ValidationErr: props.validationErrs["tag"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "category", Label: "Category", Required: true,
+							Value: props.asset.Category,
+							ValidationErr: props.validationErrs["category"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "model", Label: "Model",
+							Value: props.asset.Model,
+							ValidationErr: props.validationErrs["model"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "model_no", Label: "Model No",
+							Value: props.asset.ModelNo,
+							ValidationErr: props.validationErrs["model_no"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "manufacturer", Label: "Manufacturer",
+							Value: props.asset.Manufacturer,
+							ValidationErr: props.validationErrs["Manufacturer"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "serial_no", Label: "Serial No",
+							Value: props.asset.SerialNo,
+							ValidationErr: props.validationErrs["serial_no"],
+						})
+
+						@views.DatePicker(views.DatePickerProps{
+							Class: "col-span-1 col-start-4", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "warranty_until", Label: "Warranty Until",
+							Value: props.asset.WarrantyUntil,
+							Format: "2006-01-02",
+							ValidationErr: props.validationErrs["warranty_until"],
+						})
+
+
+						@views.Textarea(views.TextareaProps{
+							Class: "col-span-4", LabelClass: "font-bold",
+							Name: "notes", Label: "Notes",
+							Value: props.asset.Notes,
+							ValidationErr: props.validationErrs["notes"],
+						})
+					</div>
+
+					<div
+						class="col-span-1 row-span-4 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
+						x-data={fmt.Sprintf("{ img: '%s' }", props.asset.ImageURL)}
+					>
+						<label
+							for="image"
+							class="block w-full flex-1 cursor-pointer relative"
+							@dragover.prevent="$refs.icons.classList.add('drag-over')"
+							@dragleave.prevent="$refs.icons.classList.remove('drag-over')" 
+						>
+							<div class="flex flex-col items-center justify-center">
+								<div x-show="!img" class="group flex justify-center items-center w-full h-full" x-ref="icons">
+									@views.Icon("file-arrow-up", "drag-over-show pointer-events-none")
+									@views.Icon("images-square", "drag-over-hide pointer-events-none")
+								</div>
+
+								<p x-show="!img" class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Drop to upload</span> or click to select</p>
+								<p x-show="!img" class="text-xs text-gray-500 dark:text-gray-400">PNG, JPEG, WebP</p>
+
+								<img x-show="img" x-bind:src="img" class="w-full h-auto" />
+							</div>
+
+							<input
+								class="absolute top-0 left-0 bottom-0 right-0 text-sm file:text-transparent text-transparent file:border-0 file:bg-transparent"
+								name="image"
+								id="image"
+								type="file"
+								accept="image/*"
+								x-ref="fileInput"
+								@change="
+									if (!$event.target.files) {
+										return
+									}
+									reader = new FileReader();
+									reader.readAsDataURL($event.target.files[0])
+									reader.onload = e => img = e.target.result
+								"
+							/>
+						</label>
+
+						<button
+							x-show="img" class="btn btn-outline btn-danger flex justify-center items-center"
+							@click.prevent="$refs.fileInput.value = ''; img = ''"
+						>
+							@views.Icon("file-x", "w-[24px] h-[24px]")
+							Clear
+						</button>
+					</div>
+
+					<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Location</h3>
+					<div class="col-span-3 grid grid-cols-4 gap-5">
+						@views.Input(views.InputProps{
+							Class: "col-span-3", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "location", Label: "Location",
+							Value: props.asset.Location,
+							ValidationErr: props.validationErrs["location"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-1", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "position_code", Label: "PositionCode",
+							Value: props.asset.PositionCode,
+							ValidationErr: props.validationErrs["position_code"],
+						})
+					</div>
+
+					<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Purchase Info</h3>
+					<div class="col-span-3 grid grid-cols-4 gap-5">
+						@views.Input(views.InputProps{
+							Class: "col-span-3", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "purchase.order_no", Label: "Order No.",
+							Value: props.asset.PurchaseInfo.OrderNo,
+							ValidationErr: props.validationErrs["purchase.order_no"],
+						})
+
+						@views.DatePicker(views.DatePickerProps{
+							Class: "col-span-1", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "purchase.date", Label: "Purchase Date",
+							Value: props.asset.PurchaseInfo.Date,
+							Format: "2006-01-02",
+							ValidationErr: props.validationErrs["purchase.date"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-4", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
+							Name: "purchase.supplier", Label: "Supplier",
+							Value: props.asset.PurchaseInfo.Supplier,
+							ValidationErr: props.validationErrs["purchase.supplier"],
+						})
+
+						@views.Input(views.InputProps{
+							Class: "col-span-1 col-start-4 flex items-center mb-5", LabelClass: "font-bold mt-2 mr-5 flex items-center",
+							InputWrapperClass: "flex-grow flex w-full items-center",
+							InputClass: "rounded-r-none flex-1 w-80 text-right",
+							Name: "purchase.amount", Label: "Cost",
+							Value: props.asset.PurchaseInfo.Amount.Format(props.decimalSeparator),
+							ValidationErr: props.validationErrs["purchase.amount"],
+						}) {
+							<input
+								type="text"
+								name="purchase.currency"
+								id="purchase.currency"
+								value={props.asset.PurchaseInfo.Currency}
+								class={
+									"px-3 py-2 placeholder-gray-300 border border-gray-300 rounded-md rounded-l-none",
+									templ.SafeClass("w-[64px] focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300"),
+									"border-l-0",
+								}
+							/>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	}
+}

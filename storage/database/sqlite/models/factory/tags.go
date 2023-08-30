@@ -101,7 +101,7 @@ func (t TagTemplate) setModelRels(o *models.Tag) {
 		for _, r := range t.r.Assets {
 			related := r.o.toModels(r.number)
 			for _, rel := range related {
-				rel.TagID = null.From(o.ID)
+				rel.Tag = null.From(o.Tag)
 				rel.R.Tag = o
 			}
 			rel = append(rel, related...)

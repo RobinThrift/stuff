@@ -8,7 +8,6 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/csrf"
 	"github.com/kodeshack/stuff"
 )
 
@@ -23,10 +22,16 @@ func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*
 
 	mux := chi.NewMux()
 
+	csrfMiddleware, err := csrfMiddleware()
+	if err != nil {
+		return nil, err
+	}
+
 	mux.Use(
 		requestIDMiddleware,
 		logReqMiddleware,
 		sessionMiddleware(sm),
+		csrfMiddleware,
 		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/"}),
 	)
 
@@ -37,25 +42,10 @@ func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*
 		r(mux)
 	}
 
-	csrfSecret, err := genCSRFSecret()
-	if err != nil {
-		return nil, err
-	}
-	csrfProtect := csrf.Protect(
-		csrfSecret,
-		csrf.CookieName("stuff.csrf.token"),
-		csrf.FieldName("stuff.csrf.token"),
-		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "/login", http.StatusFound)
-		})),
-	)
-
-	handler := csrfProtect(mux)
-
 	return &Server{
 		srv: &http.Server{
 			Addr:    addr,
-			Handler: handler,
+			Handler: mux,
 		},
 	}, nil
 }

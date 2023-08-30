@@ -283,7 +283,7 @@ func (o TagSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 func tagsJoinAssets[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Assets.Name(ctx)).On(
-			AssetColumns.TagID.EQ(TagColumns.ID),
+			AssetColumns.Tag.EQ(TagColumns.Tag),
 		),
 	}
 }
@@ -291,18 +291,18 @@ func tagsJoinAssets[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod
 // Assets starts a query for related objects on assets
 func (o *Tag) Assets(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetsQuery {
 	return Assets.Query(ctx, exec, append(mods,
-		sm.Where(AssetColumns.TagID.EQ(sqlite.Arg(o.ID))),
+		sm.Where(AssetColumns.Tag.EQ(sqlite.Arg(o.Tag))),
 	)...)
 }
 
 func (os TagSlice) Assets(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetsQuery {
 	PKArgs := make([]bob.Expression, len(os))
 	for i, o := range os {
-		PKArgs[i] = sqlite.ArgGroup(o.ID)
+		PKArgs[i] = sqlite.ArgGroup(o.Tag)
 	}
 
 	return Assets.Query(ctx, exec, append(mods,
-		sm.Where(sqlite.Group(AssetColumns.TagID).In(PKArgs...)),
+		sm.Where(sqlite.Group(AssetColumns.Tag).In(PKArgs...)),
 	)...)
 }
 
@@ -390,7 +390,7 @@ func (os TagSlice) LoadTagAssets(ctx context.Context, exec bob.Executor, mods ..
 
 	for _, o := range os {
 		for _, rel := range assets {
-			if o.ID != rel.TagID.GetOrZero() {
+			if o.Tag != rel.Tag.GetOrZero() {
 				continue
 			}
 
@@ -405,7 +405,7 @@ func (os TagSlice) LoadTagAssets(ctx context.Context, exec bob.Executor, mods ..
 
 func insertTagAssets0(ctx context.Context, exec bob.Executor, assets1 []*AssetSetter, tag0 *Tag) (AssetSlice, error) {
 	for _, asset1 := range assets1 {
-		asset1.TagID = omitnull.From(tag0.ID)
+		asset1.Tag = omitnull.From(tag0.Tag)
 	}
 
 	ret, err := Assets.InsertMany(ctx, exec, assets1...)
@@ -418,7 +418,7 @@ func insertTagAssets0(ctx context.Context, exec bob.Executor, assets1 []*AssetSe
 
 func attachTagAssets0(ctx context.Context, exec bob.Executor, assets1 AssetSlice, tag0 *Tag) error {
 	setter := &AssetSetter{
-		TagID: omitnull.From(tag0.ID),
+		Tag: omitnull.From(tag0.Tag),
 	}
 
 	err := Assets.Update(ctx, exec, setter, assets1...)
