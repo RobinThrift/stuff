@@ -14,6 +14,7 @@
     "dependencies": {
         "alpinejs": "^3.13.0",
         "flatpickr": "^4.6.13",
-        "htmx.org": "^1.9.5"
+        "htmx.org": "^1.9.5",
+        "quick-score": "^0.2.0"
     }
 }

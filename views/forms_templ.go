@@ -839,6 +839,272 @@ func Select(props SelectProps) templ.Component {
 	})
 }
 
+type AutoCompleteProps struct {
+	Class             string
+	InputClass        string
+	InputWrapperClass string
+	LabelClass        string
+
+	Source string
+	Value  string
+
+	Type          string
+	Label         string
+	Name          string
+	Placeholder   string
+	Required      bool
+	Icon          templ.Component
+	ValidationErr string
+}
+
+func AutoComplete(props AutoCompleteProps) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		templBuffer, templIsBuffer := w.(*bytes.Buffer)
+		if !templIsBuffer {
+			templBuffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templBuffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		var_27 := templ.GetChildren(ctx)
+		if var_27 == nil {
+			var_27 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		var var_28 = []any{templ.SafeClass(props.Class)}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_28...)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("<div class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_28).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" x-data=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(`{
+			open: false,
+			qs: null,
+			items: [],
+			value: "` + props.Value + `",
+			async fetch() {
+				if (!this.qs) {
+					this.qs = new Promise(async (resolve, reject) => {
+						let { QuickScore } = await import("/static/quick-score.min.js")
+						let res = await fetch("` + props.Source + `")
+						let opts = await res.json()
+						resolve(new QuickScore(opts))
+					})
+				}
+			},
+			async onChange(el) {
+				this.fetch()
+				let qs = await this.qs
+				if (!el.value) {
+					this.items = []
+					this.open = false
+					return
+				}
+
+				this.items = qs.search(el.value).map(i => i.item)
+
+				this.open = this.items.length > 0
+				if (this.open) {
+					let pos = el.getBoundingClientRect()
+					let top = pos.top + window.scrollY
+					let left = pos.left + window.scrollX
+					this.$refs.suggestions.style.left = left + 'px';
+					this.$refs.suggestions.style.top = top + el.offsetHeight + 'px';
+					this.$refs.suggestions.style.minWidth = el.offsetWidth + 'px';
+				}
+			},
+			onClickSuggestion(value) {
+				this.value = value
+				this.open = false
+			}
+		}`))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\">")
+		if err != nil {
+			return err
+		}
+		if props.Label != "" {
+			var var_29 = []any{"block mb-2 text-sm text-gray-600", templ.SafeClass(props.LabelClass)}
+			err = templ.RenderCSSItems(ctx, templBuffer, var_29...)
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("<label for=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(props.Name))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\" class=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_29).String()))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\">")
+			if err != nil {
+				return err
+			}
+			var var_30 string = props.Label
+			_, err = templBuffer.WriteString(templ.EscapeString(var_30))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</label>")
+			if err != nil {
+				return err
+			}
+		}
+		var var_31 = []any{"relative", templ.SafeClass(props.InputWrapperClass)}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_31...)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("<div class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_31).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\">")
+		if err != nil {
+			return err
+		}
+		if props.Icon != nil {
+			_, err = templBuffer.WriteString("<span class=\"pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500\"><div class=\"h-4 w-4\">")
+			if err != nil {
+				return err
+			}
+			err = props.Icon.Render(ctx, templBuffer)
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</div></span>")
+			if err != nil {
+				return err
+			}
+		}
+		var var_32 = []any{
+			templ.SafeClass("w-full px-3 py-2 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300"),
+			templ.KV("pl-11 ", props.Icon != nil),
+			templ.SafeClass(props.InputClass),
+		}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_32...)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("<input @keyup.debounce.100ms=\"onChange($el)\"")
+		if err != nil {
+			return err
+		}
+		if props.Required {
+			_, err = templBuffer.WriteString(" required")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString(" type=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(props.Type))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" name=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(props.Name))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" id=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(props.Name))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" autocomplete=\"off\"")
+		if err != nil {
+			return err
+		}
+		if props.Placeholder != "" {
+			_, err = templBuffer.WriteString(" placeholder=\"")
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString(templ.EscapeString(props.Placeholder))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("\"")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString(" class=\"")
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_32).String()))
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("\" x-bind:value=\"value\"><template x-teleport=\"body\"><div x-ref=\"suggestions\" x-show=\"open\" class=\"absolute top-0\" @click.outside=\"open = false\"><div class=\"h-auto overflow-auto bg-white border rounded-md shadow-sm border-neutral-200/70\"><ul class=\"divide-y divide-gray-100 text-sm w-full\"><template x-for=\"item in items\"><li class=\"w-100\"><button x-text=\"item\" class=\"p-2 blcok w-full hover:bg-blue-500 hover:text-white text-left\" @click=\"onClickSuggestion(item)\"></button></li></template></ul></div></div></template>")
+		if err != nil {
+			return err
+		}
+		err = var_27.Render(ctx, templBuffer)
+		if err != nil {
+			return err
+		}
+		if props.ValidationErr != "" {
+			_, err = templBuffer.WriteString("<span class=\"block text-red-500\">")
+			if err != nil {
+				return err
+			}
+			var var_33 string = props.ValidationErr
+			_, err = templBuffer.WriteString(templ.EscapeString(var_33))
+			if err != nil {
+				return err
+			}
+			_, err = templBuffer.WriteString("</span>")
+			if err != nil {
+				return err
+			}
+		}
+		_, err = templBuffer.WriteString("</div></div>")
+		if err != nil {
+			return err
+		}
+		if !templIsBuffer {
+			_, err = io.Copy(w, templBuffer)
+		}
+		return err
+	})
+}
+
 type FormProps struct {
 	Class string
 
@@ -857,13 +1123,13 @@ func Form(props FormProps) templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_27 := templ.GetChildren(ctx)
-		if var_27 == nil {
-			var_27 = templ.NopComponent
+		var_34 := templ.GetChildren(ctx)
+		if var_34 == nil {
+			var_34 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var var_28 = []any{templ.SafeClass(props.Class)}
-		err = templ.RenderCSSItems(ctx, templBuffer, var_28...)
+		var var_35 = []any{templ.SafeClass(props.Class)}
+		err = templ.RenderCSSItems(ctx, templBuffer, var_35...)
 		if err != nil {
 			return err
 		}
@@ -871,7 +1137,7 @@ func Form(props FormProps) templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_28).String()))
+		_, err = templBuffer.WriteString(templ.EscapeString(templ.CSSClasses(var_35).String()))
 		if err != nil {
 			return err
 		}
@@ -913,18 +1179,18 @@ func Form(props FormProps) templ.Component {
 		if err != nil {
 			return err
 		}
-		err = var_27.Render(ctx, templBuffer)
+		err = var_34.Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		var_29 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		var_36 := templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 			templBuffer, templIsBuffer := w.(*bytes.Buffer)
 			if !templIsBuffer {
 				templBuffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templBuffer)
 			}
-			var var_30 string = props.SubmitButtonText
-			_, err = templBuffer.WriteString(templ.EscapeString(var_30))
+			var var_37 string = props.SubmitButtonText
+			_, err = templBuffer.WriteString(templ.EscapeString(var_37))
 			if err != nil {
 				return err
 			}
@@ -933,7 +1199,7 @@ func Form(props FormProps) templ.Component {
 			}
 			return err
 		})
-		err = Button(ButtonProps{Type: "submit", Class: "mt-5"}).Render(templ.WithChildren(ctx, var_29), templBuffer)
+		err = Button(ButtonProps{Type: "submit", Class: "mt-5"}).Render(templ.WithChildren(ctx, var_36), templBuffer)
 		if err != nil {
 			return err
 		}

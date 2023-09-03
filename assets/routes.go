@@ -1,6 +1,7 @@
 package assets
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form/v4"
 	"github.com/gorilla/csrf"
+	"github.com/kodeshack/stuff/api"
 	"github.com/kodeshack/stuff/server/session"
 	"github.com/kodeshack/stuff/users"
 	"github.com/kodeshack/stuff/views"
@@ -44,6 +46,8 @@ func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
+
+	mux.Get("/api/v1/assets/categories", rt.apiGetCategories)
 }
 
 // [GET] /
@@ -276,6 +280,27 @@ func (rt *Router) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Reques
 
 	http.Redirect(w, r, "/assets", http.StatusFound)
 	return nil
+}
+
+// [GET] /api/v1/assets/categories
+func (rt *Router) apiGetCategories(w http.ResponseWriter, r *http.Request) {
+	cats, err := rt.Control.listCategories(r.Context())
+	if err != nil {
+		api.RespondWithError(r.Context(), w, err)
+		return
+	}
+
+	b, err := json.Marshal(cats)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error marshalling categories JSON", "error", err)
+		return
+	}
+
+	api.AddJSONContentType(w)
+	_, err = w.Write(b)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
+	}
 }
 
 func renderListAssetsPage(w http.ResponseWriter, r *http.Request, assetList *AssetList, query listAssetsQuery) error {

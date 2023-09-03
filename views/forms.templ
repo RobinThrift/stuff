@@ -142,7 +142,6 @@ templ DatePicker(props DatePickerProps) {
 			}
 		</div>
 	</div>
-
 }
 
 type TextareaProps struct {
@@ -228,6 +227,132 @@ templ Select(props SelectProps) {
 				</option>
 			}
 		</select>
+	</div>
+}
+
+type AutoCompleteProps struct {
+	Class string
+	InputClass string
+	InputWrapperClass string
+	LabelClass string
+
+	Source string
+	Value string
+
+	Type string
+	Label string
+	Name string
+	Placeholder string
+	Required bool
+	Icon templ.Component
+	ValidationErr string
+}
+
+templ AutoComplete(props AutoCompleteProps) {
+	<div
+		class={ templ.SafeClass(props.Class) }
+		x-data={`{
+			open: false,
+			qs: null,
+			items: [],
+			value: "`+props.Value+`",
+			async fetch() {
+				if (!this.qs) {
+					this.qs = new Promise(async (resolve, reject) => {
+						let { QuickScore } = await import("/static/quick-score.min.js")
+						let res = await fetch("`+props.Source+`")
+						let opts = await res.json()
+						resolve(new QuickScore(opts))
+					})
+				}
+			},
+			async onChange(el) {
+				this.fetch()
+				let qs = await this.qs
+				if (el.value.value <= 3) {
+					this.items = []
+					this.open = false
+					return
+				}
+
+				this.items = qs.search(el.value).map(i => i.item)
+
+				this.open = this.items.length > 0
+				if (this.open) {
+					let pos = el.getBoundingClientRect()
+					let top = pos.top + window.scrollY
+					let left = pos.left + window.scrollX
+					this.$refs.suggestions.style.left = left + 'px';
+					this.$refs.suggestions.style.top = top + el.offsetHeight + 'px';
+					this.$refs.suggestions.style.minWidth = el.offsetWidth + 'px';
+				}
+			},
+			onClickSuggestion(value) {
+				this.value = value
+				this.open = false
+			}
+		}`}
+	>
+		if props.Label != "" {
+			<label for={ props.Name } class={"block mb-2 text-sm text-gray-600", templ.SafeClass(props.LabelClass)}>{ props.Label }</label>
+		}
+
+		<div class={"relative", templ.SafeClass(props.InputWrapperClass)}>
+			if props.Icon != nil {
+				<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+					<div class="h-4 w-4">
+						{! props.Icon }
+					</div>
+				</span>
+			}
+
+			<input
+				@keyup.debounce.100ms="onChange($el)"
+				required?={ props.Required }
+				type={ props.Type }
+				name={ props.Name }
+				id={ props.Name }
+				autocomplete="off"
+				if props.Placeholder != "" {
+					placeholder={ props.Placeholder }
+				}
+				class={
+					templ.SafeClass("w-full px-3 py-2 placeholder-gray-300 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300"),
+					templ.KV("pl-11 ", props.Icon != nil),
+					templ.SafeClass(props.InputClass),
+				}
+				x-bind:value="value"
+			/>
+
+			<template x-teleport="body">
+				<div
+					x-ref="suggestions" x-show="open"
+					class="absolute top-0"
+					@click.outside="open = false"
+				>
+					<div class="h-auto overflow-auto bg-white border rounded-md shadow-sm border-neutral-200/70">
+						<ul class="divide-y divide-gray-100 text-sm w-full">
+				 			<template x-for="item in items">
+								<li class="w-100">
+									<button
+										x-text="item"
+										class="p-2 blcok w-full hover:bg-blue-500 hover:text-white text-left"
+										@click="onClickSuggestion(item)"
+									></button>
+								</li>
+							</template>
+						</ul>
+					</div>
+				</div>
+			</template>
+
+			{ children... }
+
+
+			if props.ValidationErr != "" {
+				<span class="block text-red-500">{ props.ValidationErr }</span>
+			}
+		</div>
 	</div>
 }
 

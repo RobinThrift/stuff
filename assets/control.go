@@ -28,6 +28,8 @@ type AssetRepo interface {
 	CreateAsset(ctx context.Context, exec bob.Executor, asset *database.Asset) (*database.Asset, error)
 	UpdateAsset(ctx context.Context, exec bob.Executor, asset *database.Asset) (*database.Asset, error)
 	DeleteAsset(ctx context.Context, exec bob.Executor, id int64) error
+
+	ListCategories(ctx context.Context, exec bob.Executor) ([]string, error)
 }
 
 type listAssetsQuery struct {
@@ -321,6 +323,12 @@ func (c *Control) deleteAsset(ctx context.Context, asset *Asset) (err error) {
 		}
 
 		return c.AssetRepo.DeleteAsset(ctx, tx, asset.ID)
+	})
+}
+
+func (c *Control) listCategories(ctx context.Context) ([]string, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]string, error) {
+		return c.AssetRepo.ListCategories(ctx, tx)
 	})
 }
 

@@ -287,6 +287,23 @@ func (ar *AssetRepo) DeleteAsset(ctx context.Context, exec bob.Executor, id int6
 	return err
 }
 
+func (ar *AssetRepo) ListCategories(ctx context.Context, exec bob.Executor) ([]string, error) {
+	categories, err := models.Categories.Query(ctx, exec).All()
+	if err != nil {
+		return nil, err
+	}
+
+	cats := make([]string, 0, len(categories))
+
+	for _, c := range categories {
+		if c.Name.IsSet() {
+			cats = append(cats, c.Name.GetOrZero())
+		}
+	}
+
+	return cats, nil
+}
+
 func omitnullStr(str string) omitnull.Val[string] {
 	v := omitnull.From(str)
 	if str == "" {

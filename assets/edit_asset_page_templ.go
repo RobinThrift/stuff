@@ -131,10 +131,11 @@ func editAssetPage(props editAssetPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				err = views.Input(views.InputProps{
+				err = views.AutoComplete(views.AutoCompleteProps{
 					Class: "col-span-2", LabelClass: "font-bold", InputWrapperClass: "flex-grow",
 					Name: "category", Label: "Category", Required: true,
 					Value:         props.asset.Category,
+					Source:        "/api/v1/assets/categories",
 					ValidationErr: props.validationErrs["category"],
 				}).Render(ctx, templBuffer)
 				if err != nil {
