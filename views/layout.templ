@@ -35,7 +35,8 @@ templ siteNav() {
 
 templ siteNavMobile() {
 	<nav :class={ `{'flex': open, 'hidden': !open}` } class={ templ.SafeClass("flex-col flex-grow hidden md:pb-0 md:flex md:items-center  md:items-center md:flex-row md:ml-5") }>
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/">Assets</a>
+		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/assets">Assets</a>
+		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/tags">Tags</a>
 		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/users">Users</a>
 		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500 block md:hidden flex flex-row items-center" href="/logout">
 			 Logout

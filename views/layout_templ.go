@@ -167,7 +167,7 @@ func siteNavMobile() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("\"><a class=\"px-2 py-2 text-sm text-neutral hover:text-purple-500\" href=\"/\">")
+		_, err = templBuffer.WriteString("\"><a class=\"px-2 py-2 text-sm text-neutral hover:text-purple-500\" href=\"/assets\">")
 		if err != nil {
 			return err
 		}
@@ -176,12 +176,21 @@ func siteNavMobile() templ.Component {
 		if err != nil {
 			return err
 		}
+		_, err = templBuffer.WriteString("</a><a class=\"px-2 py-2 text-sm text-neutral hover:text-purple-500\" href=\"/tags\">")
+		if err != nil {
+			return err
+		}
+		var_7 := `Tags`
+		_, err = templBuffer.WriteString(var_7)
+		if err != nil {
+			return err
+		}
 		_, err = templBuffer.WriteString("</a><a class=\"px-2 py-2 text-sm text-neutral hover:text-purple-500\" href=\"/users\">")
 		if err != nil {
 			return err
 		}
-		var_7 := `Users`
-		_, err = templBuffer.WriteString(var_7)
+		var_8 := `Users`
+		_, err = templBuffer.WriteString(var_8)
 		if err != nil {
 			return err
 		}
@@ -189,8 +198,8 @@ func siteNavMobile() templ.Component {
 		if err != nil {
 			return err
 		}
-		var_8 := `Logout`
-		_, err = templBuffer.WriteString(var_8)
+		var_9 := `Logout`
+		_, err = templBuffer.WriteString(var_9)
 		if err != nil {
 			return err
 		}
@@ -243,9 +252,9 @@ func footer() templ.Component {
 			defer templ.ReleaseBuffer(templBuffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		var_9 := templ.GetChildren(ctx)
-		if var_9 == nil {
-			var_9 = templ.NopComponent
+		var_10 := templ.GetChildren(ctx)
+		if var_10 == nil {
+			var_10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, err = templBuffer.WriteString("<footer class=\"px-3 md:px-6 lg:px-8 py-5 bg-gray-50 w-full\"><div class=\"flex flex-wrap justify-center text-sm\">")
@@ -260,8 +269,8 @@ func footer() templ.Component {
 		if err != nil {
 			return err
 		}
-		var_10 := `Version X`
-		_, err = templBuffer.WriteString(var_10)
+		var_11 := `Version X`
+		_, err = templBuffer.WriteString(var_11)
 		if err != nil {
 			return err
 		}
@@ -281,8 +290,8 @@ func footer() templ.Component {
 		if err != nil {
 			return err
 		}
-		var_11 := `GitHub`
-		_, err = templBuffer.WriteString(var_11)
+		var_12 := `GitHub`
+		_, err = templBuffer.WriteString(var_12)
 		if err != nil {
 			return err
 		}
