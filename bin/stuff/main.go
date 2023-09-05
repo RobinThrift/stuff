@@ -98,6 +98,8 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		FileDir:          config.FileDir,
 	}
 
+	tagsRouter := &tags.Router{Control: tagCtrl}
+
 	sm := scs.New()
 	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
 	sm.Lifetime = 24 * time.Hour
@@ -105,7 +107,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	sm.Cookie.Persist = true
 	sm.Cookie.SameSite = http.SameSiteStrictMode
 
-	srv, err := server.NewServer(config.Addr, sm, authRouter.RegisterRoutes, assetsRouter.RegisterRoutes)
+	srv, err := server.NewServer(config.Addr, sm, authRouter.RegisterRoutes, assetsRouter.RegisterRoutes, tagsRouter.RegisterRoutes)
 	if err != nil {
 		return nil, err
 	}

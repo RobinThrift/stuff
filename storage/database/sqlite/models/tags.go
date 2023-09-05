@@ -26,6 +26,7 @@ import (
 type Tag struct {
 	ID        int64                `db:"id,pk" `
 	Tag       string               `db:"tag" `
+	InUse     bool                 `db:"in_use" `
 	CreatedAt types.SQLiteDatetime `db:"created_at" `
 	UpdatedAt types.SQLiteDatetime `db:"updated_at" `
 
@@ -56,18 +57,23 @@ type tagR struct {
 type TagSetter struct {
 	ID        omit.Val[int64]                `db:"id,pk"`
 	Tag       omit.Val[string]               `db:"tag"`
+	InUse     omit.Val[bool]                 `db:"in_use"`
 	CreatedAt omit.Val[types.SQLiteDatetime] `db:"created_at"`
 	UpdatedAt omit.Val[types.SQLiteDatetime] `db:"updated_at"`
 }
 
 func (s TagSetter) SetColumns() []string {
-	vals := make([]string, 0, 4)
+	vals := make([]string, 0, 5)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
 
 	if !s.Tag.IsUnset() {
 		vals = append(vals, "tag")
+	}
+
+	if !s.InUse.IsUnset() {
+		vals = append(vals, "in_use")
 	}
 
 	if !s.CreatedAt.IsUnset() {
@@ -88,6 +94,9 @@ func (s TagSetter) Overwrite(t *Tag) {
 	if !s.Tag.IsUnset() {
 		t.Tag, _ = s.Tag.Get()
 	}
+	if !s.InUse.IsUnset() {
+		t.InUse, _ = s.InUse.Get()
+	}
 	if !s.CreatedAt.IsUnset() {
 		t.CreatedAt, _ = s.CreatedAt.Get()
 	}
@@ -103,6 +112,9 @@ func (s TagSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.Tag.IsUnset() {
 		um.Set("tag").ToArg(s.Tag).Apply(q)
 	}
+	if !s.InUse.IsUnset() {
+		um.Set("in_use").ToArg(s.InUse).Apply(q)
+	}
 	if !s.CreatedAt.IsUnset() {
 		um.Set("created_at").ToArg(s.CreatedAt).Apply(q)
 	}
@@ -112,13 +124,17 @@ func (s TagSetter) Apply(q *dialect.UpdateQuery) {
 }
 
 func (s TagSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 4)
+	vals := make([]bob.Expression, 0, 5)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
 
 	if !s.Tag.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.Tag))
+	}
+
+	if !s.InUse.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.InUse))
 	}
 
 	if !s.CreatedAt.IsUnset() {
@@ -135,6 +151,7 @@ func (s TagSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 type tagColumnNames struct {
 	ID        string
 	Tag       string
+	InUse     string
 	CreatedAt string
 	UpdatedAt string
 }
@@ -160,11 +177,13 @@ func tagsJoin[Q dialect.Joinable](ctx context.Context) joinSet[tagRelationshipJo
 var TagColumns = struct {
 	ID        sqlite.Expression
 	Tag       sqlite.Expression
+	InUse     sqlite.Expression
 	CreatedAt sqlite.Expression
 	UpdatedAt sqlite.Expression
 }{
 	ID:        sqlite.Quote("tags", "id"),
 	Tag:       sqlite.Quote("tags", "tag"),
+	InUse:     sqlite.Quote("tags", "in_use"),
 	CreatedAt: sqlite.Quote("tags", "created_at"),
 	UpdatedAt: sqlite.Quote("tags", "updated_at"),
 }
@@ -172,6 +191,7 @@ var TagColumns = struct {
 type tagWhere[Q sqlite.Filterable] struct {
 	ID        sqlite.WhereMod[Q, int64]
 	Tag       sqlite.WhereMod[Q, string]
+	InUse     sqlite.WhereMod[Q, bool]
 	CreatedAt sqlite.WhereMod[Q, types.SQLiteDatetime]
 	UpdatedAt sqlite.WhereMod[Q, types.SQLiteDatetime]
 }
@@ -180,6 +200,7 @@ func TagWhere[Q sqlite.Filterable]() tagWhere[Q] {
 	return tagWhere[Q]{
 		ID:        sqlite.Where[Q, int64](TagColumns.ID),
 		Tag:       sqlite.Where[Q, string](TagColumns.Tag),
+		InUse:     sqlite.Where[Q, bool](TagColumns.InUse),
 		CreatedAt: sqlite.Where[Q, types.SQLiteDatetime](TagColumns.CreatedAt),
 		UpdatedAt: sqlite.Where[Q, types.SQLiteDatetime](TagColumns.UpdatedAt),
 	}

@@ -111,6 +111,7 @@ var ColumnNames = struct {
 	Tags: tagColumnNames{
 		ID:        "id",
 		Tag:       "tag",
+		InUse:     "in_use",
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
 	},

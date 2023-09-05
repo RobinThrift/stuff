@@ -40,7 +40,7 @@ type listAssetsQuery struct {
 }
 
 func (c *Control) generateTag(ctx context.Context) (string, error) {
-	return c.TagCtrl.Generate(ctx)
+	return c.TagCtrl.GetNext(ctx)
 }
 
 func (c *Control) getAsset(ctx context.Context, id int64) (*Asset, error) {
@@ -317,7 +317,7 @@ func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*A
 
 func (c *Control) deleteAsset(ctx context.Context, asset *Asset) (err error) {
 	return c.DB.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
-		err := c.TagCtrl.Delete(ctx, tx, asset.Tag)
+		err := c.TagCtrl.MarkTagUnused(ctx, tx, asset.Tag)
 		if err != nil {
 			return err
 		}

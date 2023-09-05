@@ -37,6 +37,7 @@ func (mods TagModSlice) Apply(n *TagTemplate) {
 type TagTemplate struct {
 	ID        func() int64
 	Tag       func() string
+	InUse     func() bool
 	CreatedAt func() types.SQLiteDatetime
 	UpdatedAt func() types.SQLiteDatetime
 
@@ -70,6 +71,9 @@ func (o TagTemplate) toModel() *models.Tag {
 	}
 	if o.Tag != nil {
 		m.Tag = o.Tag()
+	}
+	if o.InUse != nil {
+		m.InUse = o.InUse()
 	}
 	if o.CreatedAt != nil {
 		m.CreatedAt = o.CreatedAt()
@@ -121,6 +125,9 @@ func (o TagTemplate) BuildSetter() *models.TagSetter {
 	}
 	if o.Tag != nil {
 		m.Tag = omit.From(o.Tag())
+	}
+	if o.InUse != nil {
+		m.InUse = omit.From(o.InUse())
 	}
 	if o.CreatedAt != nil {
 		m.CreatedAt = omit.From(o.CreatedAt())
@@ -255,6 +262,7 @@ func (m tagMods) RandomizeAllColumns(f *faker.Faker) TagMod {
 	return TagModSlice{
 		TagMods.RandomID(f),
 		TagMods.RandomTag(f),
+		TagMods.RandomInUse(f),
 		TagMods.RandomCreatedAt(f),
 		TagMods.RandomUpdatedAt(f),
 	}
@@ -342,6 +350,49 @@ func (m tagMods) ensureTag(f *faker.Faker) TagMod {
 
 		o.Tag = func() string {
 			return random[string](f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m tagMods) InUse(val bool) TagMod {
+	return TagModFunc(func(o *TagTemplate) {
+		o.InUse = func() bool { return val }
+	})
+}
+
+// Set the Column from the function
+func (m tagMods) InUseFunc(f func() bool) TagMod {
+	return TagModFunc(func(o *TagTemplate) {
+		o.InUse = f
+	})
+}
+
+// Clear any values for the column
+func (m tagMods) UnsetInUse() TagMod {
+	return TagModFunc(func(o *TagTemplate) {
+		o.InUse = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m tagMods) RandomInUse(f *faker.Faker) TagMod {
+	return TagModFunc(func(o *TagTemplate) {
+		o.InUse = func() bool {
+			return random[bool](f)
+		}
+	})
+}
+
+func (m tagMods) ensureInUse(f *faker.Faker) TagMod {
+	return TagModFunc(func(o *TagTemplate) {
+		if o.InUse != nil {
+			return
+		}
+
+		o.InUse = func() bool {
+			return random[bool](f)
 		}
 	})
 }
