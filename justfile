@@ -7,12 +7,10 @@ export STUFF_FILE_DIR := "files_dev_run"
 
 staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.54.2"
-sql_migrate_version := "v1.5.2"
+goose_version := "v3.15.0"
 bobgen_version := "v0.22.0"
 templ_version := "v0.2.316"
 wgo_version := "v0.5.3"
-
-sql_migrate_config := "./storage/database/sqlite/sqlmigrate.yaml"
 
 _default:
     @just --list
@@ -23,6 +21,9 @@ fmt:
 lint:
 	go run honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ./...
 	go run github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} run ./...
+
+test flags="-failfast -v -timeout 5m":
+    go test {{ flags }} ./...
 
 run: _gen-templ _copy-js-libs icons
     go run ./bin/stuff
@@ -62,15 +63,17 @@ _watch-icons:
         just icons
 
 new-migration name:
-    go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} new -env production -config={{sql_migrate_config}} {{name}}
+    @rm -f _stuff.db
+    go run github.com/pressly/goose/v3/cmd/goose@{{goose_version}} -table migrations -dir storage/database/sqlite/migrations sqlite3 ./_stuff.db create {{name}} sql
+    @rm -f _stuff.db
 
 alias gen := generate
 generate:
-    rm -f _stuff.db
-    go run github.com/rubenv/sql-migrate/sql-migrate/...@{{sql_migrate_version}} up -env production -config={{sql_migrate_config}}
+    @rm -f _stuff.db
+    go run github.com/pressly/goose/v3/cmd/goose@{{goose_version}} -table migrations -dir storage/database/sqlite/migrations sqlite3 ./_stuff.db up
     go run github.com/stephenafamo/bob/gen/bobgen-sqlite@{{bobgen_version}} -c ./storage/database/sqlite/bob.yaml
     go fmt ./...
-    rm _stuff.db
+    @rm _stuff.db
     just _gen-templ
 
 _gen-templ:

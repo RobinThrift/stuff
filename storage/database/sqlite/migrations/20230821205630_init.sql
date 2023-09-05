@@ -1,4 +1,5 @@
--- +migrate Up
+-- +goose Up
+
 CREATE TABLE sessions (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     token      TEXT NOT NULL,
@@ -38,9 +39,10 @@ CREATE UNIQUE INDEX unique_auth_ref ON users(auth_ref);
 
 CREATE TABLE tags (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    tag          TEXT NOT NULL,
-    created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
-    updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))
+    tag          TEXT    NOT NULL,
+    in_use       BOOLEAN NOT NULL DEFAULT false,
+    created_at   TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
+    updated_at   TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP))
 );
 CREATE UNIQUE INDEX unique_tag ON tags(tag);
 
@@ -105,8 +107,10 @@ CREATE VIEW suppliers AS SELECT purchase_supplier as name FROM assets WHERE purc
 CREATE VIEW locations AS SELECT location as name FROM assets WHERE location IS NOT NULL GROUP BY name;
 CREATE VIEW position_codes AS SELECT position_code as code FROM assets WHERE position_code IS NOT NULL GROUP BY code;
 CREATE VIEW custom_attr_names AS SELECT j.key as name, j.type as type FROM assets, json_each(custom_attrs) j WHERE custom_attrs IS NOT NULL GROUP BY j.key;
+-- +goose StatementEnd
 
--- +migrate Down
+
+-- +goose Down
 DROP VIEW custom_attr_names;
 DROP VIEW position_codes;
 DROP VIEW locations;

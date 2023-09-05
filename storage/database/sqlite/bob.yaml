@@ -66,6 +66,5 @@ sqlite:
   no_tests: true
   no_back_referencing: true
 
-
   except:
     migrations:

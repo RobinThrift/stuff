@@ -5,15 +5,13 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
-	"io/fs"
 	"log/slog"
-	"net/http"
 
-	migrate "github.com/rubenv/sql-migrate"
+	"github.com/pressly/goose/v3"
 	_ "modernc.org/sqlite"
 )
 
-//go:embed migrations
+//go:embed migrations/*.sql
 var migrations embed.FS
 
 func NewSQLiteDB(path string) (*sql.DB, error) {
@@ -24,16 +22,15 @@ func NewSQLiteDB(path string) (*sql.DB, error) {
 func RunMigrations(ctx context.Context, db *sql.DB) error {
 	slog.InfoContext(ctx, "running migrations")
 
-	subFS, err := fs.Sub(migrations, "migrations")
+	goose.SetBaseFS(migrations)
+	err := goose.SetDialect("sqlite3")
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	source := &migrate.HttpFileSystemMigrationSource{
-		FileSystem: http.FS(subFS),
-	}
+	goose.SetTableName("migrations")
 
-	_, err = migrate.ExecContext(ctx, db, "sqlite3", source, migrate.Up)
+	err = goose.Up(db, "migrations")
 	if err != nil {
 		return fmt.Errorf("error running migrations: %w", err)
 	}
