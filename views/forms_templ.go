@@ -905,7 +905,7 @@ func AutoComplete(props AutoCompleteProps) templ.Component {
 			async onChange(el) {
 				this.fetch()
 				let qs = await this.qs
-				if (!el.value) {
+				if (!el.value.length) {
 					this.items = []
 					this.open = false
 					return
@@ -923,8 +923,9 @@ func AutoComplete(props AutoCompleteProps) templ.Component {
 					this.$refs.suggestions.style.minWidth = el.offsetWidth + 'px';
 				}
 			},
-			onClickSuggestion(value) {
-				this.value = value
+			onClickSuggestion(newValue) {
+				this.value = ""
+				this.value = newValue
 				this.open = false
 			}
 		}`))

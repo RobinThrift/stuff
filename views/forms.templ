@@ -269,7 +269,7 @@ templ AutoComplete(props AutoCompleteProps) {
 			async onChange(el) {
 				this.fetch()
 				let qs = await this.qs
-				if (el.value.value <= 3) {
+				if (!el.value.length) {
 					this.items = []
 					this.open = false
 					return
@@ -287,8 +287,9 @@ templ AutoComplete(props AutoCompleteProps) {
 					this.$refs.suggestions.style.minWidth = el.offsetWidth + 'px';
 				}
 			},
-			onClickSuggestion(value) {
-				this.value = value
+			onClickSuggestion(newValue) {
+				this.value = ""
+				this.value = newValue
 				this.open = false
 			}
 		}`}
