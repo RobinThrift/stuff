@@ -80,6 +80,7 @@ _copy-js-libs:
     cp node_modules/alpinejs/dist/cdn.min.js build/alpine.min.js
     cp node_modules/flatpickr/dist/flatpickr.min.js build/flatpickr.min.js
     cp node_modules/htmx.org/dist/htmx.min.js build/htmx.min.js
+    cp node_modules/quick-score/dist/quick-score.esm.min.js build/quick-score.min.js
 
 clean:
     rm -rf node_modules stuff.db build
