@@ -56,15 +56,20 @@ replacements:
     type: "types.SQLiteJSON[map[string]any]"
     imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
 
+no_factory: true
+no_tests: true
+no_back_referencing: true
+
 sqlite:
   dsn: "_stuff.db"
 
   output: "storage/database/sqlite/models"
   pkgname: "models"
 
-  no_factory: true
-  no_tests: true
-  no_back_referencing: true
-
   except:
     migrations:
+    assets_fts_config:
+    assets_fts_content:
+    assets_fts_data:
+    assets_fts_docsize:
+    assets_fts_idx:

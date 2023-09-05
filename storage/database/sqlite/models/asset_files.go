@@ -425,9 +425,6 @@ func (o *AssetFile) Preload(name string, retrieved any) error {
 
 		o.R.CreatedByUser = rel
 
-		if rel != nil {
-			rel.R.CreatedByAssetFiles = AssetFileSlice{o}
-		}
 		return nil
 	default:
 		return fmt.Errorf("assetFile has no relationship %q", name)
@@ -489,8 +486,6 @@ func (o *AssetFile) LoadAssetFileCreatedByUser(ctx context.Context, exec bob.Exe
 		return err
 	}
 
-	related.R.CreatedByAssetFiles = AssetFileSlice{o}
-
 	o.R.CreatedByUser = related
 	return nil
 }
@@ -511,8 +506,6 @@ func (os AssetFileSlice) LoadAssetFileCreatedByUser(ctx context.Context, exec bo
 			if o.CreatedBy != rel.ID {
 				continue
 			}
-
-			rel.R.CreatedByAssetFiles = append(rel.R.CreatedByAssetFiles, o)
 
 			o.R.CreatedByUser = rel
 			break
@@ -548,8 +541,6 @@ func (assetFile0 *AssetFile) InsertCreatedByUser(ctx context.Context, exec bob.E
 
 	assetFile0.R.CreatedByUser = user1
 
-	user1.R.CreatedByAssetFiles = append(user1.R.CreatedByAssetFiles, assetFile0)
-
 	return nil
 }
 
@@ -562,8 +553,6 @@ func (assetFile0 *AssetFile) AttachCreatedByUser(ctx context.Context, exec bob.E
 	}
 
 	assetFile0.R.CreatedByUser = user1
-
-	user1.R.CreatedByAssetFiles = append(user1.R.CreatedByAssetFiles, assetFile0)
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/aarondl/opt/null"
@@ -14,6 +15,7 @@ import (
 	"github.com/kodeshack/stuff/storage/database/sqlite/models"
 	"github.com/kodeshack/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
 	bmods "github.com/stephenafamo/bob/mods"
@@ -95,6 +97,75 @@ func (ar *AssetRepo) ListAssets(ctx context.Context, exec bob.Executor, query da
 	assetList := &database.AssetList{
 		Assets: make([]*database.Asset, 0, len(assets)),
 		Total:  int(count),
+	}
+
+	for i := range assets {
+		assetList.Assets = append(assetList.Assets, &database.Asset{
+			ID:               assets[i].ID,
+			ParentAssetID:    assets[i].ParentAssetID.GetOrZero(),
+			Status:           assets[i].Status,
+			Tag:              assets[i].Tag.GetOrZero(),
+			Name:             assets[i].Name,
+			Category:         assets[i].Category,
+			Model:            assets[i].Model.GetOrZero(),
+			ModelNo:          assets[i].ModelNo.GetOrZero(),
+			SerialNo:         assets[i].SerialNo.GetOrZero(),
+			Manufacturer:     assets[i].Manufacturer.GetOrZero(),
+			Notes:            assets[i].Notes.GetOrZero(),
+			ImageURL:         assets[i].ImageURL.GetOrZero(),
+			ThumbnailURL:     assets[i].ThumbnailURL.GetOrZero(),
+			WarrantyUntil:    assets[i].WarrantyUntil.GetOrZero().Time,
+			CustomAttrs:      assets[i].CustomAttrs.GetOrZero().JSON,
+			CheckedOutTo:     assets[i].CheckedOutTo.GetOrZero(),
+			Location:         assets[i].Location.GetOrZero(),
+			PositionCode:     assets[i].PositionCode.GetOrZero(),
+			PurchaseSupplier: assets[i].PurchaseSupplier.GetOrZero(),
+			PurchaseOrderNo:  assets[i].PurchaseOrderNo.GetOrZero(),
+			PurchaseDate:     assets[i].PurchaseDate.GetOrZero().Time,
+			PurchaseAmount:   int(assets[i].PurchaseAmount.GetOrZero()),
+			PurchaseCurrency: assets[i].PurchaseCurrency.GetOrZero(),
+			CreatedBy:        assets[i].CreatedBy,
+			CreatedAt:        assets[i].CreatedAt.Time,
+			UpdatedAt:        assets[i].UpdatedAt.Time,
+		})
+	}
+
+	return assetList, nil
+}
+
+func (ar *AssetRepo) Search(ctx context.Context, exec bob.Executor, query database.SearchAssetsQuery) (*database.AssetList, error) {
+	exec = bob.Debug(exec)
+
+	if query.Limit == 0 {
+		query.Limit = 50
+	}
+
+	entries, err := models.AssetsFTS.Query(ctx, exec, sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(query.Search))), sm.Limit(query.Limit),
+		sm.Offset(query.Offset),
+	).All()
+	if err != nil {
+		return nil, fmt.Errorf("error searching assets: %w", err)
+	}
+
+	ids := make([]int64, 0, len(entries))
+
+	for _, entry := range entries {
+		id, err := strconv.ParseInt(entry.ID.GetOrZero(), 10, 64)
+		if err != nil {
+			continue
+		}
+
+		ids = append(ids, id)
+	}
+
+	assets, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.In(ids...)).All()
+	if err != nil {
+		return nil, fmt.Errorf("error getting assets: %w", err)
+	}
+
+	assetList := &database.AssetList{
+		Assets: make([]*database.Asset, 0, len(assets)),
+		Total:  len(entries),
 	}
 
 	for i := range assets {

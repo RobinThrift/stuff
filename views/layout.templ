@@ -43,14 +43,15 @@ templ siteNavMobile() {
 			 @Icon("sign-out", "ml-1 w-[16px] h-[16px]")
 		</a>
 
-
-		@Input(InputProps{
-			Class: "w-full md:w-auto md:ml-auto flex items-center",
-			Type: "search",
-			Placeholder: "Search",
-			Name: "search",
-			Icon: Icon("magnifying-glass", "w-[24px] h-[24px]"),
-		})
+		<form method="get" action="/assets" class="w-full md:w-auto md:ml-auto flex items-center">
+			@Input(InputProps{
+				Class: "w-full md:w-auto md:ml-auto flex items-center",
+				Type: "search",
+				Placeholder: "Search",
+				Name: "query",
+				Icon: Icon("magnifying-glass", "w-[24px] h-[24px]"),
+			})
+		</form>
 
 		<a href="/logout" class="hidden md:block hover:text-purple-500 ml-5">
 			@Icon("sign-out", "w-[24px] h-[24px]")

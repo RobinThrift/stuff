@@ -107,10 +107,59 @@ CREATE VIEW suppliers AS SELECT purchase_supplier as name FROM assets WHERE purc
 CREATE VIEW locations AS SELECT location as name FROM assets WHERE location IS NOT NULL GROUP BY name;
 CREATE VIEW position_codes AS SELECT position_code as code FROM assets WHERE position_code IS NOT NULL GROUP BY code;
 CREATE VIEW custom_attr_names AS SELECT j.key as name, j.type as type FROM assets, json_each(custom_attrs) j WHERE custom_attrs IS NOT NULL GROUP BY j.key;
+
+CREATE VIRTUAL TABLE assets_fts USING fts5(id UNINDEXED, data);
+
+-- +goose StatementBegin
+CREATE TRIGGER assets_after_insert AFTER INSERT ON assets BEGIN
+  INSERT INTO assets_fts(rowid, id, data) VALUES (
+		new.id,
+		new.id,
+		coalesce(new.name, "") || " " 
+		|| coalesce(new.tag, "") || " " 
+		|| coalesce(new.category, "") || " " 
+		|| coalesce(new.model, "") || " " 
+		|| coalesce(new.model_no, "") || " " 
+		|| coalesce(new.serial_no, "") || " " 
+		|| coalesce(new.manufacturer, "") || " " 
+		|| coalesce(new.notes, "") || " " 
+		|| coalesce(new.custom_attrs, "")
+	);
+END;
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE TRIGGER assets_after_delete AFTER DELETE ON assets BEGIN
+  INSERT INTO assets_fts(assets_fts, rowid, id, data) VALUES("delete", old.id, old.id, "");
+END;
+-- +goose StatementEnd
+
+-- +goose StatementBegin
+CREATE TRIGGER assets_after_update AFTER UPDATE ON assets BEGIN
+  INSERT INTO assets_fts(assets_fts, rowid, id, data) VALUES("delete", old.id, old.id, "");
+  INSERT INTO assets_fts(rowid, id, data) VALUES (
+		new.id,
+		new.id,
+		coalesce(new.name, "") || " " 
+		|| coalesce(new.tag, "") || " " 
+		|| coalesce(new.category, "") || " " 
+		|| coalesce(new.model, "") || " " 
+		|| coalesce(new.model_no, "") || " " 
+		|| coalesce(new.serial_no, "") || " " 
+		|| coalesce(new.manufacturer, "") || " " 
+		|| coalesce(new.notes, "") || " " 
+		|| coalesce(new.custom_attrs, "")
+	);
+END;
 -- +goose StatementEnd
 
 
 -- +goose Down
+DROP TRIGGER assets_after_update;
+DROP TRIGGER assets_after_delete;
+DROP TRIGGER assets_after_insert;
+DROP TABLE assets_fts;
+
 DROP VIEW custom_attr_names;
 DROP VIEW position_codes;
 DROP VIEW locations;

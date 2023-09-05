@@ -439,11 +439,6 @@ func (o *User) Preload(name string, retrieved any) error {
 
 		o.R.CreatedByAssetFiles = rels
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.CreatedByUser = o
-			}
-		}
 		return nil
 	case "CreatedByAssets":
 		rels, ok := retrieved.(AssetSlice)
@@ -453,11 +448,6 @@ func (o *User) Preload(name string, retrieved any) error {
 
 		o.R.CreatedByAssets = rels
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.CreatedByUser = o
-			}
-		}
 		return nil
 	case "CheckedOutToAssets":
 		rels, ok := retrieved.(AssetSlice)
@@ -467,11 +457,6 @@ func (o *User) Preload(name string, retrieved any) error {
 
 		o.R.CheckedOutToAssets = rels
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.CheckedOutToUser = o
-			}
-		}
 		return nil
 	default:
 		return fmt.Errorf("user has no relationship %q", name)
@@ -512,10 +497,6 @@ func (o *User) LoadUserCreatedByAssetFiles(ctx context.Context, exec bob.Executo
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.CreatedByUser = o
-	}
-
 	o.R.CreatedByAssetFiles = related
 	return nil
 }
@@ -540,8 +521,6 @@ func (os UserSlice) LoadUserCreatedByAssetFiles(ctx context.Context, exec bob.Ex
 			if o.ID != rel.CreatedBy {
 				continue
 			}
-
-			rel.R.CreatedByUser = o
 
 			o.R.CreatedByAssetFiles = append(o.R.CreatedByAssetFiles, rel)
 		}
@@ -584,10 +563,6 @@ func (o *User) LoadUserCreatedByAssets(ctx context.Context, exec bob.Executor, m
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.CreatedByUser = o
-	}
-
 	o.R.CreatedByAssets = related
 	return nil
 }
@@ -612,8 +587,6 @@ func (os UserSlice) LoadUserCreatedByAssets(ctx context.Context, exec bob.Execut
 			if o.ID != rel.CreatedBy {
 				continue
 			}
-
-			rel.R.CreatedByUser = o
 
 			o.R.CreatedByAssets = append(o.R.CreatedByAssets, rel)
 		}
@@ -656,10 +629,6 @@ func (o *User) LoadUserCheckedOutToAssets(ctx context.Context, exec bob.Executor
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.CheckedOutToUser = o
-	}
-
 	o.R.CheckedOutToAssets = related
 	return nil
 }
@@ -684,8 +653,6 @@ func (os UserSlice) LoadUserCheckedOutToAssets(ctx context.Context, exec bob.Exe
 			if o.ID != rel.CheckedOutTo.GetOrZero() {
 				continue
 			}
-
-			rel.R.CheckedOutToUser = o
 
 			o.R.CheckedOutToAssets = append(o.R.CheckedOutToAssets, rel)
 		}
@@ -732,10 +699,6 @@ func (user0 *User) InsertCreatedByAssetFiles(ctx context.Context, exec bob.Execu
 
 	user0.R.CreatedByAssetFiles = append(user0.R.CreatedByAssetFiles, assetFile1...)
 
-	for _, rel := range assetFile1 {
-		rel.R.CreatedByUser = user0
-	}
-
 	return nil
 }
 
@@ -753,10 +716,6 @@ func (user0 *User) AttachCreatedByAssetFiles(ctx context.Context, exec bob.Execu
 	}
 
 	user0.R.CreatedByAssetFiles = append(user0.R.CreatedByAssetFiles, assetFile1...)
-
-	for _, rel := range related {
-		rel.R.CreatedByUser = user0
-	}
 
 	return nil
 }
@@ -799,10 +758,6 @@ func (user0 *User) InsertCreatedByAssets(ctx context.Context, exec bob.Executor,
 
 	user0.R.CreatedByAssets = append(user0.R.CreatedByAssets, asset1...)
 
-	for _, rel := range asset1 {
-		rel.R.CreatedByUser = user0
-	}
-
 	return nil
 }
 
@@ -820,10 +775,6 @@ func (user0 *User) AttachCreatedByAssets(ctx context.Context, exec bob.Executor,
 	}
 
 	user0.R.CreatedByAssets = append(user0.R.CreatedByAssets, asset1...)
-
-	for _, rel := range related {
-		rel.R.CreatedByUser = user0
-	}
 
 	return nil
 }
@@ -866,10 +817,6 @@ func (user0 *User) InsertCheckedOutToAssets(ctx context.Context, exec bob.Execut
 
 	user0.R.CheckedOutToAssets = append(user0.R.CheckedOutToAssets, asset1...)
 
-	for _, rel := range asset1 {
-		rel.R.CheckedOutToUser = user0
-	}
-
 	return nil
 }
 
@@ -887,10 +834,6 @@ func (user0 *User) AttachCheckedOutToAssets(ctx context.Context, exec bob.Execut
 	}
 
 	user0.R.CheckedOutToAssets = append(user0.R.CheckedOutToAssets, asset1...)
-
-	for _, rel := range related {
-		rel.R.CheckedOutToUser = user0
-	}
 
 	return nil
 }

@@ -60,13 +60,21 @@ templ listAssetsPage(props listAssetsPageProps) {
 								</span>
 							</button>
 						</td>
-						<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{ asset.Tag }</strong></td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">
+							<a class="hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))}>
+								<strong>{ asset.Tag }</strong>
+							</a>
+						</td>
 						<td class="px-5 py-4 text-sm whitespace-nowrap">
 							if asset.ThumbnailURL != "" {
 								<img class="h-[50px]" src={ asset.ThumbnailURL } />
 							}
 						</td>
-						<td class="px-5 py-4 text-sm whitespace-nowrap">{ asset.Name }</td>
+						<td class="px-5 py-4 text-sm whitespace-nowrap">
+							<a class="hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))}>
+								{ asset.Name }
+							</a>
+						</td>
 						<td class="px-5 py-4 text-sm whitespace-nowrap">{ asset.Category }</td>
 						<td class="px-5 py-4 text-sm whitespace-nowrap">
 							{ asset.Location }
@@ -78,10 +86,6 @@ templ listAssetsPage(props listAssetsPageProps) {
 							@statusBadge(asset.Status, "")
 						</td>
 						<td class="last:pr-0 px-5 py-4 text-sm font-medium text-right whitespace-nowrap">
-							<a class="text-blue-400 hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))}>
-								View
-							</a>
-							{" "}
 							<a class="text-blue-400 hover:text-purple-500" href={templ.SafeURL(fmt.Sprintf("/assets/%v/edit", asset.ID))}>
 								Edit
 							</a>

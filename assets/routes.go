@@ -48,13 +48,23 @@ func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
 
 	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
+	mux.Get("/api/v1/assets/search", rt.apiSearchAssets)
 }
 
 // [GET] /
 // [GET] /assets
 func (rt *Router) handleAssetsListGet(w http.ResponseWriter, r *http.Request) error {
 	query := listAssetsQueryFromURL(r.URL.Query())
-	assetList, err := rt.Control.listAssets(r.Context(), query)
+
+	var assetList *AssetList
+	var err error
+
+	if query.search != "" {
+		assetList, err = rt.Control.searchAssets(r.Context(), query)
+	} else {
+		assetList, err = rt.Control.listAssets(r.Context(), query)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -303,6 +313,33 @@ func (rt *Router) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// [GET] /api/v1/assets/categories
+func (rt *Router) apiSearchAssets(w http.ResponseWriter, r *http.Request) {
+	assets := []*Asset{}
+	query := listAssetsQueryFromURL(r.URL.Query())
+	if query.search != "" {
+		assetList, err := rt.Control.searchAssets(r.Context(), query)
+		if err != nil {
+			api.RespondWithError(r.Context(), w, err)
+			return
+		}
+
+		assets = assetList.Assets
+	}
+
+	b, err := json.Marshal(assets)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error marshalling assets JSON", "error", err)
+		return
+	}
+
+	api.AddJSONContentType(w)
+	_, err = w.Write(b)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
+	}
+}
+
 func renderListAssetsPage(w http.ResponseWriter, r *http.Request, assetList *AssetList, query listAssetsQuery) error {
 	infomsg, _ := session.Pop[string](r.Context(), "info_message")
 
@@ -388,6 +425,7 @@ func listAssetsQueryFromURL(params url.Values) listAssetsQuery {
 	q := listAssetsQuery{
 		limit:   50,
 		orderBy: params.Get("order_by"),
+		search:  params.Get("query"),
 	}
 
 	if size := params.Get("page_size"); size != "" {

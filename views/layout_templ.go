@@ -211,7 +211,7 @@ func siteNavMobile() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</a>")
+		_, err = templBuffer.WriteString("</a><form method=\"get\" action=\"/assets\" class=\"w-full md:w-auto md:ml-auto flex items-center\">")
 		if err != nil {
 			return err
 		}
@@ -219,13 +219,13 @@ func siteNavMobile() templ.Component {
 			Class:       "w-full md:w-auto md:ml-auto flex items-center",
 			Type:        "search",
 			Placeholder: "Search",
-			Name:        "search",
+			Name:        "query",
 			Icon:        Icon("magnifying-glass", "w-[24px] h-[24px]"),
 		}).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("<a href=\"/logout\" class=\"hidden md:block hover:text-purple-500 ml-5\">")
+		_, err = templBuffer.WriteString("</form><a href=\"/logout\" class=\"hidden md:block hover:text-purple-500 ml-5\">")
 		if err != nil {
 			return err
 		}

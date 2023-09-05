@@ -13,6 +13,7 @@ import (
 var TableNames = struct {
 	AssetFiles      string
 	Assets          string
+	AssetsFTS       string
 	LocalAuthUsers  string
 	Sessions        string
 	Tags            string
@@ -26,6 +27,7 @@ var TableNames = struct {
 }{
 	AssetFiles:      "asset_files",
 	Assets:          "assets",
+	AssetsFTS:       "assets_fts",
 	LocalAuthUsers:  "local_auth_users",
 	Sessions:        "sessions",
 	Tags:            "tags",
@@ -41,6 +43,7 @@ var TableNames = struct {
 var ColumnNames = struct {
 	AssetFiles      assetFileColumnNames
 	Assets          assetColumnNames
+	AssetsFTS       assetsFTColumnNames
 	LocalAuthUsers  localAuthUserColumnNames
 	Sessions        sessionColumnNames
 	Tags            tagColumnNames
@@ -90,6 +93,12 @@ var ColumnNames = struct {
 		CreatedBy:        "created_by",
 		CreatedAt:        "created_at",
 		UpdatedAt:        "updated_at",
+	},
+	AssetsFTS: assetsFTColumnNames{
+		ID:        "id",
+		Data:      "data",
+		AssetsFTS: "assets_fts",
+		Rank:      "rank",
 	},
 	LocalAuthUsers: localAuthUserColumnNames{
 		ID:                     "id",
@@ -155,6 +164,7 @@ var (
 func Where[Q sqlite.Filterable]() struct {
 	AssetFiles      assetFileWhere[Q]
 	Assets          assetWhere[Q]
+	AssetsFTS       assetsFTWhere[Q]
 	LocalAuthUsers  localAuthUserWhere[Q]
 	Sessions        sessionWhere[Q]
 	Tags            tagWhere[Q]
@@ -169,6 +179,7 @@ func Where[Q sqlite.Filterable]() struct {
 	return struct {
 		AssetFiles      assetFileWhere[Q]
 		Assets          assetWhere[Q]
+		AssetsFTS       assetsFTWhere[Q]
 		LocalAuthUsers  localAuthUserWhere[Q]
 		Sessions        sessionWhere[Q]
 		Tags            tagWhere[Q]
@@ -182,6 +193,7 @@ func Where[Q sqlite.Filterable]() struct {
 	}{
 		AssetFiles:      AssetFileWhere[Q](),
 		Assets:          AssetWhere[Q](),
+		AssetsFTS:       AssetsFTWhere[Q](),
 		LocalAuthUsers:  LocalAuthUserWhere[Q](),
 		Sessions:        SessionWhere[Q](),
 		Tags:            TagWhere[Q](),

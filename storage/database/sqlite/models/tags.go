@@ -341,11 +341,6 @@ func (o *Tag) Preload(name string, retrieved any) error {
 
 		o.R.Assets = rels
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Tag = o
-			}
-		}
 		return nil
 	default:
 		return fmt.Errorf("tag has no relationship %q", name)
@@ -386,10 +381,6 @@ func (o *Tag) LoadTagAssets(ctx context.Context, exec bob.Executor, mods ...bob.
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.Tag = o
-	}
-
 	o.R.Assets = related
 	return nil
 }
@@ -414,8 +405,6 @@ func (os TagSlice) LoadTagAssets(ctx context.Context, exec bob.Executor, mods ..
 			if o.Tag != rel.Tag.GetOrZero() {
 				continue
 			}
-
-			rel.R.Tag = o
 
 			o.R.Assets = append(o.R.Assets, rel)
 		}
@@ -462,10 +451,6 @@ func (tag0 *Tag) InsertAssets(ctx context.Context, exec bob.Executor, related ..
 
 	tag0.R.Assets = append(tag0.R.Assets, asset1...)
 
-	for _, rel := range asset1 {
-		rel.R.Tag = tag0
-	}
-
 	return nil
 }
 
@@ -483,10 +468,6 @@ func (tag0 *Tag) AttachAssets(ctx context.Context, exec bob.Executor, related ..
 	}
 
 	tag0.R.Assets = append(tag0.R.Assets, asset1...)
-
-	for _, rel := range related {
-		rel.R.Tag = tag0
-	}
 
 	return nil
 }

@@ -221,16 +221,25 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString("</span></button></td><td class=\"px-5 py-4 text-sm whitespace-nowrap\"><strong>")
+				_, err = templBuffer.WriteString("</span></button></td><td class=\"px-5 py-4 text-sm whitespace-nowrap\"><a class=\"hover:text-purple-500\" href=\"")
 				if err != nil {
 					return err
 				}
-				var var_15 string = asset.Tag
-				_, err = templBuffer.WriteString(templ.EscapeString(var_15))
+				var var_15 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))
+				_, err = templBuffer.WriteString(templ.EscapeString(string(var_15)))
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString("</strong></td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
+				_, err = templBuffer.WriteString("\"><strong>")
+				if err != nil {
+					return err
+				}
+				var var_16 string = asset.Tag
+				_, err = templBuffer.WriteString(templ.EscapeString(var_16))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</strong></a></td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
 				if err != nil {
 					return err
 				}
@@ -248,46 +257,55 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 						return err
 					}
 				}
-				_, err = templBuffer.WriteString("</td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
+				_, err = templBuffer.WriteString("</td><td class=\"px-5 py-4 text-sm whitespace-nowrap\"><a class=\"hover:text-purple-500\" href=\"")
 				if err != nil {
 					return err
 				}
-				var var_16 string = asset.Name
-				_, err = templBuffer.WriteString(templ.EscapeString(var_16))
+				var var_17 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))
+				_, err = templBuffer.WriteString(templ.EscapeString(string(var_17)))
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString("</td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
+				_, err = templBuffer.WriteString("\">")
 				if err != nil {
 					return err
 				}
-				var var_17 string = asset.Category
-				_, err = templBuffer.WriteString(templ.EscapeString(var_17))
-				if err != nil {
-					return err
-				}
-				_, err = templBuffer.WriteString("</td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
-				if err != nil {
-					return err
-				}
-				var var_18 string = asset.Location
+				var var_18 string = asset.Name
 				_, err = templBuffer.WriteString(templ.EscapeString(var_18))
 				if err != nil {
 					return err
 				}
+				_, err = templBuffer.WriteString("</a></td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
+				if err != nil {
+					return err
+				}
+				var var_19 string = asset.Category
+				_, err = templBuffer.WriteString(templ.EscapeString(var_19))
+				if err != nil {
+					return err
+				}
+				_, err = templBuffer.WriteString("</td><td class=\"px-5 py-4 text-sm whitespace-nowrap\">")
+				if err != nil {
+					return err
+				}
+				var var_20 string = asset.Location
+				_, err = templBuffer.WriteString(templ.EscapeString(var_20))
+				if err != nil {
+					return err
+				}
 				if asset.PositionCode != "" {
-					var_19 := `(`
-					_, err = templBuffer.WriteString(var_19)
-					if err != nil {
-						return err
-					}
-					var var_20 string = asset.PositionCode
-					_, err = templBuffer.WriteString(templ.EscapeString(var_20))
-					if err != nil {
-						return err
-					}
-					var_21 := `)`
+					var_21 := `(`
 					_, err = templBuffer.WriteString(var_21)
+					if err != nil {
+						return err
+					}
+					var var_22 string = asset.PositionCode
+					_, err = templBuffer.WriteString(templ.EscapeString(var_22))
+					if err != nil {
+						return err
+					}
+					var_23 := `)`
+					_, err = templBuffer.WriteString(var_23)
 					if err != nil {
 						return err
 					}
@@ -304,8 +322,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_22 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/assets/%v", asset.ID))
-				_, err = templBuffer.WriteString(templ.EscapeString(string(var_22)))
+				var var_24 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/assets/%v/edit", asset.ID))
+				_, err = templBuffer.WriteString(templ.EscapeString(string(var_24)))
 				if err != nil {
 					return err
 				}
@@ -313,35 +331,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_23 := `View`
-				_, err = templBuffer.WriteString(var_23)
-				if err != nil {
-					return err
-				}
-				_, err = templBuffer.WriteString("</a>")
-				if err != nil {
-					return err
-				}
-				var var_24 string = " "
-				_, err = templBuffer.WriteString(templ.EscapeString(var_24))
-				if err != nil {
-					return err
-				}
-				_, err = templBuffer.WriteString("<a class=\"text-blue-400 hover:text-purple-500\" href=\"")
-				if err != nil {
-					return err
-				}
-				var var_25 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/assets/%v/edit", asset.ID))
-				_, err = templBuffer.WriteString(templ.EscapeString(string(var_25)))
-				if err != nil {
-					return err
-				}
-				_, err = templBuffer.WriteString("\">")
-				if err != nil {
-					return err
-				}
-				var_26 := `Edit`
-				_, err = templBuffer.WriteString(var_26)
+				var_25 := `Edit`
+				_, err = templBuffer.WriteString(var_25)
 				if err != nil {
 					return err
 				}
@@ -375,8 +366,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_27 := `Showing `
-				_, err = templBuffer.WriteString(var_27)
+				var_26 := `Showing `
+				_, err = templBuffer.WriteString(var_26)
 				if err != nil {
 					return err
 				}
@@ -384,8 +375,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_28 string = fmt.Sprint(props.query.offset + 1)
-				_, err = templBuffer.WriteString(templ.EscapeString(var_28))
+				var var_27 string = fmt.Sprint(props.query.offset + 1)
+				_, err = templBuffer.WriteString(templ.EscapeString(var_27))
 				if err != nil {
 					return err
 				}
@@ -393,8 +384,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_29 := `to `
-				_, err = templBuffer.WriteString(var_29)
+				var_28 := `to `
+				_, err = templBuffer.WriteString(var_28)
 				if err != nil {
 					return err
 				}
@@ -402,8 +393,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_30 string = fmt.Sprint(props.query.offset + props.total)
-				_, err = templBuffer.WriteString(templ.EscapeString(var_30))
+				var var_29 string = fmt.Sprint(props.query.offset + props.total)
+				_, err = templBuffer.WriteString(templ.EscapeString(var_29))
 				if err != nil {
 					return err
 				}
@@ -411,8 +402,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_31 := `of `
-				_, err = templBuffer.WriteString(var_31)
+				var_30 := `of `
+				_, err = templBuffer.WriteString(var_30)
 				if err != nil {
 					return err
 				}
@@ -420,8 +411,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_32 string = fmt.Sprint(props.total)
-				_, err = templBuffer.WriteString(templ.EscapeString(var_32))
+				var var_31 string = fmt.Sprint(props.total)
+				_, err = templBuffer.WriteString(templ.EscapeString(var_31))
 				if err != nil {
 					return err
 				}
@@ -429,8 +420,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_33 := `assets`
-				_, err = templBuffer.WriteString(var_33)
+				var_32 := `assets`
+				_, err = templBuffer.WriteString(var_32)
 				if err != nil {
 					return err
 				}
@@ -438,8 +429,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_34 := `Previous`
-				_, err = templBuffer.WriteString(var_34)
+				var_33 := `Previous`
+				_, err = templBuffer.WriteString(var_33)
 				if err != nil {
 					return err
 				}
@@ -447,8 +438,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_35 := `1`
-				_, err = templBuffer.WriteString(var_35)
+				var_34 := `1`
+				_, err = templBuffer.WriteString(var_34)
 				if err != nil {
 					return err
 				}
@@ -456,8 +447,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_36 := `2`
-				_, err = templBuffer.WriteString(var_36)
+				var_35 := `2`
+				_, err = templBuffer.WriteString(var_35)
 				if err != nil {
 					return err
 				}
@@ -465,8 +456,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_37 := `...`
-				_, err = templBuffer.WriteString(var_37)
+				var_36 := `...`
+				_, err = templBuffer.WriteString(var_36)
 				if err != nil {
 					return err
 				}
@@ -474,8 +465,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_38 := `6`
-				_, err = templBuffer.WriteString(var_38)
+				var_37 := `6`
+				_, err = templBuffer.WriteString(var_37)
 				if err != nil {
 					return err
 				}
@@ -483,8 +474,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_39 := `7`
-				_, err = templBuffer.WriteString(var_39)
+				var_38 := `7`
+				_, err = templBuffer.WriteString(var_38)
 				if err != nil {
 					return err
 				}
@@ -492,8 +483,8 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var_40 := `Next`
-				_, err = templBuffer.WriteString(var_40)
+				var_39 := `Next`
+				_, err = templBuffer.WriteString(var_39)
 				if err != nil {
 					return err
 				}

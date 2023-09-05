@@ -896,9 +896,6 @@ func (o *Asset) Preload(name string, retrieved any) error {
 
 		o.R.CreatedByUser = rel
 
-		if rel != nil {
-			rel.R.CreatedByAssets = AssetSlice{o}
-		}
 		return nil
 	case "CheckedOutToUser":
 		rel, ok := retrieved.(*User)
@@ -908,9 +905,6 @@ func (o *Asset) Preload(name string, retrieved any) error {
 
 		o.R.CheckedOutToUser = rel
 
-		if rel != nil {
-			rel.R.CheckedOutToAssets = AssetSlice{o}
-		}
 		return nil
 	case "Tag":
 		rel, ok := retrieved.(*Tag)
@@ -920,9 +914,6 @@ func (o *Asset) Preload(name string, retrieved any) error {
 
 		o.R.Tag = rel
 
-		if rel != nil {
-			rel.R.Assets = AssetSlice{o}
-		}
 		return nil
 	case "ParentAsset":
 		rel, ok := retrieved.(*Asset)
@@ -932,9 +923,6 @@ func (o *Asset) Preload(name string, retrieved any) error {
 
 		o.R.ParentAsset = rel
 
-		if rel != nil {
-			rel.R.ParentAsset = o
-		}
 		return nil
 	case "ReverseParentAssets":
 		rels, ok := retrieved.(AssetSlice)
@@ -944,11 +932,6 @@ func (o *Asset) Preload(name string, retrieved any) error {
 
 		o.R.ReverseParentAssets = rels
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.ReverseParentAssets = AssetSlice{o}
-			}
-		}
 		return nil
 	default:
 		return fmt.Errorf("asset has no relationship %q", name)
@@ -1010,8 +993,6 @@ func (o *Asset) LoadAssetCreatedByUser(ctx context.Context, exec bob.Executor, m
 		return err
 	}
 
-	related.R.CreatedByAssets = AssetSlice{o}
-
 	o.R.CreatedByUser = related
 	return nil
 }
@@ -1032,8 +1013,6 @@ func (os AssetSlice) LoadAssetCreatedByUser(ctx context.Context, exec bob.Execut
 			if o.CreatedBy != rel.ID {
 				continue
 			}
-
-			rel.R.CreatedByAssets = append(rel.R.CreatedByAssets, o)
 
 			o.R.CreatedByUser = rel
 			break
@@ -1098,8 +1077,6 @@ func (o *Asset) LoadAssetCheckedOutToUser(ctx context.Context, exec bob.Executor
 		return err
 	}
 
-	related.R.CheckedOutToAssets = AssetSlice{o}
-
 	o.R.CheckedOutToUser = related
 	return nil
 }
@@ -1120,8 +1097,6 @@ func (os AssetSlice) LoadAssetCheckedOutToUser(ctx context.Context, exec bob.Exe
 			if o.CheckedOutTo.GetOrZero() != rel.ID {
 				continue
 			}
-
-			rel.R.CheckedOutToAssets = append(rel.R.CheckedOutToAssets, o)
 
 			o.R.CheckedOutToUser = rel
 			break
@@ -1186,8 +1161,6 @@ func (o *Asset) LoadAssetTag(ctx context.Context, exec bob.Executor, mods ...bob
 		return err
 	}
 
-	related.R.Assets = AssetSlice{o}
-
 	o.R.Tag = related
 	return nil
 }
@@ -1208,8 +1181,6 @@ func (os AssetSlice) LoadAssetTag(ctx context.Context, exec bob.Executor, mods .
 			if o.Tag.GetOrZero() != rel.Tag {
 				continue
 			}
-
-			rel.R.Assets = append(rel.R.Assets, o)
 
 			o.R.Tag = rel
 			break
@@ -1274,8 +1245,6 @@ func (o *Asset) LoadAssetParentAsset(ctx context.Context, exec bob.Executor, mod
 		return err
 	}
 
-	related.R.ParentAsset = o
-
 	o.R.ParentAsset = related
 	return nil
 }
@@ -1296,8 +1265,6 @@ func (os AssetSlice) LoadAssetParentAsset(ctx context.Context, exec bob.Executor
 			if o.ParentAssetID.GetOrZero() != rel.ID {
 				continue
 			}
-
-			rel.R.ParentAsset = o
 
 			o.R.ParentAsset = rel
 			break
@@ -1341,10 +1308,6 @@ func (o *Asset) LoadAssetReverseParentAssets(ctx context.Context, exec bob.Execu
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.ReverseParentAssets = AssetSlice{o}
-	}
-
 	o.R.ReverseParentAssets = related
 	return nil
 }
@@ -1369,8 +1332,6 @@ func (os AssetSlice) LoadAssetReverseParentAssets(ctx context.Context, exec bob.
 			if o.ID != rel.ParentAssetID.GetOrZero() {
 				continue
 			}
-
-			rel.R.ReverseParentAssets = append(rel.R.ReverseParentAssets, o)
 
 			o.R.ReverseParentAssets = append(o.R.ReverseParentAssets, rel)
 		}
@@ -1405,8 +1366,6 @@ func (asset0 *Asset) InsertCreatedByUser(ctx context.Context, exec bob.Executor,
 
 	asset0.R.CreatedByUser = user1
 
-	user1.R.CreatedByAssets = append(user1.R.CreatedByAssets, asset0)
-
 	return nil
 }
 
@@ -1419,8 +1378,6 @@ func (asset0 *Asset) AttachCreatedByUser(ctx context.Context, exec bob.Executor,
 	}
 
 	asset0.R.CreatedByUser = user1
-
-	user1.R.CreatedByAssets = append(user1.R.CreatedByAssets, asset0)
 
 	return nil
 }
@@ -1451,8 +1408,6 @@ func (asset0 *Asset) InsertCheckedOutToUser(ctx context.Context, exec bob.Execut
 
 	asset0.R.CheckedOutToUser = user1
 
-	user1.R.CheckedOutToAssets = append(user1.R.CheckedOutToAssets, asset0)
-
 	return nil
 }
 
@@ -1465,8 +1420,6 @@ func (asset0 *Asset) AttachCheckedOutToUser(ctx context.Context, exec bob.Execut
 	}
 
 	asset0.R.CheckedOutToUser = user1
-
-	user1.R.CheckedOutToAssets = append(user1.R.CheckedOutToAssets, asset0)
 
 	return nil
 }
@@ -1497,8 +1450,6 @@ func (asset0 *Asset) InsertTag(ctx context.Context, exec bob.Executor, related *
 
 	asset0.R.Tag = tag1
 
-	tag1.R.Assets = append(tag1.R.Assets, asset0)
-
 	return nil
 }
 
@@ -1511,8 +1462,6 @@ func (asset0 *Asset) AttachTag(ctx context.Context, exec bob.Executor, tag1 *Tag
 	}
 
 	asset0.R.Tag = tag1
-
-	tag1.R.Assets = append(tag1.R.Assets, asset0)
 
 	return nil
 }
@@ -1543,8 +1492,6 @@ func (asset0 *Asset) InsertParentAsset(ctx context.Context, exec bob.Executor, r
 
 	asset0.R.ParentAsset = asset1
 
-	asset1.R.ParentAsset = asset0
-
 	return nil
 }
 
@@ -1557,8 +1504,6 @@ func (asset0 *Asset) AttachParentAsset(ctx context.Context, exec bob.Executor, a
 	}
 
 	asset0.R.ParentAsset = asset1
-
-	asset1.R.ParentAsset = asset0
 
 	return nil
 }
@@ -1601,10 +1546,6 @@ func (asset0 *Asset) InsertReverseParentAssets(ctx context.Context, exec bob.Exe
 
 	asset0.R.ReverseParentAssets = append(asset0.R.ReverseParentAssets, asset1...)
 
-	for _, rel := range asset1 {
-		rel.R.ReverseParentAssets = append(rel.R.ReverseParentAssets, asset0)
-	}
-
 	return nil
 }
 
@@ -1622,10 +1563,6 @@ func (asset0 *Asset) AttachReverseParentAssets(ctx context.Context, exec bob.Exe
 	}
 
 	asset0.R.ReverseParentAssets = append(asset0.R.ReverseParentAssets, asset1...)
-
-	for _, rel := range related {
-		rel.R.ReverseParentAssets = append(rel.R.ReverseParentAssets, asset0)
-	}
 
 	return nil
 }

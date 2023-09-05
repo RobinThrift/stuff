@@ -25,6 +25,7 @@ type Control struct {
 type AssetRepo interface {
 	GetAsset(ctx context.Context, exec bob.Executor, id int64) (*database.Asset, error)
 	ListAssets(ctx context.Context, exec bob.Executor, query database.ListAssetsQuery) (*database.AssetList, error)
+	Search(ctx context.Context, exec bob.Executor, query database.SearchAssetsQuery) (*database.AssetList, error)
 	CreateAsset(ctx context.Context, exec bob.Executor, asset *database.Asset) (*database.Asset, error)
 	UpdateAsset(ctx context.Context, exec bob.Executor, asset *database.Asset) (*database.Asset, error)
 	DeleteAsset(ctx context.Context, exec bob.Executor, id int64) error
@@ -33,6 +34,7 @@ type AssetRepo interface {
 }
 
 type listAssetsQuery struct {
+	search   string
 	offset   int
 	limit    int
 	orderBy  string
@@ -94,6 +96,63 @@ func (c *Control) listAssets(ctx context.Context, query listAssetsQuery) (*Asset
 		Limit:    query.limit,
 		OrderBy:  query.orderBy,
 		OrderDir: query.orderDir,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	assetList := &AssetList{
+		Assets: make([]*Asset, 0, len(assets.Assets)),
+		Total:  assets.Total,
+	}
+
+	for i := range assets.Assets {
+		assetList.Assets = append(assetList.Assets, &Asset{
+			ID:            assets.Assets[i].ID,
+			ParentAssetID: assets.Assets[i].ParentAssetID,
+			Status:        Status(assets.Assets[i].Status),
+
+			Name:          assets.Assets[i].Name,
+			Category:      assets.Assets[i].Category,
+			SerialNo:      assets.Assets[i].SerialNo,
+			Model:         assets.Assets[i].Model,
+			ModelNo:       assets.Assets[i].ModelNo,
+			Manufacturer:  assets.Assets[i].Manufacturer,
+			Notes:         assets.Assets[i].Notes,
+			ImageURL:      assets.Assets[i].ImageURL,
+			ThumbnailURL:  assets.Assets[i].ThumbnailURL,
+			WarrantyUntil: assets.Assets[i].WarrantyUntil,
+			CustomAttrs:   assets.Assets[i].CustomAttrs,
+			Tag:           assets.Assets[i].Tag,
+			CheckedOutTo:  assets.Assets[i].CheckedOutTo,
+			Location:      assets.Assets[i].Location,
+			PositionCode:  assets.Assets[i].PositionCode,
+
+			PurchaseInfo: PurchaseInfo{
+				Supplier: assets.Assets[i].PurchaseSupplier,
+				OrderNo:  assets.Assets[i].PurchaseOrderNo,
+				Date:     assets.Assets[i].PurchaseDate,
+				Amount:   MonetaryAmount(assets.Assets[i].PurchaseAmount),
+				Currency: assets.Assets[i].PurchaseCurrency,
+			},
+
+			MetaInfo: MetaInfo{
+				CreatedBy: assets.Assets[i].CreatedBy,
+				CreatedAt: assets.Assets[i].CreatedAt,
+				UpdatedAt: assets.Assets[i].UpdatedAt,
+			},
+		})
+	}
+
+	return assetList, nil
+}
+
+func (c *Control) searchAssets(ctx context.Context, query listAssetsQuery) (*AssetList, error) {
+	assets, err := c.AssetRepo.Search(ctx, c.DB, database.SearchAssetsQuery{
+		Search: query.search,
+		Offset: query.offset,
+		Limit:  query.limit,
 	})
 
 	if err != nil {

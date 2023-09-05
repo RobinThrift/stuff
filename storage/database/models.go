@@ -59,10 +59,18 @@ type AssetList struct {
 }
 
 type ListAssetsQuery struct {
+	Search string
+
 	Offset   int
 	Limit    int
 	OrderBy  string
 	OrderDir string
+}
+
+type SearchAssetsQuery struct {
+	Search string
+	Offset int
+	Limit  int
 }
 
 var ErrUserNotFound = errors.New("user not found")
