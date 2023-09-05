@@ -152,7 +152,7 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", asset.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", asset.ID)))
 				if err != nil {
 					return err
 				}
@@ -160,7 +160,7 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", asset.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", asset.ID)))
 				if err != nil {
 					return err
 				}
@@ -168,7 +168,7 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", asset.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", asset.ID)))
 				if err != nil {
 					return err
 				}
@@ -176,7 +176,7 @@ func listAssetsPage(props listAssetsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_14 string = fmt.Sprintf("selectk%s", asset.ID)
+				var var_14 string = fmt.Sprintf("selectk%v", asset.ID)
 				_, err = templBuffer.WriteString(templ.EscapeString(var_14))
 				if err != nil {
 					return err

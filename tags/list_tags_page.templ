@@ -38,8 +38,8 @@ templ listTagsPage(props listTagsPageProps) {
 					<tr class="text-neutral-800">
 						<td class="first:pl-0 last:pr-0 py-4 text-sm whitespace-nowrap">
 							<div class="flex items-center">
-								<input id={fmt.Sprintf("selected_%s", tag.ID)} name={fmt.Sprintf("selected_%s", tag.ID)} type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
-								<label for={fmt.Sprintf("selected_%s", tag.ID)} class="sr-only">{fmt.Sprintf("selectk%s", tag.ID)}</label>
+								<input id={fmt.Sprintf("selected_%v", tag.ID)} name={fmt.Sprintf("selected_%v", tag.ID)} type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+								<label for={fmt.Sprintf("selected_%v", tag.ID)} class="sr-only">{fmt.Sprintf("selectk%v", tag.ID)}</label>
 							</div>
 						</td>
 						<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{ tag.Tag }</strong></td>

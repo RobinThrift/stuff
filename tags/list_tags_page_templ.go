@@ -93,7 +93,7 @@ func listTagsPage(props listTagsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", tag.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", tag.ID)))
 				if err != nil {
 					return err
 				}
@@ -101,7 +101,7 @@ func listTagsPage(props listTagsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", tag.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", tag.ID)))
 				if err != nil {
 					return err
 				}
@@ -109,7 +109,7 @@ func listTagsPage(props listTagsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%s", tag.ID)))
+				_, err = templBuffer.WriteString(templ.EscapeString(fmt.Sprintf("selected_%v", tag.ID)))
 				if err != nil {
 					return err
 				}
@@ -117,7 +117,7 @@ func listTagsPage(props listTagsPageProps) templ.Component {
 				if err != nil {
 					return err
 				}
-				var var_8 string = fmt.Sprintf("selectk%s", tag.ID)
+				var var_8 string = fmt.Sprintf("selectk%v", tag.ID)
 				_, err = templBuffer.WriteString(templ.EscapeString(var_8))
 				if err != nil {
 					return err
