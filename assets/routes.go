@@ -47,7 +47,7 @@ func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
 
-	mux.Get("/api/v1/assets/categories", rt.apiGetCategories)
+	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
 }
 
 // [GET] /
@@ -283,7 +283,7 @@ func (rt *Router) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Reques
 }
 
 // [GET] /api/v1/assets/categories
-func (rt *Router) apiGetCategories(w http.ResponseWriter, r *http.Request) {
+func (rt *Router) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	cats, err := rt.Control.listCategories(r.Context())
 	if err != nil {
 		api.RespondWithError(r.Context(), w, err)
