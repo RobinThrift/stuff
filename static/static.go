@@ -1,7 +1,7 @@
 //go:build !dev
 // +build !dev
 
-package stuff
+package static
 
 import (
 	"embed"
@@ -14,6 +14,6 @@ var _assets embed.FS
 
 var _corrected, _ = fs.Sub(_assets, "build")
 
-func StaticFiles(prefix string) http.Handler {
+func Files(prefix string) http.Handler {
 	return http.StripPrefix(prefix, http.FileServer(http.FS(_corrected)))
 }

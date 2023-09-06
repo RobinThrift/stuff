@@ -8,7 +8,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/kodeshack/stuff"
+	"github.com/kodeshack/stuff/static"
 )
 
 type Server struct {
@@ -36,7 +36,7 @@ func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*
 	)
 
 	mux.Get("/health", http.HandlerFunc(srv.handleHealth))
-	mux.Handle("/static/*", stuff.StaticFiles("/static/"))
+	mux.Handle("/static/*", static.Files("/static/"))
 
 	for _, r := range routes {
 		r(mux)

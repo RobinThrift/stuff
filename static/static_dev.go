@@ -1,12 +1,12 @@
 //go:build dev
 // +build dev
 
-package stuff
+package static
 
 import (
 	"net/http"
 )
 
-func StaticFiles(prefix string) http.Handler {
+func Files(prefix string) http.Handler {
 	return http.StripPrefix(prefix, http.FileServer(http.Dir("./build")))
 }
