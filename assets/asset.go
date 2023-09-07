@@ -85,3 +85,13 @@ type AssetListPage struct {
 	Page     int
 	PageSize int
 }
+
+type ListCategoriesQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}
+
+type Category struct {
+	Name string
+}

@@ -20,13 +20,29 @@ func (rt *APIRouter) RegisterRoutes(mux *chi.Mux) {
 
 // [GET] /api/v1/assets/categories
 func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
-	cats, err := rt.Control.listCategories(r.Context())
+	type category struct {
+		Name string `json:"name"`
+	}
+
+	type page struct {
+		Categories []category `json:"categories"`
+	}
+
+	cats, err := rt.Control.listCategories(r.Context(), ListCategoriesQuery{Search: r.URL.Query().Get("query")})
 	if err != nil {
 		api.RespondWithError(r.Context(), w, err)
 		return
 	}
 
-	b, err := json.Marshal(cats)
+	res := page{
+		Categories: make([]category, 0, len(cats)),
+	}
+
+	for _, c := range cats {
+		res.Categories = append(res.Categories, category{Name: c})
+	}
+
+	b, err := json.Marshal(res)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "error marshalling categories JSON", "error", err)
 		return
@@ -39,7 +55,7 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [GET] /api/v1/assets/categories
+// [GET] /api/v1/assets/search
 func (rt *APIRouter) apiSearchAssets(w http.ResponseWriter, r *http.Request) {
 	assets := []*Asset{}
 	query := listAssetsQueryFromURL(r.URL.Query())

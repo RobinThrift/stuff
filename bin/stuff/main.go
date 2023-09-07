@@ -97,7 +97,8 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		Control: assetsCtrl,
 	}
 
-	tagsRouter := &tags.Router{Control: tagCtrl}
+	tagsUIRouter := &tags.UIRouter{Control: tagCtrl}
+	tagAPIRouter := &tags.APIRouter{Control: tagCtrl}
 
 	sm := scs.New()
 	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
@@ -110,7 +111,8 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		authRouter.RegisterRoutes,
 		assetsUIRouter.RegisterRoutes,
 		assetsAPIRouter.RegisterRoutes,
-		tagsRouter.RegisterRoutes,
+		tagsUIRouter.RegisterRoutes,
+		tagAPIRouter.RegisterRoutes,
 	)
 	if err != nil {
 		return nil, err

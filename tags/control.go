@@ -107,6 +107,8 @@ func (c *Control) Delete(ctx context.Context, exec bob.Executor, tag string) err
 }
 
 type ListTagsQuery struct {
+	Search   string
+	InUse    *bool
 	Page     int
 	PageSize int
 	OrderBy  string
@@ -115,12 +117,7 @@ type ListTagsQuery struct {
 
 func (c *Control) listTags(ctx context.Context, query ListTagsQuery) (*TagListPage, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*TagListPage, error) {
-		return c.TagRepo.List(ctx, tx, ListTagsQuery{
-			Page:     query.Page,
-			PageSize: query.PageSize,
-			OrderBy:  query.OrderBy,
-			OrderDir: query.OrderDir,
-		})
+		return c.TagRepo.List(ctx, tx, query)
 	})
 }
 

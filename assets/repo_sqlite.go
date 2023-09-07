@@ -86,12 +86,14 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 }
 
 func (ar *RepoSQLite) Search(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
-	exec = bob.Debug(exec)
-
 	limit := query.PageSize
 
 	if limit == 0 {
 		limit = 50
+	}
+
+	if limit > 100 {
+		limit = 100
 	}
 
 	offset := limit * query.Page
@@ -180,8 +182,6 @@ func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asse
 }
 
 func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
-	exec = bob.Debug(exec)
-
 	model := &models.Asset{
 		ID:               asset.ID,
 		ParentAssetID:    nullInt64(asset.ParentAssetID),
@@ -248,8 +248,29 @@ func (ar *RepoSQLite) Delete(ctx context.Context, exec bob.Executor, id int64) e
 	return err
 }
 
-func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor) ([]string, error) {
-	categories, err := models.Categories.Query(ctx, exec).All()
+func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]string, error) {
+	limit := query.PageSize
+
+	if limit == 0 {
+		limit = 50
+	}
+
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset := limit * query.Page
+
+	mods := []bob.Mod[*dialect.SelectQuery]{
+		sm.Limit(limit),
+		sm.Offset(offset),
+	}
+
+	if query.Search != "" {
+		mods = append(mods, models.SelectWhere.Categories.Name.Like("%"+query.Search+"%"))
+	}
+
+	categories, err := models.Categories.Query(ctx, exec, mods...).All()
 	if err != nil {
 		return nil, err
 	}

@@ -3,8 +3,10 @@
     "version": "1.0.0",
     "public": true,
     "devDependencies": {
+        "@biomejs/biome": "1.1.1",
         "autoprefixer": "^10.4.15",
         "concurrently": "^8.2.1",
+        "esbuild": "^0.19.2",
         "postcss": "^8.4.28",
         "postcss-cli": "^10.1.0",
         "postcss-import": "^15.1.0",
@@ -14,7 +16,6 @@
     "dependencies": {
         "alpinejs": "^3.13.0",
         "flatpickr": "^4.6.13",
-        "htmx.org": "^1.9.5",
-        "quick-score": "^0.2.0"
+        "htmx.org": "^1.9.5"
     }
 }

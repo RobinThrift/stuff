@@ -23,7 +23,11 @@ func requestIDMiddleware(next http.Handler) http.Handler {
 
 func logReqMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		slog.InfoContext(r.Context(), r.URL.Path, "method", r.Method)
+		url := r.URL.Path
+		if r.URL.RawQuery != "" {
+			url += "?" + r.URL.RawQuery
+		}
+		slog.InfoContext(r.Context(), url, "method", r.Method)
 		next.ServeHTTP(w, r)
 	})
 }

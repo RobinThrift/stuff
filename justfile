@@ -37,6 +37,8 @@ styles: _npm-install
     postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map
 
 icons: _npm-install
+build-js: _npm-install _copy-js-libs
+    cd static && esbuild src/helper.js --minify --bundle --outfile=build/helper.min.js
     rm -f staic/build/*.svg
     svg-sprite \
         --symbol --symbol-dest="" \

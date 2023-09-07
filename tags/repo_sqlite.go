@@ -27,6 +27,10 @@ func (*RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListTagsQu
 		limit = 50
 	}
 
+	if limit > 100 {
+		limit = 100
+	}
+
 	offset := limit * query.Page
 
 	mods := []bob.Mod[*dialect.SelectQuery]{
@@ -43,6 +47,14 @@ func (*RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListTagsQu
 			Expression: query.OrderBy,
 			Direction:  query.OrderDir,
 		})
+	}
+
+	if query.Search != "" {
+		mods = append(mods, models.SelectWhere.Tags.Tag.Like("%"+query.Search+"%"))
+	}
+
+	if query.InUse != nil {
+		mods = append(mods, models.SelectWhere.Tags.InUse.EQ(*query.InUse))
 	}
 
 	tags, err := models.Tags.Query(ctx, exec, mods...).All()
