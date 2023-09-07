@@ -1,0 +1,15 @@
+{{ template "document_head" . }}
+
+<div class="grid h-screen px-4 bg-white place-content-center">
+	<div class="text-center">
+		<h1 class="font-black text-9xl text-transparent rainbow bg-clip-text bg-gradient-to-bl">{{ .Data.Code }}</h1>
+		<p class="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ .Data.Title }}</p>
+		<p class="mt-4 text-gray-500">{{ .Data.Message }}</p>
+
+		<a href="/" class="btn btn-primary inline-block mt-6 py-4 md:text-base" >
+			Back Home
+		</a>
+	</div>
+</div>
+
+{{ template "document_footer" . }}

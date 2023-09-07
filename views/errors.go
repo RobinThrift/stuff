@@ -14,23 +14,22 @@ type ErrorPageErr struct {
 }
 
 func RenderErrorPage(w http.ResponseWriter, r *http.Request, err error) {
-	statusCode := http.StatusInternalServerError
-	title := "Unknown Error"
-	message := err.Error()
-
 	var errPageErr ErrorPageErr
-	if errors.As(err, &errPageErr) {
-		statusCode = errPageErr.Code
-		title = errPageErr.Title
-		if errPageErr.Message != "" {
-			message = errPageErr.Message
+
+	if !errors.As(err, &errPageErr) {
+		errPageErr = ErrorPageErr{
+			Code:    http.StatusInternalServerError,
+			Title:   "Unknown Error",
+			Message: err.Error(),
 		}
 	}
 
-	errorPage := ErrorPage(statusCode, title, message)
-	page := Document(title, errorPage)
-
-	renderErr := page.Render(r.Context(), w)
+	renderErr := Render(w, "error_page", Model[ErrorPageErr]{
+		Global: Global{
+			Title: errPageErr.Title,
+		},
+		Data: errPageErr,
+	})
 	if renderErr != nil {
 		slog.ErrorContext(r.Context(), "error rendering error page", "error", renderErr)
 	}

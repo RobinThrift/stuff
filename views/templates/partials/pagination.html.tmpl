@@ -1,0 +1,51 @@
+{{ define "pagination" }}
+<div class="flex items-center justify-between w-full h-16 px-3 border-t border-neutral-200">
+	<p class="pl-2 text-sm text-gray-700">
+		Showing <span class="font-medium">{{ mul .Page.Page .Page.PageSize }}</span> to <span class="font-medium">{{ mul (add .Page.Page 1) .Page.PageSize }}</span> of <span class="font-medium">{{ .Page.Total }}</span> tags
+	</p>
+	<nav>
+		<ul class="flex items-center text-sm leading-tight bg-white border divide-x rounded h-9 text-neutral-500 divide-neutral-200 border-neutral-200">
+			<li class="h-full">
+				<a href="#" class="relative inline-flex items-center h-full px-3 ml-0 rounded-l group hover:text-blue-500">
+					<span>Previous</span>
+				</a>
+			</li>
+			<li class="hidden h-full md:block">
+				<a href="#" class="relative inline-flex items-center h-full px-3 text-neutral-900 group bg-gray-50">
+					<span>1</span>
+					<span class="box-content absolute bottom-0 left-0 w-full h-px -mx-px translate-y-px border-l border-r bg-blue-500 border-blue-500"></span>
+				</a>
+			</li>
+			<li class="hidden h-full md:block">
+				<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+					<span>2</span>
+					<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+				</a>
+			</li>
+			<li class="hidden h-full md:block">
+				<div class="relative inline-flex items-center h-full px-2.5 group">
+					<span>...</span>
+				</div>
+			</li>
+			<li class="hidden h-full md:block">
+				<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+					<span>6</span>
+					<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+				</a>
+			</li>
+			<li class="hidden h-full md:block">
+				<a href="#" class="relative inline-flex items-center h-full px-3 group hover:text-neutral-900">
+					<span>7</span>
+					<span class="box-content absolute bottom-0 w-0 h-px -mx-px duration-200 ease-out translate-y-px border-transparent bg-blue-500 group-hover:border-l group-hover:border-r group-hover:border-blue-500 left-1/2 group-hover:left-0 group-hover:w-full"></span>
+				</a>
+			</li>
+			<li class="h-full">
+				<a href="#" class="relative inline-flex items-center h-full px-3 ml-0 rounded-l group hover:text-blue-500">
+					<span>Next</span>
+				</a>
+			</li>
+		</ul>
+	</nav>
+</div>
+{{ end }}
+

@@ -1,0 +1,187 @@
+{{- /*
+Input:
+	Class string
+	InputClass string
+	InputWrapperClass string
+	LabelClass string
+	Value string
+	Type string
+	Label string
+	Name string
+	Placeholder string
+	Required bool
+	AutoComplete string
+	Icon templ.Component
+	ValidationErr string
+	XRef string
+	XData string
+*/ -}}
+{{ define "input" }}
+<div {{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}} {{ if has . "XData" -}} x-data="{{ .XData }}" {{- end -}}>
+	{{ if ne .Label "" }}
+	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
+	{{ end }}
+
+	<div class="relative {{- if has . "InputWrapperClass" -}} {{ .InputWrapperClass }} {{- end -}}">
+		{{ if ne .Icon "" }}
+		<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+			<div class="h-4 w-4">
+				{{ template "icon" dict "Icon" .Icon "Class" "w-[24px] h-[24px]" }}
+			</div>
+		</span>
+		{{ end }}
+
+		<input
+			{{ if has . "XRef" }}
+			x-ref="{{ .XRef }}"
+			{{ end }}
+
+			{{ if has . "Required" }}
+			required="{{ .Required }}"
+			{{ end }}
+
+			type="{{ default .Type "text" }}"
+
+			name="{{ .Name }}"
+			id="{{ .Name }}"
+
+			{{ if has . "Placeholder" }}
+			placeholder={{ .Placeholder }}
+			{{ end }}
+
+			auto-complete={{ default .AutoComplete "none" }}
+
+			class="input {{ if has . "Icon"  -}} pl-11 {{- end }} {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
+
+			{{ if ne (print .Value ) "" }}
+			value="{{ .Value }}"
+			{{ end }}
+		/>
+
+		{{ if ne .ValidationErr "" }}
+		<span class="block text-red-500">{{ .ValidationErr }}</span>
+		{{ end }}
+	</div>
+</div>
+{{ end }}
+
+{{- /*
+Textarea:
+	Class string
+	LabelClass string
+	InputClass string
+	Name string
+	Label string
+	Placeholder string
+	Value string
+	ValidationErr string
+*/ -}}
+{{ define "textarea" }}
+<div {{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}>
+	{{ if ne .Label "" }}
+	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
+	{{ end }}
+
+	<textarea
+		class="input w-full h-auto min-h-[96px] px-3 py-2 {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
+		name="{{ .Name }}"
+		id="{{ .Name }}"
+
+		{{ if has . "Placeholder" }}
+		placeholder={{ .Placeholder }}
+		{{ end }}
+
+		x-data="{resize () {
+			$el.style.height = '0px'; 
+			$el.style.height = $el.scrollHeight + 'px' 
+		}}"
+		x-init="resize()"
+		x-on:input="resize()"
+	>{{ .Value }}</textarea>
+
+	{{ if ne .ValidationErr "" }}
+	<span class="block text-red-500">{{ .ValidationErr }}</span>
+	{{ end }}
+</div>
+{{ end }}
+
+
+{{- /*
+Select:
+	Class string
+	InputClass string
+	LabelClass string
+	Name string
+	Label string
+	Value string
+	Options [][]string
+*/ -}}
+{{ define "select" }}
+<div {{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}>
+	{{ if ne .Label "" }}
+	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
+	{{ end }}
+
+	<select
+		name="{{ .Name }}"
+		id="{{ .Name }}"
+		class="input w-full py-2.5 {{ if ne .InputClass "" -}} {{ .InputClass }} {{- end -}}"
+		{{ if ne .Value "" }}
+			value="{{ .Value }}"
+		{{ end }}
+	>
+		{{ range .Options }}
+			<option
+				value={{ index . 1 }}
+				{{ if eq (index . 1) $.Value }}
+				selected
+				{{ end }}
+			>
+				{{ index . 0 }}
+			</option>
+		{{ end }}
+	</select>
+</div>
+{{ end }}
+
+{{- /*
+ DatePicker:
+	Class string
+	InputClass string
+	InputWrapperClass string
+	LabelClass string
+	Value time.Time
+	Format string
+	Type string
+	Label string
+	Name string
+	Placeholder string
+	Required bool
+	AutoComplete string
+	Icon templ.Component
+	ValidationErr string
+*/ -}}
+{{ define "datepicker" }}
+{{ $value := "" }}
+{{ if not .Value.IsZero }}
+{{ $value = (.Value.Format .Format) }}
+{{end}}
+
+{{-
+	template "input"
+	merge . (dict
+		"Value" $value
+		"XRef" "picker"
+		"XData" `{
+		init() {
+			return import("/static/flatpickr.min.js").catch(console.error).then(() => {
+				globalThis.flatpickr($refs.picker, {
+					allowInput: true,
+					dateFormat: 'Y-m-d',
+				})
+			})
+		}
+	}`
+	)
+-}}
+{{ end }}

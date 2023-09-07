@@ -1,0 +1,15 @@
+{{ define "status_badge" }}
+
+{{ $class := "" }}
+{{ if eq .Status "IN_STORAGE" }}
+{{ $class = "bg-blue-500 text-blue-100" }}
+{{ else if eq .Status "IN_USE" }}
+{{ $class = "bg-emerald-100 text-emerald-700" }}
+{{ else if eq .Status "ARCHIVED" }}
+{{ $class = "bg-slate-300 text-slate-700" }}
+{{ end }}
+
+<span class="rounded text-sm px-2.5 py-0.5 font-bold {{ $class }} {{- if has . "Class" }} {{ .Class }} {{- end -}}" >
+	{{ .Status }}
+</span>
+{{ end }}

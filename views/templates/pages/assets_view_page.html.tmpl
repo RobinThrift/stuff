@@ -1,0 +1,131 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "main" }}
+{{ with .Data.Asset }}
+<header class="my-5 flex flex-row items-start justify-start lg:items-center">
+	<h1 class="font-extrabold md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
+		{{ .Name }}
+		<span class="ms-2 text-slate-400"> ({{ .Tag }})</span>
+
+		{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
+	</h1>
+
+	<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end" x-data="{{ template "dropdown_x_data" }}">
+		<button class="btn btn-primary flex items-center" x-on:click="{{ template "dropdown_button_on_click" }}">
+			Actions
+			{{ template "icon" dict "Icon" "caret-down" "Class" "w-[16px] h-[16px] ms-2" }}
+		</button>
+		{{ template "dropdown_content_start" }}
+		<ul class="py-2 text-sm w-full">
+			<li>
+				<a href={{ printf "/assets/%d/edit" .ID }} class="block px-4 py-2 hover:bg-gray-100">Edit</a>
+			</li>
+			<li>
+				<a href={{ printf "/assets/%d/delete" .ID }} class="block px-4 py-2 text-red-700 hover:bg-gray-100">Delete</a>
+			</li>
+		</ul>
+		{{ template "dropdown_content_end" }}
+	</div>
+</header>
+
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+	<div class="lg:col-span-2">
+		<div class="flow-root">
+			<dl class="divide-y divide-gray-100 text-sm">
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Category</dt>
+					<dd class="text-gray-700 sm:col-span-2">{{ .Category }}</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Manufacturer</dt>
+					<dd class="text-gray-700 sm:col-span-2">{{ .Manufacturer }}</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Model</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						{{ .Model }}
+						{{ if ne .ModelNo "" }}
+							({{ .ModelNo }})
+						{{ end }}
+					</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">SerialNo</dt>
+					<dd class="text-gray-700 sm:col-span-2">{{ .SerialNo }}</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Warranty Until</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						{{ if not .WarrantyUntil.IsZero }}
+							{{ .WarrantyUntil.Format "2006-01-02" }}
+						{{ end }}
+					</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Location</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						{{ .Location }} <br />
+						{{ if ne .PositionCode "" }}
+							Code: <strong>{{ .PositionCode }}</strong>
+						{{ end }}
+					</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Notes</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						<p>
+						{{ range split .Notes "\n" }}
+						{{ . }}<br />
+						{{ end }}
+						</p>
+					</dd>
+				</div>
+
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<h3 class="font-bold text-lg text-gray-900">Purchase Info</h3>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Supplier</dt>
+					<dd class="text-gray-700 sm:col-span-2">{{ .PurchaseInfo.Supplier }}</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Order No.</dt>
+					<dd class="text-gray-700 sm:col-span-2">{{ .PurchaseInfo.OrderNo }}</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Purchase Date</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						{{ if not .PurchaseInfo.Date.IsZero }}
+						{{ .PurchaseInfo.Date.Format "2006-02-01" }}
+						{{ end }}
+					</dd>
+				</div>
+
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium text-gray-900">Amount</dt>
+					<dd class="text-gray-700 sm:col-span-2">
+						{{ .PurchaseInfo.Amount.Format $.Data.DecimalSeparator }} {{ .PurchaseInfo.Currency }}
+					</dd>
+				</div>
+			</dl>
+		</div>
+	</div>
+
+	<div class="rounded-md bg-gray-100 py-5">
+		<img src={{ .ImageURL }} class="w-full h-auto object-scale-down max-h-[500px]" />
+	</div>
+</div>
+
+{{ end }}
+{{ end }}
+

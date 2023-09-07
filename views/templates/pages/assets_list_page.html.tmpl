@@ -1,0 +1,80 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "main" }}
+<header class="my-5 flex items-end">
+	<h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
+	<a href="/assets/new" class="btn btn-primary inline-block ml-8">New Asset</a>
+</header>
+
+{{ with .Data }}
+<table class="min-w-full divide-y divide-neutral-200">
+	{{ template "table_head" list "" "Tag" "Image" "Name" "Category" "Location" "Status" "" }}
+
+	<tbody class="divide-y divide-neutral-200" x-data="{ open: {} }">
+		{{ range .Page.Assets }}
+		<tr class="text-neutral-800">
+			<td class="first:pl-0 last:pr-0 py-4 text-sm whitespace-nowrap">
+				<div class="flex items-center">
+					<input id="selected_{{ .ID }}" name="selected_{{ .ID }}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+					<label id="selected_{{ .ID }}" class="sr-only">Select Tag {{ .Tag }}</label>
+				</div>
+			</td>
+			<td class="py-4 text-sm whitespace-nowrap">
+				<button
+					class="border-0 bg-transparent text-blue-400 hover:text-purple-500"
+					x-on:click="{{ printf "open['%d'] = !open['%[1]d'];" .ID }}"
+					hx-trigger="click once"
+					hx-get="{{ printf "/assets/%d" .ID }}"
+					hx-target="{{ printf "#view-%d" .ID }}"
+					hx-select="#main"
+				>
+					<span x-bind:class="{{ printf "open['%d'] ? 'rotate-90' : ''" .ID }}" class="transition-transform inline-block">
+						{{ template "icon" dict "Icon" "caret-right" "Class" "w-[16px] h-[16px]" }}
+					</span>
+				</button>
+			</td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">
+				<a class="hover:text-purple-500" href="{{ printf "/assets/%v" .ID }}">
+					<strong>{{ .Tag }}</strong>
+				</a>
+			</td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">
+				{{ if ne .ThumbnailURL "" }}
+					<img class="h-[50px]" src={{ .ThumbnailURL }} />
+				{{ end }}
+			</td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">
+				<a class="hover:text-purple-500" href="{{ printf "/assets/%v" .ID }}">
+					{{ .Name }}
+				</a>
+			</td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">{{ .Category }}</td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">
+				{{  .Location  }}
+				{{ if ne .PositionCode "" }}
+					({{ .PositionCode }})
+				{{ end }}
+			</td>
+			<td class="py-4 text-sm whitespace-nowrap">
+				{{ template "status_badge" dict "Status" .Status }}
+			</td>
+			<td class="last:pr-0 px-5 py-4 text-sm font-medium text-right whitespace-nowrap">
+				<a class="text-blue-400 hover:text-purple-500" href="{{ printf "/assets/%v/edit" .ID }}">
+					Edit
+				</a>
+			</td>
+		</tr>
+		<tr x-show="{{ printf "open['%d']" .ID }}">
+			<td id={{ printf "view-%d" .ID }} colspan="9"></td>
+		</tr>
+		</tr>
+		{{ end }}
+	</tbody>
+</table>
+
+{{ if gt .Page.NumPages 1 }}
+{{ template "pagination" dict "Page" .Page }}
+{{ end }}
+
+{{ end }}
+{{ end }}

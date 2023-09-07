@@ -1,0 +1,33 @@
+{{ define "dropdown_x_data" }}
+{
+	open: false,
+	position(el) {
+		let pos = el.getBoundingClientRect()
+		let top = pos.top + window.scrollY
+		let left = pos.left + window.scrollX
+		this.$refs.dropdown.style.left = left + 'px';
+		this.$refs.dropdown.style.top = top + el.offsetHeight + 'px';
+		this.$refs.dropdown.style.minWidth = el.offsetWidth + 'px';
+	},
+}
+{{ end }}
+
+{{ define "dropdown_button_on_click" }}
+position($el); open = !open
+{{ end }}
+
+{{ define "dropdown_content_start" }}
+<template x-teleport="body">
+	<div
+		x-ref="dropdown" x-show="open"
+		class="absolute top-0"
+		@click.outside="open = false"
+	>
+		<div class="flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70">
+{{ end }}
+
+{{ define "dropdown_content_end" }}
+		</div>
+	</div>
+</template>
+{{ end }}

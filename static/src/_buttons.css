@@ -1,0 +1,22 @@
+@layer components {
+	.btn {
+		@apply px-3 py-2 focus:outline-none rounded-md;
+	}
+
+	.btn.btn-primary {
+		@apply text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700;
+	}
+
+	.btn.btn-danger {
+		@apply text-white bg-red-500 hover:bg-red-600 focus:bg-red-700;
+	}
+
+	.btn.btn-muted {
+		@apply text-white bg-gray-500 hover:bg-gray-600 focus:bg-gray-700;
+	}
+
+	.btn.btn-outline.btn-danger {
+		@apply px-3 py-2 bg-transparent border text-red-500 border-red-500 hover:bg-red-600 focus:bg-red-700 hover:text-white focus:text-white;
+	}
+}
+

@@ -10,7 +10,6 @@ staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.54.2"
 goose_version := "v3.15.0"
 bobgen_version := "v0.22.0"
-templ_version := "v0.2.316"
 wgo_version := "v0.5.3"
 
 _default:
@@ -27,11 +26,11 @@ test flags="-failfast -v -timeout 5m":
     @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
     go test {{ flags }} ./...
 
-run: _gen-templ _copy-js-libs icons
+run: _copy-js-libs icons
     mkdir -p .run
-    go run ./bin/stuff
+    go run -tags dev ./bin/stuff
 
-build: _gen-templ _copy-js-libs styles icons
+build: _copy-js-libs styles icons
     go build ./bin/stuff
 
 styles: _npm-install
@@ -49,12 +48,10 @@ watch: _npm-install
 
 _watch-go: _copy-js-libs
     go run github.com/bokwoon95/wgo@{{wgo_version}} \
-        -xfile '.*_templ.go' \
         -file '.*\.go' \
-        -file '.*\.templ' \
         just _run-watch
 
-_run-watch: _gen-templ
+_run-watch:
     mkdir -p .run
     go run -tags dev ./bin/stuff
 
@@ -78,10 +75,6 @@ generate:
     go run github.com/stephenafamo/bob/gen/bobgen-sqlite@{{bobgen_version}} -c ./storage/database/sqlite/bob.yaml
     go fmt ./...
     @rm _stuff.db
-    just _gen-templ
-
-_gen-templ:
-    go run github.com/a-h/templ/cmd/templ@{{templ_version}} generate -path .
 
 _copy-js-libs: _npm-install
     -mkdir static/build

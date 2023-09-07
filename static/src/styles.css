@@ -1,33 +1,12 @@
 @import "../node_modules/flatpickr/dist/flatpickr.css";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "./_tailwind.css";
+@import "./_buttons.css";
+@import "./_forms.css";
 
 [x-cloak] { display: none !important; }
 
 .rainbow {
     @apply from-green-300 via-blue-500 to-purple-600;
-}
-
-.btn {
-    @apply px-3 py-2 focus:outline-none rounded-md;
-}
-
-.btn.btn-primary {
-    @apply text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700;
-}
-
-.btn.btn-danger {
-    @apply text-white bg-red-500 hover:bg-red-600 focus:bg-red-700;
-}
-
-.btn.btn-muted {
-    @apply text-white bg-gray-500 hover:bg-gray-600 focus:bg-gray-700;
-}
-
-.btn.btn-outline.btn-danger {
-    @apply px-3 py-2 bg-transparent border text-red-500 border-red-500 hover:bg-red-600 focus:bg-red-700 hover:text-white focus:text-white;
 }
 
 .drag-over .drag-over-show {
@@ -45,7 +24,6 @@
 .drag-over-show {
     display: none;
 }
-
 
 .flatpickr-calendar {
     @apply text-neutral-500;

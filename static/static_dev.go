@@ -8,5 +8,5 @@ import (
 )
 
 func Files(prefix string) http.Handler {
-	return http.StripPrefix(prefix, http.FileServer(http.Dir("./build")))
+	return http.StripPrefix(prefix, http.FileServer(http.Dir("./static/build")))
 }
