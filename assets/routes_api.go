@@ -14,8 +14,8 @@ type APIRouter struct {
 }
 
 func (rt *APIRouter) RegisterRoutes(mux *chi.Mux) {
+	mux.Get("/api/v1/assets", rt.apiListAssets)
 	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
-	mux.Get("/api/v1/assets/search", rt.apiSearchAssets)
 }
 
 // [GET] /api/v1/assets/categories
@@ -55,21 +55,16 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// [GET] /api/v1/assets/search
-func (rt *APIRouter) apiSearchAssets(w http.ResponseWriter, r *http.Request) {
-	assets := []*Asset{}
+// [GET] /api/v1/assets
+func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
 	query := listAssetsQueryFromURL(r.URL.Query())
-	if query.Search != "" {
-		assetList, err := rt.Control.searchAssets(r.Context(), query)
-		if err != nil {
-			api.RespondWithError(r.Context(), w, err)
-			return
-		}
-
-		assets = assetList.Assets
+	page, err := rt.Control.listAssets(r.Context(), query)
+	if err != nil {
+		api.RespondWithError(r.Context(), w, err)
+		return
 	}
 
-	b, err := json.Marshal(assets)
+	b, err := json.Marshal(page.Assets)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "error marshalling assets JSON", "error", err)
 		return

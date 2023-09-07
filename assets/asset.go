@@ -86,12 +86,28 @@ type AssetListPage struct {
 	PageSize int
 }
 
+type Category struct {
+	Name string
+}
+
+type ListAssetsQuery struct {
+	Search *ListAssetsQuerySearch
+
+	Page     int
+	PageSize int
+
+	OrderBy  string
+	OrderDir string
+}
+
+type ListAssetsQuerySearch struct {
+	Raw string
+
+	Fields map[string]string
+}
+
 type ListCategoriesQuery struct {
 	Search   string
 	Page     int
 	PageSize int
-}
-
-type Category struct {
-	Name string
 }

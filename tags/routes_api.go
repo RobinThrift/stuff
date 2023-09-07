@@ -67,7 +67,7 @@ func (rt *APIRouter) apiListTags(w http.ResponseWriter, r *http.Request) {
 }
 
 func listTagsQueryFromURL(params url.Values) ListTagsQuery {
-	q := ListTagsQuery{
+	q := ListTagsQuery{ //nolint: varnamelen
 		Search:   params.Get("query"),
 		PageSize: 50,
 		OrderBy:  params.Get("order_by"),

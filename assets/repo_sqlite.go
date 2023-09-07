@@ -41,12 +41,15 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 		limit = 50
 	}
 
+	if limit > 100 {
+		limit = 100
+	}
+
 	offset := limit * query.Page
 
 	mods := []bob.Mod[*dialect.SelectQuery]{
 		sm.Limit(limit),
 		sm.Offset(offset),
-		models.SelectWhere.Assets.ParentAssetID.IsNull(),
 	}
 
 	if query.OrderBy != "" {
@@ -60,14 +63,27 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 		})
 	}
 
-	assets, err := models.Assets.Query(ctx, exec, mods...).All()
-	if err != nil {
-		return nil, fmt.Errorf("error getting assets: %w", err)
-	}
+	var err error
+	var assets models.AssetSlice
+	var count int64
 
-	count, err := models.Assets.Query(ctx, exec, mods...).Count()
-	if err != nil {
-		return nil, fmt.Errorf("error counting assets: %w", err)
+	if query.Search != nil && query.Search.Raw != "" {
+		assets, count, err = ar.listAssetsFromFTSTable(ctx, exec, query.Search, mods)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		mods = append(mods, models.SelectWhere.Assets.ParentAssetID.IsNull())
+
+		count, err = models.Assets.Query(ctx, exec, mods...).Count()
+		if err != nil {
+			return nil, fmt.Errorf("error counting assets: %w", err)
+		}
+
+		assets, err = models.Assets.Query(ctx, exec, mods...).All()
+		if err != nil {
+			return nil, fmt.Errorf("error getting assets: %w", err)
+		}
 	}
 
 	page := &AssetListPage{
@@ -85,34 +101,30 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 	return page, nil
 }
 
-func (ar *RepoSQLite) Search(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
-	limit := query.PageSize
-
-	if limit == 0 {
-		limit = 50
+func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Executor, search *ListAssetsQuerySearch, mods []bob.Mod[*dialect.SelectQuery]) (models.AssetSlice, int64, error) {
+	if len(search.Fields) == 0 {
+		mods = append(mods,
+			sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(search.Raw))),
+		)
 	}
 
-	if limit > 100 {
-		limit = 100
+	for field, value := range search.Fields {
+		column, ok := isAssetsFTSColumn(field)
+		if !ok {
+			continue
+		}
+
+		mods = append(mods, sm.Where(sqlite.Raw(column+" MATCH ?", value)))
 	}
 
-	offset := limit * query.Page
-
-	q := models.AssetsFTS.Query(
-		ctx, exec,
-		sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(query.Search))),
-		sm.Limit(limit),
-		sm.Offset(offset),
-	)
-
-	count, err := q.Count()
+	count, err := models.AssetsFTS.Query(ctx, exec, mods...).Count()
 	if err != nil {
-		return nil, fmt.Errorf("error counting searched assets: %w", err)
+		return nil, 0, fmt.Errorf("error counting searched assets: %w", err)
 	}
 
-	entries, err := q.All()
+	entries, err := models.AssetsFTS.Query(ctx, exec, mods...).All()
 	if err != nil {
-		return nil, fmt.Errorf("error searching assets: %w", err)
+		return nil, 0, fmt.Errorf("error searching assets: %w", err)
 	}
 
 	ids := make([]int64, 0, len(entries))
@@ -126,24 +138,12 @@ func (ar *RepoSQLite) Search(ctx context.Context, exec bob.Executor, query ListA
 		ids = append(ids, id)
 	}
 
-	assets, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.In(ids...)).All()
+	assets, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.In(ids...), models.SelectWhere.Assets.ParentAssetID.IsNull()).All()
 	if err != nil {
-		return nil, fmt.Errorf("error getting assets: %w", err)
+		return nil, 0, fmt.Errorf("error getting assets: %w", err)
 	}
 
-	page := &AssetListPage{
-		Assets:   make([]*Asset, 0, len(assets)),
-		Total:    int(count),
-		Page:     query.Page,
-		PageSize: query.PageSize,
-		NumPages: len(ids) / query.PageSize,
-	}
-
-	for i := range assets {
-		page.Assets = append(page.Assets, mapDBModelToAsset(assets[i]))
-	}
-
-	return page, nil
+	return assets, count, nil
 }
 
 func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
@@ -396,4 +396,26 @@ func nullCustomAttrs(a map[string]any) null.Val[types.SQLiteJSON[map[string]any]
 	}
 
 	return v
+}
+
+func isAssetsFTSColumn(s string) (string, bool) {
+	switch s {
+	case models.ColumnNames.AssetsFTS.Tag:
+		return models.ColumnNames.AssetsFTS.Tag, true
+	case models.ColumnNames.AssetsFTS.Name:
+		return models.ColumnNames.AssetsFTS.Name, true
+	case models.ColumnNames.AssetsFTS.Category:
+		return models.ColumnNames.AssetsFTS.Category, true
+	case models.ColumnNames.AssetsFTS.Model:
+		return models.ColumnNames.AssetsFTS.Model, true
+	case models.ColumnNames.AssetsFTS.ModelNo, "modelno":
+		return models.ColumnNames.AssetsFTS.ModelNo, true
+	case models.ColumnNames.AssetsFTS.SerialNo, "serial", "serialno":
+		return models.ColumnNames.AssetsFTS.SerialNo, true
+	case models.ColumnNames.AssetsFTS.Manufacturer:
+		return models.ColumnNames.AssetsFTS.Manufacturer, true
+	case models.ColumnNames.AssetsFTS.Notes:
+		return models.ColumnNames.AssetsFTS.Notes, true
+	}
+	return "", false
 }

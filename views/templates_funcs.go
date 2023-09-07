@@ -84,7 +84,7 @@ func isZeroValue(value any) bool {
 	val := reflect.ValueOf(value)
 
 	// Basically adapted from text/template.isTrue
-	switch val.Kind() { //nolint:
+	switch val.Kind() { //nolint: exhaustive
 	case reflect.Invalid:
 		return true
 	case reflect.Array, reflect.Slice, reflect.Map, reflect.String:

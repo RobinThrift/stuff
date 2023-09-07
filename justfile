@@ -18,7 +18,7 @@ lint: _npm-install
     golangci-lint run ./...
     cd static && biome check src/*.js
 
-test flags="-failfast -v -timeout 5m":
+test *flags="-failfast -v -timeout 5m":
     @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
     go test {{ flags }} ./...
 
@@ -43,11 +43,13 @@ build-icons: _npm-install
         --dest=static/build static/src/icons/*.svg
 
 watch: _npm-install _copy-js-libs
+    mkdir -p .run
     concurrently "just _watch-go" "just _watch-styles" "just _watch-icons" "just _watch-js"
 
 _watch-go:
     wgo \
         -file '.*\.go' \
+        -xfile '.*_test\.go' \
         go run -tags dev ./bin/stuff
 
 _watch-styles:
@@ -61,13 +63,13 @@ _watch-icons:
         -file 'static/src/\/icons\/.*\.svg' \
         just build-icons
 
-new-migration name:
+new-migration name: _go-tools
     @rm -f _stuff.db
     goose -table migrations -dir storage/database/sqlite/migrations sqlite3 ./_stuff.db create {{name}} sql
     @rm -f _stuff.db
 
 alias gen := generate
-generate:
+generate: _go-tools
     @rm -f _stuff.db
     goose -table migrations -dir storage/database/sqlite/migrations sqlite3 ./_stuff.db up
     bobgen-sqlite -c ./storage/database/sqlite/bob.yaml

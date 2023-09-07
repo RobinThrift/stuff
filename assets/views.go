@@ -34,10 +34,16 @@ type DeleteAssetsPageViewModel struct {
 func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAssetsQuery, page *AssetListPage) error {
 	infomsg, _ := session.Pop[string](r.Context(), "info_message")
 
+	search := ""
+	if query.Search != nil {
+		search = query.Search.Raw
+	}
+
 	err := views.Render(w, "assets_list_page", views.Model[ListAssetsPageViewModel]{
 		Global: views.Global{
 			Title:        "Assets",
 			FlashMessage: infomsg,
+			Search:       search,
 		},
 		Data: ListAssetsPageViewModel{
 			Page:  page,

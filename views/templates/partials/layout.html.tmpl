@@ -4,7 +4,7 @@
 	<header class="w-full bg-white border-b">
 		<div x-data="{ open: false }" class="relative flex flex-col w-full bg-white md:items-center md:justify-between md:flex-row py-3 px-3 md:px-6 lg:px-8">
 			{{ template "site_nav" . }}
-			{{ template "site_nav_mobile" . }}
+			{{ template "site_nav_items" . }}
 		</div>
 	</header>
 
@@ -30,7 +30,7 @@
 </div>
 {{ end }}
 
-{{ define "site_nav_mobile" }}
+{{ define "site_nav_items" }}
 	<nav x-bind:class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow hidden md:pb-0 md:flex md:items-center  md:items-center md:flex-row md:ml-5">
 		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/assets">Assets</a>
 		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/tags">Tags</a>
@@ -48,6 +48,7 @@
 				"Placeholder" "Search"
 				"Name" "query"
 				"Icon" "magnifying-glass"
+				"Value" .Global.Search
 			-}}
 		</form>
 

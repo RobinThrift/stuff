@@ -9,6 +9,7 @@ type Global struct {
 	Title        string
 	CSRFToken    string
 	FlashMessage string
+	Search       string
 }
 
 type DocumentViewModel struct {

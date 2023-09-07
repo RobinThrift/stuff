@@ -50,15 +50,7 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 func (rt *UIRouter) handleAssetsListGet(w http.ResponseWriter, r *http.Request) error {
 	query := listAssetsQueryFromURL(r.URL.Query())
 
-	var page *AssetListPage
-	var err error
-
-	if query.Search != "" {
-		page, err = rt.Control.searchAssets(r.Context(), query)
-	} else {
-		page, err = rt.Control.listAssets(r.Context(), query)
-	}
-
+	page, err := rt.Control.listAssets(r.Context(), query)
 	if err != nil {
 		return err
 	}
@@ -282,9 +274,12 @@ func (rt *UIRouter) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Requ
 
 func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 	q := ListAssetsQuery{
-		Search:   params.Get("query"),
 		PageSize: 50,
 		OrderBy:  params.Get("order_by"),
+	}
+
+	if query := params.Get("query"); query != "" {
+		q.Search = decodeSearchQuery(query)
 	}
 
 	if size := params.Get("page_size"); size != "" {
@@ -394,4 +389,44 @@ func NewDecoder(decimalSeparator string) *form.Decoder {
 	}, MonetaryAmount(0))
 
 	return decoder
+}
+
+func decodeSearchQuery(queryStr string) *ListAssetsQuerySearch {
+	queryStr = strings.TrimPrefix(queryStr, "*")
+	q := &ListAssetsQuerySearch{Raw: queryStr, Fields: map[string]string{}} //nolint: varnamelen
+
+	words := strings.Split(queryStr, " ")
+	if len(words) == 1 {
+		return q
+	}
+
+	lastWordEnd := 0
+	lastNameEnd := 0
+	name := ""
+	value := ""
+	for i := 0; i < len(queryStr)-1; i++ {
+		switch queryStr[i] {
+		case ':':
+			value = queryStr[lastNameEnd:lastWordEnd]
+			if name != "" {
+				q.Fields[strings.ToLower(name)] = value
+			}
+			if queryStr[lastWordEnd] == ' ' {
+				lastWordEnd += 1
+			}
+			name = queryStr[lastWordEnd:i]
+			lastNameEnd = i + 1
+			if i+1 < len(queryStr) && queryStr[i+1] == ' ' {
+				lastNameEnd = i + 2
+			}
+		case ' ':
+			lastWordEnd = i
+		}
+	}
+
+	if name != "" {
+		q.Fields[strings.ToLower(name)] = queryStr[lastNameEnd:]
+	}
+
+	return q
 }

@@ -20,7 +20,7 @@ position($el); open = !open
 <template x-teleport="body">
 	<div
 		x-ref="dropdown" x-show="open"
-		class="absolute top-0"
+		class="absolute top-0 mt-1"
 		@click.outside="open = false"
 	>
 		<div class="flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70">

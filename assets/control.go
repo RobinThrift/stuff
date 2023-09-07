@@ -25,7 +25,6 @@ type Control struct {
 type AssetRepo interface {
 	Get(ctx context.Context, exec bob.Executor, id int64) (*Asset, error)
 	List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
-	Search(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
 	Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Delete(ctx context.Context, exec bob.Executor, id int64) error
@@ -46,12 +45,6 @@ func (c *Control) getAsset(ctx context.Context, id int64) (*Asset, error) {
 func (c *Control) listAssets(ctx context.Context, query ListAssetsQuery) (*AssetListPage, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*AssetListPage, error) {
 		return c.AssetRepo.List(ctx, tx, query)
-	})
-}
-
-func (c *Control) searchAssets(ctx context.Context, query ListAssetsQuery) (*AssetListPage, error) {
-	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*AssetListPage, error) {
-		return c.AssetRepo.Search(ctx, tx, query)
 	})
 }
 
@@ -132,7 +125,7 @@ func (c *Control) listCategories(ctx context.Context, query ListCategoriesQuery)
 	})
 }
 
-func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename string, hash string, err error) {
+func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename string, hash string, err error) { //nolint: unparam // will fix soon
 	err = ensureDirExists(c.FileDir)
 	if err != nil {
 		return "", "", err

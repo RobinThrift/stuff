@@ -11,10 +11,18 @@ import (
 
 // AssetsFT is an object representing the database table.
 type AssetsFT struct {
-	ID        null.Val[string] `db:"id" `
-	Data      null.Val[string] `db:"data" `
-	AssetsFTS null.Val[string] `db:"assets_fts" `
-	Rank      null.Val[string] `db:"rank" `
+	ID           null.Val[string] `db:"id" `
+	Name         null.Val[string] `db:"name" `
+	Tag          null.Val[string] `db:"tag" `
+	Category     null.Val[string] `db:"category" `
+	Model        null.Val[string] `db:"model" `
+	ModelNo      null.Val[string] `db:"model_no" `
+	SerialNo     null.Val[string] `db:"serial_no" `
+	Manufacturer null.Val[string] `db:"manufacturer" `
+	Notes        null.Val[string] `db:"notes" `
+	CustomAttrs  null.Val[string] `db:"custom_attrs" `
+	AssetsFTS    null.Val[string] `db:"assets_fts" `
+	Rank         null.Val[string] `db:"rank" `
 }
 
 // AssetsFTSlice is an alias for a slice of pointers to AssetsFT.
@@ -31,36 +39,76 @@ type AssetsFTSQuery = *sqlite.ViewQuery[*AssetsFT, AssetsFTSlice]
 type AssetsFTSStmt = bob.QueryStmt[*AssetsFT, AssetsFTSlice]
 
 type assetsFTColumnNames struct {
-	ID        string
-	Data      string
-	AssetsFTS string
-	Rank      string
+	ID           string
+	Name         string
+	Tag          string
+	Category     string
+	Model        string
+	ModelNo      string
+	SerialNo     string
+	Manufacturer string
+	Notes        string
+	CustomAttrs  string
+	AssetsFTS    string
+	Rank         string
 }
 
 var AssetsFTColumns = struct {
-	ID        sqlite.Expression
-	Data      sqlite.Expression
-	AssetsFTS sqlite.Expression
-	Rank      sqlite.Expression
+	ID           sqlite.Expression
+	Name         sqlite.Expression
+	Tag          sqlite.Expression
+	Category     sqlite.Expression
+	Model        sqlite.Expression
+	ModelNo      sqlite.Expression
+	SerialNo     sqlite.Expression
+	Manufacturer sqlite.Expression
+	Notes        sqlite.Expression
+	CustomAttrs  sqlite.Expression
+	AssetsFTS    sqlite.Expression
+	Rank         sqlite.Expression
 }{
-	ID:        sqlite.Quote("assets_fts", "id"),
-	Data:      sqlite.Quote("assets_fts", "data"),
-	AssetsFTS: sqlite.Quote("assets_fts", "assets_fts"),
-	Rank:      sqlite.Quote("assets_fts", "rank"),
+	ID:           sqlite.Quote("assets_fts", "id"),
+	Name:         sqlite.Quote("assets_fts", "name"),
+	Tag:          sqlite.Quote("assets_fts", "tag"),
+	Category:     sqlite.Quote("assets_fts", "category"),
+	Model:        sqlite.Quote("assets_fts", "model"),
+	ModelNo:      sqlite.Quote("assets_fts", "model_no"),
+	SerialNo:     sqlite.Quote("assets_fts", "serial_no"),
+	Manufacturer: sqlite.Quote("assets_fts", "manufacturer"),
+	Notes:        sqlite.Quote("assets_fts", "notes"),
+	CustomAttrs:  sqlite.Quote("assets_fts", "custom_attrs"),
+	AssetsFTS:    sqlite.Quote("assets_fts", "assets_fts"),
+	Rank:         sqlite.Quote("assets_fts", "rank"),
 }
 
 type assetsFTWhere[Q sqlite.Filterable] struct {
-	ID        sqlite.WhereNullMod[Q, string]
-	Data      sqlite.WhereNullMod[Q, string]
-	AssetsFTS sqlite.WhereNullMod[Q, string]
-	Rank      sqlite.WhereNullMod[Q, string]
+	ID           sqlite.WhereNullMod[Q, string]
+	Name         sqlite.WhereNullMod[Q, string]
+	Tag          sqlite.WhereNullMod[Q, string]
+	Category     sqlite.WhereNullMod[Q, string]
+	Model        sqlite.WhereNullMod[Q, string]
+	ModelNo      sqlite.WhereNullMod[Q, string]
+	SerialNo     sqlite.WhereNullMod[Q, string]
+	Manufacturer sqlite.WhereNullMod[Q, string]
+	Notes        sqlite.WhereNullMod[Q, string]
+	CustomAttrs  sqlite.WhereNullMod[Q, string]
+	AssetsFTS    sqlite.WhereNullMod[Q, string]
+	Rank         sqlite.WhereNullMod[Q, string]
 }
 
 func AssetsFTWhere[Q sqlite.Filterable]() assetsFTWhere[Q] {
 	return assetsFTWhere[Q]{
-		ID:        sqlite.WhereNull[Q, string](AssetsFTColumns.ID),
-		Data:      sqlite.WhereNull[Q, string](AssetsFTColumns.Data),
-		AssetsFTS: sqlite.WhereNull[Q, string](AssetsFTColumns.AssetsFTS),
-		Rank:      sqlite.WhereNull[Q, string](AssetsFTColumns.Rank),
+		ID:           sqlite.WhereNull[Q, string](AssetsFTColumns.ID),
+		Name:         sqlite.WhereNull[Q, string](AssetsFTColumns.Name),
+		Tag:          sqlite.WhereNull[Q, string](AssetsFTColumns.Tag),
+		Category:     sqlite.WhereNull[Q, string](AssetsFTColumns.Category),
+		Model:        sqlite.WhereNull[Q, string](AssetsFTColumns.Model),
+		ModelNo:      sqlite.WhereNull[Q, string](AssetsFTColumns.ModelNo),
+		SerialNo:     sqlite.WhereNull[Q, string](AssetsFTColumns.SerialNo),
+		Manufacturer: sqlite.WhereNull[Q, string](AssetsFTColumns.Manufacturer),
+		Notes:        sqlite.WhereNull[Q, string](AssetsFTColumns.Notes),
+		CustomAttrs:  sqlite.WhereNull[Q, string](AssetsFTColumns.CustomAttrs),
+		AssetsFTS:    sqlite.WhereNull[Q, string](AssetsFTColumns.AssetsFTS),
+		Rank:         sqlite.WhereNull[Q, string](AssetsFTColumns.Rank),
 	}
 }
