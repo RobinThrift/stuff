@@ -395,11 +395,6 @@ func decodeSearchQuery(queryStr string) *ListAssetsQuerySearch {
 	queryStr = strings.TrimPrefix(queryStr, "*")
 	q := &ListAssetsQuerySearch{Raw: queryStr, Fields: map[string]string{}} //nolint: varnamelen
 
-	words := strings.Split(queryStr, " ")
-	if len(words) == 1 {
-		return q
-	}
-
 	lastWordEnd := 0
 	lastNameEnd := 0
 	name := ""
@@ -425,7 +420,10 @@ func decodeSearchQuery(queryStr string) *ListAssetsQuerySearch {
 	}
 
 	if name != "" {
-		q.Fields[strings.ToLower(name)] = queryStr[lastNameEnd:]
+		value = queryStr[lastNameEnd:]
+		if value != "" {
+			q.Fields[strings.ToLower(name)] = queryStr[lastNameEnd:]
+		}
 	}
 
 	return q
