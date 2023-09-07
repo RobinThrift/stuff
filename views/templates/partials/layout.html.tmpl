@@ -16,6 +16,8 @@
 	</div>
 </div>
 
+{{ template "command_palette" }}
+
 {{ template "document_footer" . }}
 
 {{ define "site_nav" }}
@@ -70,4 +72,162 @@
 		</a>
 	</div>
 </footer>
+{{ end }}
+
+
+{{ define "command_palette" }}
+<div
+	class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start"
+	x-cloak
+	x-show="show"
+	x-data="{{`{
+		show: false,
+
+		commands: [
+			['Assets', [
+				{
+					name: 'Add Asset',
+					icon: 'plus',
+					url: '/assets/new'
+				},
+				{
+					name: 'All Assets',
+					icon: 'list',
+					url: '/assets'
+				},
+			]],
+			['Tags', [
+				{
+					name: 'All Tags',
+					icon: 'list',
+					url: '/tags'
+				},
+			]],
+		],
+		shown: [],
+		curr: [0, 0],
+		search: "",
+	
+		onSearch() {
+			if (this.search.length === 0) {
+				this.curr = [0, 0]
+				this.shown = this.commands
+				return
+			}
+
+			let needle = new RegExp('.*'+this.search+'.*', 'i')
+
+			this.shown = this.commands
+				.map(cmds => ([cmds[0], cmds[1].filter(c => needle.test(c.name) )]))
+				.filter(cmds => cmds[1].length)
+
+			if (this.shown.length === 0) {
+				this.curr = undefined
+			} else {
+				this.curr = [0, 0]
+			}
+		},
+
+		selectNext() {
+			if (!this.curr) { return }
+
+			let [cat, cmd] = this.curr
+			if (cmd+1 < this.shown[cat][1].length) {
+				this.curr = [cat, cmd+1]
+				this.scrollToActive()
+				return
+			}
+
+			if (cat+1 < this.shown.length) {
+				this.curr = [cat+1, 0]
+				this.scrollToActive()
+			}
+		},
+
+		selectPrev() {
+			if (!this.curr) { return }
+			let [cat, cmd] = this.curr
+			if (cmd-1 >= 0) {
+				this.curr = [cat, cmd-1]
+				this.scrollToActive()
+				return
+			}
+
+			if (cmd-1 < 0 && cat != 0) {
+				this.curr = [cat-1, this.shown[cat-1][1].length - 1]
+				this.scrollToActive()
+			}
+		},
+
+		exec() {
+			if (!this.curr) {
+	 			if (!this.search) { return }
+				window.location = location.origin+'/assets?query='+this.search
+				return
+			}
+
+			let [cat, cmd] = this.curr
+			let execCmd = this.shown[cat][1][cmd]
+			if (execCmd) {
+				window.location = location.origin+execCmd.url
+			}
+		},
+
+		scrollToActive() {
+			if (!this.curr) { return }
+			let el = $refs.cmdsList.querySelector('.command-palette-active')
+			if (!el) { return }
+
+			let offset = el.offsetTop + ( el.offsetHeight *2) - this.$refs.cmdsList.offsetHeight
+			if(offset > 0){
+				this.$refs.cmdsList.scrollTo({top: offset})
+			} else {
+				this.$refs.cmdsList.scrollTo({top: 0})
+			}
+		},
+	}`}}"
+
+	x-init="
+		shown = commands
+		$watch('search', () => onSearch());
+	" 
+
+	x-on:keydown.down.prevent="selectNext()" 
+	x-on:keydown.up.prevent="selectPrev()" 
+	x-on:keydown.enter.prevent="exec()" 
+	x-on:keydown.escape.prevent="show = false" 
+	x-on:keydown.window.prevent.meta.k="show = true; setTimeout(() => { $refs.input.focus() }, 100)"
+	x-on:click.outside="show = false"
+>
+	<div class="flex flex-col w-full h-full overflow-hidden bg-white border rounded shadow-md">
+		<div class="flex items-center px-3 border-b">
+			{{ template "icon" dict "Icon" "magnifying-glass" "Class" "w-[24px] h-[24px] text-neutral-400" }}
+			<input x-model="search" x-ref="input" type="text" class="input h-11 bg-transparent border-0 outline-none focus:outline-none shadow-none focus:ring-0" placeholder="Type a command or search..." autocomplete="off" autocorrect="off" spellcheck="false">
+		</div>
+
+		<div x-ref="cmdsList" class="max-h-[320px] overflow-y-auto overflow-x-hidden">
+			<div x-show="shown.length === 0">
+				<span class="px-2 py-1 my-1 text-neutral-400">Search for <strong x-text="search"></strong></span>
+			</div>
+			<template x-for="(cat, i) in shown" :key="cat[0]">
+				<ul class="space-y-1">
+					<li class="block px-2 py-1 my-1 font-medium text-neutral-500" x-text="cat[0]"></li>
+					<template x-for="(cmd, j) in cat[1]" :key="cmd.name">
+						<li
+							x-on:click="curr=[i, j]; exec()"
+							x-on:mousemove="curr=[i, j]"
+							x-bind:class="{ 'bg-neutral-100 text-gray-900 command-palette-active': curr && curr[0] == i && curr[1] == j  }"
+							class="px-1 flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 outline-none"
+						>
+							<svg class="h-[24px] w-[24px]">
+								<use x-bin:xlink:href="`/static/icons.svg#${cmd.icon}`"></use>
+							</svg>
+							<span x-text="cmd.name"></span>
+						</li>
+					</template>
+				</ul>
+			</template>
+		</div>
+	</div>
+</div>
 {{ end }}
