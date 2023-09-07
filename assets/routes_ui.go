@@ -80,7 +80,6 @@ func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) 
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
-	fmt.Printf("asset %#v\n", asset)
 	if err != nil {
 		return err
 	}
@@ -343,7 +342,6 @@ func handleFileUpload(r *http.Request, key string) (*File, error) {
 
 	uploaded, header, err := r.FormFile(key)
 	if err != nil {
-		fmt.Printf("err %#v\n", err)
 		return nil, err
 	}
 
