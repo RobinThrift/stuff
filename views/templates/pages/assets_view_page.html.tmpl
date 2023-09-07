@@ -122,7 +122,9 @@
 	</div>
 
 	<div class="rounded-md bg-gray-100 py-5">
-		<img src={{ .ImageURL }} class="w-full h-auto object-scale-down max-h-[500px]" />
+		{{ if ne .ImageURL "" }}
+		<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
+		{{ end }}
 	</div>
 </div>
 
