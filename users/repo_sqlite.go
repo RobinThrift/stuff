@@ -1,4 +1,4 @@
-package sqlite
+package users
 
 import (
 	"context"
@@ -6,14 +6,13 @@ import (
 	"errors"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite/models"
 	"github.com/stephenafamo/bob"
 )
 
-type UserRepo struct{}
+type RepoSQLite struct{}
 
-func (*UserRepo) CreateUser(ctx context.Context, tx bob.Executor, toCreate *database.User) (*database.User, error) {
+func (*RepoSQLite) Create(ctx context.Context, tx bob.Executor, toCreate *User) (*User, error) {
 	inserted, err := models.Users.Insert(ctx, tx, &models.UserSetter{
 		Username:    omit.From(toCreate.Username),
 		DisplayName: omit.From(toCreate.DisplayName),
@@ -24,7 +23,7 @@ func (*UserRepo) CreateUser(ctx context.Context, tx bob.Executor, toCreate *data
 		return nil, err
 	}
 
-	return &database.User{
+	return &User{
 		ID:          inserted.ID,
 		Username:    inserted.Username,
 		DisplayName: inserted.DisplayName,
@@ -35,16 +34,16 @@ func (*UserRepo) CreateUser(ctx context.Context, tx bob.Executor, toCreate *data
 	}, nil
 }
 
-func (*UserRepo) GetUserByRef(ctx context.Context, tx bob.Executor, ref string) (*database.User, error) {
+func (*RepoSQLite) GetByRef(ctx context.Context, tx bob.Executor, ref string) (*User, error) {
 	query := models.Users.Query(ctx, tx, models.SelectWhere.Users.AuthRef.EQ(ref))
 	user, err := query.One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, database.ErrUserNotFound
+			return nil, ErrUserNotFound
 		}
 	}
 
-	return &database.User{
+	return &User{
 		ID:          user.ID,
 		Username:    user.Username,
 		DisplayName: user.DisplayName,

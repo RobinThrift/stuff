@@ -2,7 +2,6 @@ package users
 
 import (
 	"context"
-	"errors"
 
 	"github.com/kodeshack/stuff/storage/database"
 	"github.com/stephenafamo/bob"
@@ -14,13 +13,13 @@ type Control struct {
 }
 
 type UserRepo interface {
-	CreateUser(ctx context.Context, tx bob.Executor, toCreate *database.User) (*database.User, error)
-	GetUserByRef(ctx context.Context, tx bob.Executor, ref string) (*database.User, error)
+	Create(ctx context.Context, tx bob.Executor, toCreate *User) (*User, error)
+	GetByRef(ctx context.Context, tx bob.Executor, ref string) (*User, error)
 }
 
 func (c *Control) CreateUser(ctx context.Context, toCreate *User, authRef string) (*User, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*User, error) {
-		user, err := c.UserRepo.CreateUser(ctx, tx, &database.User{
+		user, err := c.UserRepo.Create(ctx, tx, &User{
 			Username:    toCreate.Username,
 			DisplayName: toCreate.DisplayName,
 			IsAdmin:     toCreate.IsAdmin,
@@ -43,12 +42,8 @@ func (c *Control) CreateUser(ctx context.Context, toCreate *User, authRef string
 
 func (c *Control) GetUserByRef(ctx context.Context, ref string) (*User, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*User, error) {
-		user, err := c.UserRepo.GetUserByRef(ctx, tx, ref)
+		user, err := c.UserRepo.GetByRef(ctx, tx, ref)
 		if err != nil {
-			if errors.Is(err, database.ErrUserNotFound) {
-				return nil, ErrUserNotFound
-			}
-
 			return nil, err
 		}
 

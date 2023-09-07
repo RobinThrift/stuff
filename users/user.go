@@ -16,6 +16,8 @@ type User struct {
 
 	RequiresPasswordChange bool
 
+	AuthRef string
+
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

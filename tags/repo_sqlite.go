@@ -1,4 +1,4 @@
-package sqlite
+package tags
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite/models"
 	"github.com/kodeshack/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
@@ -19,16 +18,20 @@ import (
 	"github.com/stephenafamo/scan"
 )
 
-type TagRepo struct{}
+type RepoSQLite struct{}
 
-func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.ListTagsQuery) (*database.TagList, error) {
-	if query.Limit == 0 {
-		query.Limit = 50
+func (*RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListTagsQuery) (*TagListPage, error) {
+	limit := query.PageSize
+
+	if limit == 0 {
+		limit = 50
 	}
 
+	offset := limit * query.Page
+
 	mods := []bob.Mod[*dialect.SelectQuery]{
-		sm.Limit(query.Limit),
-		sm.Offset(query.Offset),
+		sm.Limit(limit),
+		sm.Offset(offset),
 	}
 
 	if query.OrderBy != "" {
@@ -52,13 +55,16 @@ func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.List
 		return nil, fmt.Errorf("error counting tags: %w", err)
 	}
 
-	tagList := &database.TagList{
-		Tags:  make([]*database.Tag, 0, len(tags)),
-		Total: int(count),
+	page := &TagListPage{
+		Tags:     make([]*Tag, 0, len(tags)),
+		Total:    int(count),
+		Page:     query.Page,
+		PageSize: query.PageSize,
+		NumPages: int(count) / query.PageSize,
 	}
 
 	for i := range tags {
-		tagList.Tags = append(tagList.Tags, &database.Tag{
+		page.Tags = append(page.Tags, &Tag{
 			ID:        tags[i].ID,
 			Tag:       tags[i].Tag,
 			InUse:     tags[i].InUse,
@@ -67,10 +73,10 @@ func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.List
 		})
 	}
 
-	return tagList, nil
+	return page, nil
 }
 
-func (*TagRepo) GetUnused(ctx context.Context, exec bob.Executor) (*database.Tag, error) {
+func (*RepoSQLite) GetUnused(ctx context.Context, exec bob.Executor) (*Tag, error) {
 	model, err := models.Tags.Query(ctx, exec, models.SelectWhere.Tags.InUse.EQ(false)).One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -79,7 +85,7 @@ func (*TagRepo) GetUnused(ctx context.Context, exec bob.Executor) (*database.Tag
 		return nil, err
 	}
 
-	return &database.Tag{
+	return &Tag{
 		ID:        model.ID,
 		Tag:       model.Tag,
 		CreatedAt: model.CreatedAt.Time,
@@ -87,16 +93,16 @@ func (*TagRepo) GetUnused(ctx context.Context, exec bob.Executor) (*database.Tag
 	}, nil
 }
 
-func (*TagRepo) Get(ctx context.Context, exec bob.Executor, tag string) (*database.Tag, error) {
+func (*RepoSQLite) Get(ctx context.Context, exec bob.Executor, tag string) (*Tag, error) {
 	model, err := models.Tags.Query(ctx, exec, models.SelectWhere.Tags.Tag.EQ(tag)).One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, database.ErrTagNotFound
+			return nil, ErrTagNotFound
 		}
 		return nil, err
 	}
 
-	return &database.Tag{
+	return &Tag{
 		ID:        model.ID,
 		Tag:       model.Tag,
 		CreatedAt: model.CreatedAt.Time,
@@ -104,7 +110,7 @@ func (*TagRepo) Get(ctx context.Context, exec bob.Executor, tag string) (*databa
 	}, nil
 }
 
-func (*TagRepo) Create(ctx context.Context, exec bob.Executor, tag *database.Tag) (*database.Tag, error) {
+func (*RepoSQLite) Create(ctx context.Context, exec bob.Executor, tag *Tag) (*Tag, error) {
 	model := &models.TagSetter{
 		Tag:   omit.From(tag.Tag),
 		InUse: omit.From(true),
@@ -115,7 +121,7 @@ func (*TagRepo) Create(ctx context.Context, exec bob.Executor, tag *database.Tag
 		return nil, err
 	}
 
-	return &database.Tag{
+	return &Tag{
 		ID:        inserted.ID,
 		Tag:       inserted.Tag,
 		InUse:     inserted.InUse,
@@ -124,7 +130,7 @@ func (*TagRepo) Create(ctx context.Context, exec bob.Executor, tag *database.Tag
 	}, nil
 }
 
-func (*TagRepo) MarkTagUsed(ctx context.Context, exec bob.Executor, tag string) error {
+func (*RepoSQLite) MarkTagUsed(ctx context.Context, exec bob.Executor, tag string) error {
 	setter := models.TagSetter{
 		InUse:     omit.From(true),
 		UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
@@ -133,7 +139,7 @@ func (*TagRepo) MarkTagUsed(ctx context.Context, exec bob.Executor, tag string) 
 	_, err := models.Tags.UpdateQ(ctx, exec, models.UpdateWhere.Tags.Tag.EQ(tag), setter).Exec()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return database.ErrTagNotFound
+			return ErrTagNotFound
 		}
 		return err
 	}
@@ -141,7 +147,7 @@ func (*TagRepo) MarkTagUsed(ctx context.Context, exec bob.Executor, tag string) 
 	return nil
 }
 
-func (*TagRepo) MarkTagUnused(ctx context.Context, exec bob.Executor, tag string) error {
+func (*RepoSQLite) MarkTagUnused(ctx context.Context, exec bob.Executor, tag string) error {
 	setter := models.TagSetter{
 		InUse:     omit.From(false),
 		UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
@@ -150,7 +156,7 @@ func (*TagRepo) MarkTagUnused(ctx context.Context, exec bob.Executor, tag string
 	_, err := models.Tags.UpdateQ(ctx, exec, models.UpdateWhere.Tags.Tag.EQ(tag), setter).Exec()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return database.ErrTagNotFound
+			return ErrTagNotFound
 		}
 		return err
 	}
@@ -158,12 +164,12 @@ func (*TagRepo) MarkTagUnused(ctx context.Context, exec bob.Executor, tag string
 	return nil
 }
 
-func (*TagRepo) Delete(ctx context.Context, exec bob.Executor, tag string) error {
+func (*RepoSQLite) Delete(ctx context.Context, exec bob.Executor, tag string) error {
 	_, err := models.Tags.DeleteQ(ctx, exec, models.DeleteWhere.Tags.Tag.EQ(tag), models.DeleteWhere.Tags.InUse.EQ(false)).Exec()
 	return err
 }
 
-func (*TagRepo) NextSequential(ctx context.Context, exec bob.Executor) (int64, error) {
+func (*RepoSQLite) NextSequential(ctx context.Context, exec bob.Executor) (int64, error) {
 	// SELECT seq FROM sqlite_sequence WHERE name = 'tags' LIMIT 1;
 	next, err := bob.One(ctx, exec,
 		sqlite.Select(

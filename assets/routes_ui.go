@@ -1,7 +1,6 @@
 package assets
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,8 +14,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form/v4"
-	"github.com/gorilla/csrf"
-	"github.com/kodeshack/stuff/api"
 	"github.com/kodeshack/stuff/server/session"
 	"github.com/kodeshack/stuff/users"
 	"github.com/kodeshack/stuff/views"
@@ -25,7 +22,7 @@ import (
 
 var policy = bluemonday.StrictPolicy()
 
-type Router struct {
+type UIRouter struct {
 	Control          *Control
 	Decoder          *form.Decoder
 	DefaultCurrency  string
@@ -33,7 +30,7 @@ type Router struct {
 	FileDir          string
 }
 
-func (rt *Router) RegisterRoutes(mux *chi.Mux) {
+func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 	mux.Handle("/assets/files/*", http.StripPrefix("/assets/files/", http.FileServer(http.Dir(rt.FileDir))))
 
 	mux.Get("/", views.HTTPHandlerFuncErr(rt.handleAssetsListGet))
@@ -46,34 +43,31 @@ func (rt *Router) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
-
-	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
-	mux.Get("/api/v1/assets/search", rt.apiSearchAssets)
 }
 
 // [GET] /
 // [GET] /assets
-func (rt *Router) handleAssetsListGet(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsListGet(w http.ResponseWriter, r *http.Request) error {
 	query := listAssetsQueryFromURL(r.URL.Query())
 
-	var assetList *AssetList
+	var page *AssetListPage
 	var err error
 
-	if query.search != "" {
-		assetList, err = rt.Control.searchAssets(r.Context(), query)
+	if query.Search != "" {
+		page, err = rt.Control.searchAssets(r.Context(), query)
 	} else {
-		assetList, err = rt.Control.listAssets(r.Context(), query)
+		page, err = rt.Control.listAssets(r.Context(), query)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return renderListAssetsPage(w, r, assetList, query)
+	return renderListAssetsPage(w, r, query, page)
 }
 
 // [GET] /assets/{id}
-func (rt *Router) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) error {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -86,29 +80,24 @@ func (rt *Router) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) er
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
+	fmt.Printf("asset %#v\n", asset)
 	if err != nil {
 		return err
 	}
 
-	viewAssetPage := viewAssetPage(asset, rt.DecimalSeparator)
-
-	page := views.Document(asset.Name, viewAssetPage)
-
-	err = page.Render(r.Context(), w)
-	if err != nil {
-		return fmt.Errorf("error rendering view asset page: %w", err)
-	}
-
-	return nil
+	return renderViewAssetPage(w, r, ViewAssetsPageViewModel{
+		Asset:            asset,
+		DecimalSeparator: rt.DecimalSeparator,
+	})
 }
 
 // [GET] /assets/new
-func (rt *Router) handleAssetsNewGet(w http.ResponseWriter, r *http.Request) error {
-	return rt.renderEditAssetPage(w, r, editAssetPageProps{asset: &Asset{}, isNewAsset: true, validationErrs: map[string]string{}})
+func (rt *UIRouter) handleAssetsNewGet(w http.ResponseWriter, r *http.Request) error {
+	return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: &Asset{}, IsNew: true, ValidationErrs: map[string]string{}})
 }
 
 // [POST] /assets/new
-func (rt *Router) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) error {
 	user, ok := session.Get[*users.User](r.Context(), "user")
 	if !ok {
 		return errors.New("can't find user in session")
@@ -138,13 +127,13 @@ func (rt *Router) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) er
 	asset.Notes = policy.Sanitize(asset.Notes)
 
 	if len(validationErrs) != 0 {
-		return rt.renderEditAssetPage(w, r, editAssetPageProps{isNewAsset: true, asset: &asset, validationErrs: validationErrs})
+		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: &asset, IsNew: true, ValidationErrs: validationErrs})
 	}
 
 	file, err := handleFileUpload(r, "image")
 	if err != nil {
 		validationErrs["general"] = err.Error()
-		return rt.renderEditAssetPage(w, r, editAssetPageProps{isNewAsset: true, asset: &asset, validationErrs: validationErrs})
+		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: &asset, IsNew: true, ValidationErrs: validationErrs})
 	}
 
 	asset.MetaInfo.CreatedBy = user.ID
@@ -161,7 +150,7 @@ func (rt *Router) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) er
 }
 
 // [GET] /assets/{id}/edit
-func (rt *Router) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) error {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -178,11 +167,11 @@ func (rt *Router) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	return rt.renderEditAssetPage(w, r, editAssetPageProps{isNewAsset: false, asset: asset, validationErrs: map[string]string{}})
+	return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: asset, ValidationErrs: map[string]string{}})
 }
 
 // [POST] /assets/{id}/edit
-func (rt *Router) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) error {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -221,13 +210,13 @@ func (rt *Router) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) e
 	asset.Notes = policy.Sanitize(asset.Notes)
 
 	if len(validationErrs) != 0 {
-		return rt.renderEditAssetPage(w, r, editAssetPageProps{isNewAsset: false, asset: asset, validationErrs: validationErrs})
+		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: asset, IsNew: true, ValidationErrs: validationErrs})
 	}
 
 	file, err := handleFileUpload(r, "image")
 	if err != nil {
 		validationErrs["general"] = err.Error()
-		return rt.renderEditAssetPage(w, r, editAssetPageProps{isNewAsset: false, asset: asset, validationErrs: validationErrs})
+		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: asset, IsNew: true, ValidationErrs: validationErrs})
 	}
 
 	updated, err := rt.Control.updateAsset(r.Context(), asset, file)
@@ -242,7 +231,7 @@ func (rt *Router) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) e
 }
 
 // [GET] /assets/{id}/delete
-func (rt *Router) handleAssetsDeleteGet(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsDeleteGet(w http.ResponseWriter, r *http.Request) error {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -259,11 +248,11 @@ func (rt *Router) handleAssetsDeleteGet(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 
-	return renderDeleteAssetPage(w, r, asset, "")
+	return renderDeleteAssetPage(w, r, DeleteAssetsPageViewModel{Asset: asset})
 }
 
 // [DELETE] /assets/{id}/delete
-func (rt *Router) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Request) error {
+func (rt *UIRouter) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Request) error {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -283,7 +272,7 @@ func (rt *Router) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Reques
 	err = rt.Control.deleteAsset(r.Context(), asset)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "error deleting asset", "error", err)
-		return renderDeleteAssetPage(w, r, asset, err.Error())
+		return renderDeleteAssetPage(w, r, DeleteAssetsPageViewModel{Asset: asset, Message: err.Error()})
 	}
 
 	session.Put(r.Context(), "info_message", fmt.Sprintf("Asset '%s' deleted", asset.Name))
@@ -292,157 +281,28 @@ func (rt *Router) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Reques
 	return nil
 }
 
-// [GET] /api/v1/assets/categories
-func (rt *Router) apiListCategories(w http.ResponseWriter, r *http.Request) {
-	cats, err := rt.Control.listCategories(r.Context())
-	if err != nil {
-		api.RespondWithError(r.Context(), w, err)
-		return
-	}
-
-	b, err := json.Marshal(cats)
-	if err != nil {
-		slog.ErrorContext(r.Context(), "error marshalling categories JSON", "error", err)
-		return
-	}
-
-	api.AddJSONContentType(w)
-	_, err = w.Write(b)
-	if err != nil {
-		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
-	}
-}
-
-// [GET] /api/v1/assets/categories
-func (rt *Router) apiSearchAssets(w http.ResponseWriter, r *http.Request) {
-	assets := []*Asset{}
-	query := listAssetsQueryFromURL(r.URL.Query())
-	if query.search != "" {
-		assetList, err := rt.Control.searchAssets(r.Context(), query)
-		if err != nil {
-			api.RespondWithError(r.Context(), w, err)
-			return
-		}
-
-		assets = assetList.Assets
-	}
-
-	b, err := json.Marshal(assets)
-	if err != nil {
-		slog.ErrorContext(r.Context(), "error marshalling assets JSON", "error", err)
-		return
-	}
-
-	api.AddJSONContentType(w)
-	_, err = w.Write(b)
-	if err != nil {
-		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
-	}
-}
-
-func renderListAssetsPage(w http.ResponseWriter, r *http.Request, assetList *AssetList, query listAssetsQuery) error {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
-	listAssetsPage := listAssetsPage(listAssetsPageProps{
-		assets:  assetList.Assets,
-		total:   assetList.Total,
-		query:   query,
-		infomsg: infomsg,
-	})
-	page := views.Document("Assets", listAssetsPage)
-
-	err := page.Render(r.Context(), w)
-	if err != nil {
-		return fmt.Errorf("error rendering list assets page: %w", err)
-	}
-
-	return nil
-}
-
-func (rt *Router) renderEditAssetPage(w http.ResponseWriter, r *http.Request, props editAssetPageProps) error {
-	props.decimalSeparator = rt.DecimalSeparator
-
-	if props.asset.PurchaseInfo.Currency == "" {
-		props.asset.PurchaseInfo.Currency = rt.DefaultCurrency
-	}
-
-	props.postTarget = "/assets/new"
-	props.csrfToken = csrf.Token(r)
-
-	title := "New Asset"
-	if !props.isNewAsset {
-		title = "Edit Asset"
-		props.postTarget = fmt.Sprintf("/assets/%v/edit", props.asset.ID)
-	}
-
-	if props.asset.Tag == "" {
-		tag, err := rt.Control.generateTag(r.Context())
-		if err != nil {
-			return err
-		}
-		props.asset.Tag = tag
-	}
-
-	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
-	if ok {
-		props.validationErrs["general"] = csrfErr
-	}
-
-	editAssetPage := editAssetPage(props)
-
-	page := views.Document(title, editAssetPage)
-
-	err := page.Render(r.Context(), w)
-	if err != nil {
-		return fmt.Errorf("error rendering edit asset page: %w", err)
-	}
-
-	return nil
-}
-
-func renderDeleteAssetPage(w http.ResponseWriter, r *http.Request, asset *Asset, msg string) error {
-	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
-	if ok {
-		if msg != "" {
-			msg += "\n"
-		}
-		msg += csrfErr
-	}
-
-	deleteAssetPage := deleteAssetPage(deleteAssetPageProps{asset: asset, errMsg: msg, csrfToken: csrf.Token(r)})
-
-	page := views.Document("Delete Asset "+asset.Name, deleteAssetPage)
-
-	err := page.Render(r.Context(), w)
-	if err != nil {
-		return fmt.Errorf("error rendering delete asset page: %w", err)
-	}
-
-	return nil
-}
-
-func listAssetsQueryFromURL(params url.Values) listAssetsQuery {
-	q := listAssetsQuery{
-		limit:   50,
-		orderBy: params.Get("order_by"),
-		search:  params.Get("query"),
+func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
+	q := ListAssetsQuery{
+		Search:   params.Get("query"),
+		PageSize: 50,
+		OrderBy:  params.Get("order_by"),
 	}
 
 	if size := params.Get("page_size"); size != "" {
-		q.limit, _ = strconv.Atoi(size)
+		q.PageSize, _ = strconv.Atoi(size)
 	}
 
 	if pageStr := params.Get("page"); pageStr != "" {
 		page, err := strconv.Atoi(pageStr)
 		if err == nil {
-			q.offset = q.limit * page
+			q.Page = q.PageSize * page
 		}
 	}
 
 	if orderDir := params.Get("order_dir"); orderDir != "" {
 		orderDir = strings.ToUpper(orderDir)
 		if orderDir == "ASC" || orderDir == "DESC" {
-			q.orderDir = orderDir
+			q.OrderDir = orderDir
 		}
 	}
 

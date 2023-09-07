@@ -64,22 +64,17 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 
 	database := &database.Database{DB: bob.NewDB(db)}
 
-	localAuthRepo := &sqlite.LocalAuthRepo{}
-	userRepo := &sqlite.UserRepo{}
-	assetRepo := &sqlite.AssetRepo{}
-	tagRepo := &sqlite.TagRepo{}
-
-	tagCtrl := &tags.Control{Algorithm: config.TagAlgorithm, DB: database, TagRepo: tagRepo}
-	userCtrl := &users.Control{DB: database, UserRepo: userRepo}
+	tagCtrl := &tags.Control{Algorithm: config.TagAlgorithm, DB: database, TagRepo: &tags.RepoSQLite{}}
+	userCtrl := &users.Control{DB: database, UserRepo: &users.RepoSQLite{}}
 	authCtrl := &auth.Control{
 		DB:            database,
 		Users:         userCtrl,
-		LocalAuthRepo: localAuthRepo,
+		LocalAuthRepo: &auth.RepoSQLite{},
 		Argon2Params:  auth.Argon2Params(config.Auth.Local.Argon2Params),
 	}
 	assetsCtrl := &assets.Control{
 		DB:        database,
-		AssetRepo: assetRepo,
+		AssetRepo: &assets.RepoSQLite{},
 		TagCtrl:   tagCtrl,
 		FileDir:   config.FileDir,
 	}
@@ -90,12 +85,16 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	}
 
 	authRouter := &auth.Router{Control: authCtrl}
-	assetsRouter := &assets.Router{
+	assetsUIRouter := &assets.UIRouter{
 		Control:          assetsCtrl,
 		Decoder:          assets.NewDecoder(config.DecimalSeparator),
 		DefaultCurrency:  config.DefaultCurrency,
 		DecimalSeparator: config.DecimalSeparator,
 		FileDir:          config.FileDir,
+	}
+
+	assetsAPIRouter := &assets.APIRouter{
+		Control: assetsCtrl,
 	}
 
 	tagsRouter := &tags.Router{Control: tagCtrl}
@@ -107,7 +106,12 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	sm.Cookie.Persist = true
 	sm.Cookie.SameSite = http.SameSiteStrictMode
 
-	srv, err := server.NewServer(config.Addr, sm, authRouter.RegisterRoutes, assetsRouter.RegisterRoutes, tagsRouter.RegisterRoutes)
+	srv, err := server.NewServer(config.Addr, sm,
+		authRouter.RegisterRoutes,
+		assetsUIRouter.RegisterRoutes,
+		assetsAPIRouter.RegisterRoutes,
+		tagsRouter.RegisterRoutes,
+	)
 	if err != nil {
 		return nil, err
 	}

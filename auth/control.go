@@ -20,16 +20,16 @@ type Control struct {
 }
 
 type LocalAuthRepo interface {
-	GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*database.LocalAuthUser, error)
-	CreateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) (*database.LocalAuthUser, error)
-	UpdateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) error
+	GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*LocalAuthUser, error)
+	CreateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) (*LocalAuthUser, error)
+	UpdateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) error
 }
 
 func (c *Control) RunInitSetup(ctx context.Context, username string, plaintextPasswd string) error {
 	return c.DB.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
 		localUser, err := c.LocalAuthRepo.GetLocalUser(ctx, tx, username)
 		if err != nil {
-			if !errors.Is(err, database.ErrLocalAuthUserNotFound) {
+			if !errors.Is(err, ErrLocalAuthUserNotFound) {
 				return err
 			}
 		}
@@ -52,7 +52,7 @@ func (c *Control) RunInitSetup(ctx context.Context, username string, plaintextPa
 			return err
 		}
 
-		_, err = c.LocalAuthRepo.CreateLocalUser(ctx, tx, &database.LocalAuthUser{
+		_, err = c.LocalAuthRepo.CreateLocalUser(ctx, tx, &LocalAuthUser{
 			Username:               username,
 			Algorithm:              "argon2",
 			Params:                 params,
@@ -94,7 +94,7 @@ func (c *Control) getUserForCredentials(ctx context.Context, username string, pl
 	user, err := database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*users.User, error) {
 		localUser, err := c.LocalAuthRepo.GetLocalUser(ctx, tx, username)
 		if err != nil {
-			if errors.Is(err, database.ErrLocalAuthUserNotFound) {
+			if errors.Is(err, ErrLocalAuthUserNotFound) {
 				return nil, ErrInvalidCredentials
 			}
 
@@ -166,7 +166,7 @@ func (c *Control) changeUserCredentials(ctx context.Context, cmd changeUserCrede
 	localUser, err := c.LocalAuthRepo.GetLocalUser(ctx, c.DB, cmd.user.Username)
 	if err != nil {
 		slog.ErrorContext(ctx, "error finding user for changing password", "error", err, "username", cmd.user.Username)
-		if errors.Is(err, database.ErrLocalAuthUserNotFound) {
+		if errors.Is(err, ErrLocalAuthUserNotFound) {
 			return nil, ErrInvalidCredentials
 		}
 

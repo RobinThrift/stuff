@@ -1,4 +1,4 @@
-package sqlite
+package auth
 
 import (
 	"context"
@@ -8,26 +8,25 @@ import (
 	"time"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite/models"
 	"github.com/kodeshack/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
 )
 
-type LocalAuthRepo struct{}
+type RepoSQLite struct{}
 
-func (*LocalAuthRepo) GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*database.LocalAuthUser, error) {
+func (*RepoSQLite) GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*LocalAuthUser, error) {
 	query := models.LocalAuthUsers.Query(ctx, tx, models.SelectWhere.LocalAuthUsers.Username.EQ(username))
 	user, err := query.One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, database.ErrLocalAuthUserNotFound
+			return nil, ErrLocalAuthUserNotFound
 		}
 
 		return nil, err
 	}
 
-	return &database.LocalAuthUser{
+	return &LocalAuthUser{
 		ID:                     user.ID,
 		Username:               user.Username,
 		Algorithm:              user.Algorithm,
@@ -40,7 +39,7 @@ func (*LocalAuthRepo) GetLocalUser(ctx context.Context, tx bob.Executor, usernam
 	}, nil
 }
 
-func (*LocalAuthRepo) CreateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) (*database.LocalAuthUser, error) {
+func (*RepoSQLite) CreateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) (*LocalAuthUser, error) {
 	inserted, err := models.LocalAuthUsers.Insert(ctx, tx, &models.LocalAuthUserSetter{
 		Username:               omit.From(user.Username),
 		Algorithm:              omit.From(user.Algorithm),
@@ -53,7 +52,7 @@ func (*LocalAuthRepo) CreateLocalUser(ctx context.Context, tx bob.Executor, user
 		return nil, err
 	}
 
-	return &database.LocalAuthUser{
+	return &LocalAuthUser{
 		ID:                     inserted.ID,
 		Username:               inserted.Username,
 		Algorithm:              inserted.Algorithm,
@@ -66,7 +65,7 @@ func (*LocalAuthRepo) CreateLocalUser(ctx context.Context, tx bob.Executor, user
 	}, nil
 }
 
-func (*LocalAuthRepo) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *database.LocalAuthUser) error {
+func (*RepoSQLite) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) error {
 	_, err := models.LocalAuthUsers.UpdateQ(ctx, tx, &models.LocalAuthUserSetter{
 		Algorithm:              omit.From(user.Algorithm),
 		Params:                 omit.From(user.Params),
@@ -77,7 +76,7 @@ func (*LocalAuthRepo) UpdateLocalUser(ctx context.Context, tx bob.Executor, user
 	}, models.UpdateWhere.LocalAuthUsers.ID.EQ(user.ID)).One()
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("error updating local auth user: %w", database.ErrLocalAuthUserNotFound)
+			return fmt.Errorf("error updating local auth user: %w", ErrLocalAuthUserNotFound)
 		}
 	}
 

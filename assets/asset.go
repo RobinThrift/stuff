@@ -78,7 +78,10 @@ type File struct {
 	r io.Reader
 }
 
-type AssetList struct {
-	Assets []*Asset
-	Total  int
+type AssetListPage struct {
+	Assets   []*Asset
+	Total    int
+	NumPages int
+	Page     int
+	PageSize int
 }

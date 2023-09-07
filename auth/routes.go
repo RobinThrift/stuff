@@ -136,10 +136,15 @@ func renderLoginPage(w http.ResponseWriter, r *http.Request, validationErrors ma
 		validationErrors["general"] = csrfErr
 	}
 
-	loginPage := views.LoginPage(csrf.Token(r), validationErrors)
-	page := views.Document("Login", loginPage)
-
-	err := page.Render(r.Context(), w)
+	err := views.RenderLoginPage(w, views.Model[views.LoginPageViewModel]{
+		Global: views.Global{
+			Title:     "Login",
+			CSRFToken: csrf.Token(r),
+		},
+		Data: views.LoginPageViewModel{
+			ValidationErrs: validationErrors,
+		},
+	})
 	if err != nil {
 		return fmt.Errorf("error rendering login page: %w", err)
 	}
@@ -153,10 +158,15 @@ func renderChangePasswordPage(w http.ResponseWriter, r *http.Request, validation
 		validationErrors["general"] = csrfErr
 	}
 
-	changePasswordPage := views.ChangePasswordPage(csrf.Token(r), validationErrors)
-	page := views.Document("Change Password", changePasswordPage)
-
-	err := page.Render(r.Context(), w)
+	err := views.RenderChangePasswordPage(w, views.Model[views.ChangePasswordPageViewModel]{
+		Global: views.Global{
+			Title:     "Change Password",
+			CSRFToken: csrf.Token(r),
+		},
+		Data: views.ChangePasswordPageViewModel{
+			ValidationErrs: validationErrors,
+		},
+	})
 	if err != nil {
 		return fmt.Errorf("error rendering change password page: %w", err)
 	}

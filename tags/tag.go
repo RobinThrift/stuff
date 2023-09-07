@@ -12,7 +12,10 @@ type Tag struct {
 	UpdatedAt time.Time
 }
 
-type TagList struct {
-	Tags  []*Tag
-	Total int
+type TagListPage struct {
+	Tags     []*Tag
+	Total    int
+	NumPages int
+	Page     int
+	PageSize int
 }

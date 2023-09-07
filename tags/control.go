@@ -19,11 +19,11 @@ type Control struct {
 }
 
 type TagRepo interface {
-	List(ctx context.Context, exec bob.Executor, query database.ListTagsQuery) (*database.TagList, error)
-	GetUnused(ctx context.Context, exec bob.Executor) (*database.Tag, error)
-	Get(ctx context.Context, exec bob.Executor, tag string) (*database.Tag, error)
+	List(ctx context.Context, exec bob.Executor, query ListTagsQuery) (*TagListPage, error)
+	GetUnused(ctx context.Context, exec bob.Executor) (*Tag, error)
+	Get(ctx context.Context, exec bob.Executor, tag string) (*Tag, error)
 	NextSequential(ctx context.Context, exec bob.Executor) (int64, error)
-	Create(ctx context.Context, exec bob.Executor, tag *database.Tag) (*database.Tag, error)
+	Create(ctx context.Context, exec bob.Executor, tag *Tag) (*Tag, error)
 	MarkTagUsed(ctx context.Context, exec bob.Executor, tag string) error
 	MarkTagUnused(ctx context.Context, exec bob.Executor, tag string) error
 	Delete(ctx context.Context, exec bob.Executor, tag string) error
@@ -59,7 +59,7 @@ func (c *Control) CreateIfNotExists(ctx context.Context, tag string) (*Tag, erro
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Tag, error) {
 		found, err := c.TagRepo.Get(ctx, tx, tag)
 		if err != nil {
-			if !errors.Is(err, database.ErrTagNotFound) {
+			if !errors.Is(err, ErrTagNotFound) {
 				return nil, err
 			}
 		}
@@ -79,7 +79,7 @@ func (c *Control) CreateIfNotExists(ctx context.Context, tag string) (*Tag, erro
 			}, nil
 		}
 
-		created, err := c.TagRepo.Create(ctx, tx, &database.Tag{Tag: tag})
+		created, err := c.TagRepo.Create(ctx, tx, &Tag{Tag: tag})
 		if err != nil {
 			return nil, err
 		}
@@ -106,40 +106,21 @@ func (c *Control) Delete(ctx context.Context, exec bob.Executor, tag string) err
 	})
 }
 
-type listTagsQuery struct {
-	offset   int
-	limit    int
-	orderBy  string
-	orderDir string
+type ListTagsQuery struct {
+	Page     int
+	PageSize int
+	OrderBy  string
+	OrderDir string
 }
 
-func (c *Control) listTags(ctx context.Context, query listTagsQuery) (*TagList, error) {
-	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*TagList, error) {
-		dbTags, err := c.TagRepo.List(ctx, tx, database.ListTagsQuery{
-			Offset:   query.offset,
-			Limit:    query.limit,
-			OrderBy:  query.orderBy,
-			OrderDir: query.orderDir,
+func (c *Control) listTags(ctx context.Context, query ListTagsQuery) (*TagListPage, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*TagListPage, error) {
+		return c.TagRepo.List(ctx, tx, ListTagsQuery{
+			Page:     query.Page,
+			PageSize: query.PageSize,
+			OrderBy:  query.OrderBy,
+			OrderDir: query.OrderDir,
 		})
-		if err != nil {
-			return nil, err
-		}
-
-		tags := make([]*Tag, 0, len(dbTags.Tags))
-		for _, tag := range dbTags.Tags {
-			tags = append(tags, &Tag{
-				ID:        tag.ID,
-				Tag:       tag.Tag,
-				InUse:     tag.InUse,
-				CreatedAt: tag.CreatedAt,
-				UpdatedAt: tag.UpdatedAt,
-			})
-		}
-
-		return &TagList{
-			Tags:  tags,
-			Total: dbTags.Total,
-		}, nil
 	})
 }
 
