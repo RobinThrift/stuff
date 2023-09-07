@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -101,10 +102,13 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 	return page, nil
 }
 
+var removeSpecialChars = regexp.MustCompile(`[^\w* ]`)
+
 func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Executor, search *ListAssetsQuerySearch, mods []bob.Mod[*dialect.SelectQuery]) (models.AssetSlice, int64, error) {
 	if len(search.Fields) == 0 {
+		value := removeSpecialChars.ReplaceAllString(search.Raw, "")
 		mods = append(mods,
-			sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(search.Raw))),
+			sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(value))),
 		)
 	}
 
@@ -113,6 +117,8 @@ func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Execu
 		if !ok {
 			continue
 		}
+
+		value = removeSpecialChars.ReplaceAllString(value, "")
 
 		mods = append(mods, sm.Where(sqlite.Raw(column+" MATCH ?", value)))
 	}
