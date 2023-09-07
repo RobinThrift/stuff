@@ -30,17 +30,7 @@ type AssetRepo interface {
 	Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Delete(ctx context.Context, exec bob.Executor, id int64) error
 
-	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]string, error)
-}
-
-type ListAssetsQuery struct {
-	Search string
-
-	Page     int
-	PageSize int
-
-	OrderBy  string
-	OrderDir string
+	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
 }
 
 func (c *Control) generateTag(ctx context.Context) (string, error) {
@@ -136,8 +126,8 @@ func (c *Control) deleteAsset(ctx context.Context, asset *Asset) (err error) {
 	})
 }
 
-func (c *Control) listCategories(ctx context.Context, query ListCategoriesQuery) ([]string, error) {
-	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]string, error) {
+func (c *Control) listCategories(ctx context.Context, query ListCategoriesQuery) ([]Category, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]Category, error) {
 		return c.AssetRepo.ListCategories(ctx, tx, query)
 	})
 }

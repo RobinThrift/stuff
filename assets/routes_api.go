@@ -39,7 +39,7 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, c := range cats {
-		res.Categories = append(res.Categories, category{Name: c})
+		res.Categories = append(res.Categories, category(c))
 	}
 
 	b, err := json.Marshal(res)

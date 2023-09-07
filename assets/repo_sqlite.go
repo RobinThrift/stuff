@@ -248,7 +248,7 @@ func (ar *RepoSQLite) Delete(ctx context.Context, exec bob.Executor, id int64) e
 	return err
 }
 
-func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]string, error) {
+func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error) {
 	limit := query.PageSize
 
 	if limit == 0 {
@@ -275,11 +275,11 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 		return nil, err
 	}
 
-	cats := make([]string, 0, len(categories))
+	cats := make([]Category, 0, len(categories))
 
 	for _, c := range categories {
 		if c.Name.IsSet() {
-			cats = append(cats, c.Name.GetOrZero())
+			cats = append(cats, Category{Name: c.Name.GetOrZero()})
 		}
 	}
 
