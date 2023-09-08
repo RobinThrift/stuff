@@ -115,7 +115,7 @@ func (rt *UIRouter) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) 
 		validationErrs["category"] = "Category must not be empty"
 	}
 
-	asset.Notes = policy.Sanitize(asset.Notes)
+	sanitizeAssetFields(&asset)
 
 	if len(validationErrs) != 0 {
 		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: &asset, IsNew: true, ValidationErrs: validationErrs})
@@ -198,7 +198,7 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 		validationErrs["category"] = "Category must not be empty"
 	}
 
-	asset.Notes = policy.Sanitize(asset.Notes)
+	sanitizeAssetFields(asset)
 
 	if len(validationErrs) != 0 {
 		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: asset, IsNew: true, ValidationErrs: validationErrs})
@@ -427,4 +427,20 @@ func decodeSearchQuery(queryStr string) *ListAssetsQuerySearch {
 	}
 
 	return q
+}
+
+func sanitizeAssetFields(asset *Asset) {
+	asset.Tag = policy.Sanitize(asset.Tag)
+	asset.Name = policy.Sanitize(asset.Name)
+	asset.Category = policy.Sanitize(asset.Category)
+	asset.Model = policy.Sanitize(asset.Model)
+	asset.ModelNo = policy.Sanitize(asset.ModelNo)
+	asset.SerialNo = policy.Sanitize(asset.SerialNo)
+	asset.Manufacturer = policy.Sanitize(asset.Manufacturer)
+	asset.Location = policy.Sanitize(asset.Location)
+	asset.PositionCode = policy.Sanitize(asset.PositionCode)
+	asset.Notes = policy.Sanitize(asset.Notes)
+	asset.PurchaseInfo.Supplier = policy.Sanitize(asset.PurchaseInfo.Supplier)
+	asset.PurchaseInfo.OrderNo = policy.Sanitize(asset.PurchaseInfo.OrderNo)
+	asset.PurchaseInfo.Currency = policy.Sanitize(asset.PurchaseInfo.Currency)
 }
