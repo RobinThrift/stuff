@@ -2,8 +2,10 @@
     "name": "@kodeshack/stuff",
     "version": "1.0.0",
     "public": true,
+    "type": "module",
     "devDependencies": {
         "@biomejs/biome": "1.1.1",
+        "@types/alpinejs": "^3.7.2",
         "autoprefixer": "^10.4.15",
         "concurrently": "^8.2.1",
         "esbuild": "^0.19.2",
@@ -16,6 +18,7 @@
     "dependencies": {
         "alpinejs": "^3.13.0",
         "flatpickr": "^4.6.13",
-        "htmx.org": "^1.9.5"
+        "htmx.org": "^1.9.5",
+        "quick-score": "^0.2.0"
     }
 }

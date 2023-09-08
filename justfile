@@ -11,12 +11,12 @@ _default:
 
 fmt: _npm-install
     go fmt ./...
-    cd static && biome format src/*.js
+    cd static && biome format "src/*.ts"
 
 lint: _npm-install
     staticcheck ./...
     golangci-lint run ./...
-    cd static && biome check src/*.js
+    cd static && biome check "src/*.ts"
 
 test *flags="-failfast -v -timeout 5m":
     @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
@@ -33,7 +33,7 @@ build-styles: _npm-install
     postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map
 
 build-js: _npm-install _copy-js-libs
-    cd static && esbuild src/helper.js --minify --bundle --outfile=build/helper.min.js
+    cd static && esbuild src/index.ts --format=esm --target=es2020 --minify --bundle --outfile=build/bundle.min.js
 
 build-icons: _npm-install
     rm -f staic/build/*.svg
@@ -56,7 +56,7 @@ _watch-styles:
     postcss ./static/src/styles.css -o ./static/build/styles.css --watch
 
 _watch-js:
-    cd static && esbuild src/helper.js --bundle --outfile=build/helper.min.js --watch
+    cd static && esbuild src/index.ts --format=esm --target=es2020 --bundle --outfile=build/bundle.min.js --watch
 
 _watch-icons:
     wgo \
@@ -78,7 +78,6 @@ generate: _go-tools
 
 _copy-js-libs: _npm-install
     -mkdir static/build
-    cp static/node_modules/alpinejs/dist/cdn.min.js static/build/alpine.min.js
     cp static/node_modules/flatpickr/dist/flatpickr.min.js static/build/flatpickr.min.js
     cp static/node_modules/htmx.org/dist/htmx.min.js static/build/htmx.min.js
 

@@ -79,118 +79,8 @@
 <div
 	class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start"
 	x-cloak
+	x-data="commandpalette"
 	x-show="show"
-	x-data="{{`{
-		show: false,
-
-		commands: [
-			['Assets', [
-				{
-					name: 'Add Asset',
-					icon: 'plus',
-					url: '/assets/new'
-				},
-				{
-					name: 'All Assets',
-					icon: 'list',
-					url: '/assets'
-				},
-			]],
-			['Tags', [
-				{
-					name: 'All Tags',
-					icon: 'list',
-					url: '/tags'
-				},
-			]],
-		],
-		shown: [],
-		curr: [0, 0],
-		search: "",
-	
-		onSearch() {
-			if (this.search.length === 0) {
-				this.curr = [0, 0]
-				this.shown = this.commands
-				return
-			}
-
-			let needle = new RegExp('.*'+this.search+'.*', 'i')
-
-			this.shown = this.commands
-				.map(cmds => ([cmds[0], cmds[1].filter(c => needle.test(c.name) )]))
-				.filter(cmds => cmds[1].length)
-
-			if (this.shown.length === 0) {
-				this.curr = undefined
-			} else {
-				this.curr = [0, 0]
-			}
-		},
-
-		selectNext() {
-			if (!this.curr) { return }
-
-			let [cat, cmd] = this.curr
-			if (cmd+1 < this.shown[cat][1].length) {
-				this.curr = [cat, cmd+1]
-				this.scrollToActive()
-				return
-			}
-
-			if (cat+1 < this.shown.length) {
-				this.curr = [cat+1, 0]
-				this.scrollToActive()
-			}
-		},
-
-		selectPrev() {
-			if (!this.curr) { return }
-			let [cat, cmd] = this.curr
-			if (cmd-1 >= 0) {
-				this.curr = [cat, cmd-1]
-				this.scrollToActive()
-				return
-			}
-
-			if (cmd-1 < 0 && cat != 0) {
-				this.curr = [cat-1, this.shown[cat-1][1].length - 1]
-				this.scrollToActive()
-			}
-		},
-
-		exec() {
-			if (!this.curr) {
-	 			if (!this.search) { return }
-				window.location = location.origin+'/assets?query='+this.search
-				return
-			}
-
-			let [cat, cmd] = this.curr
-			let execCmd = this.shown[cat][1][cmd]
-			if (execCmd) {
-				window.location = location.origin+execCmd.url
-			}
-		},
-
-		scrollToActive() {
-			if (!this.curr) { return }
-			let el = $refs.cmdsList.querySelector('.command-palette-active')
-			if (!el) { return }
-
-			let offset = el.offsetTop + ( el.offsetHeight *2) - this.$refs.cmdsList.offsetHeight
-			if(offset > 0){
-				this.$refs.cmdsList.scrollTo({top: offset})
-			} else {
-				this.$refs.cmdsList.scrollTo({top: 0})
-			}
-		},
-	}`}}"
-
-	x-init="
-		shown = commands
-		$watch('search', () => onSearch());
-	" 
 
 	x-on:keydown.down.prevent="selectNext()" 
 	x-on:keydown.up.prevent="selectPrev()" 
@@ -222,7 +112,7 @@
 							<svg class="h-[24px] w-[24px]">
 								<use x-bin:xlink:href="`/static/icons.svg#${cmd.icon}`"></use>
 							</svg>
-							<span x-text="cmd.name"></span>
+							<span x-html="cmd.name"></span>
 						</li>
 					</template>
 				</ul>

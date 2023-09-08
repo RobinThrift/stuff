@@ -22,7 +22,10 @@ Input:
 <div
 	{{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}
 	{{ if has . "XData" -}} x-data="{{ .XData }}" {{- end -}}
-	{{ if has . "AutoCompleteSource" }} x-data="{{ template "autocomplete_x-data" . }}" {{- end }}
+
+	{{ if has . "AutoCompleteSource" }}
+	x-data="autocompleter({ 'source': '{{ .AutoCompleteSource}}', 'valueAt': '{{ .AutoCompletePath }}', 'value': '{{ .Value }}' })"
+	{{- end }}
 >
 	{{ if ne .Label "" }}
 	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
@@ -225,50 +228,4 @@ Select:
 	}`
 	)
 -}}
-{{ end }}
-
-
-{{/* 
-autocomplete_x-data
-	Value string
-	AutoCompleteSource string
-	AutoCompletePath string
-*/}}
-{{ define "autocomplete_x-data" }}
-{{
-	printf `{
-	open: false,
-	qs: null,
-	items: [],
-	value: "%v",
-
-	autocompleter: new AutoCompleter({ source: "%v", valueAt: "%v" }),
-
-	async onChange(el) {
-		if (!el.value.length) {
-			this.items = []
-			this.open = false
-			return
-		}
-
-		this.items = await this.autocompleter.fetch(el.value)
-
-		this.open = this.items.length > 0
-		if (this.open) {
-			let pos = el.getBoundingClientRect()
-			let top = pos.top + window.scrollY
-			let left = pos.left + window.scrollX
-			this.$refs.suggestions.style.left = left + 'px';
-			this.$refs.suggestions.style.top = top + el.offsetHeight + 'px';
-			this.$refs.suggestions.style.minWidth = el.offsetWidth + 'px';
-		}
-	},
-
-	onClickSuggestion(newValue) {
-		this.value = ""
-		this.value = newValue
-		this.open = false
-	}
-}` .Value .AutoCompleteSource .AutoCompletePath
-}}
 {{ end }}
