@@ -56,49 +56,48 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type apiPart struct {
+	ID           int64  `json:"id"`
+	AssetID      int64  `json:"asset_id"`
+	Tag          string `json:"tag"`
+	Name         string `json:"name"`
+	Location     string `json:"location,omitempty"`
+	PositionCode string `json:"position_code,omitempty"`
+	Notes        string `json:"notes,omitempty"`
+}
+
+type apiAsset struct {
+	ID            int64          `json:"id,omitempty"`
+	ParentAssetID int64          `json:"parent_asset_id,omitempty"`
+	Tag           string         `json:"tag"`
+	Status        Status         `json:"status"`
+	Name          string         `json:"name"`
+	Category      string         `json:"category"`
+	Model         string         `json:"model,omitempty"`
+	ModelNo       string         `json:"model_no,omitempty"`
+	SerialNo      string         `json:"serial_no,omitempty"`
+	Manufacturer  string         `json:"manufacturer,omitempty"`
+	Notes         string         `json:"notes,omitempty"`
+	ImageURL      string         `json:"image_url,omitempty"`
+	ThumbnailURL  string         `json:"thumbnail_url,omitempty"`
+	WarrantyUntil time.Time      `json:"warranty_until,omitempty"`
+	CustomAttrs   map[string]any `json:"custom_attrs,omitempty"`
+
+	Location     string `json:"location,omitempty"`
+	PositionCode string `json:"position_code,omitempty"`
+
+	PurchaseSupplier string         `json:"purchase_supplier,omitempty"`
+	PurchaseOrderNo  string         `json:"purchase_order_no,omitempty"`
+	PurchaseDate     time.Time      `json:"purchase_date,omitempty"`
+	PurchaseAmount   MonetaryAmount `json:"purchase_amount,omitempty"`
+	PurchaseCurrency string         `json:"purchase_currency,omitempty"`
+
+	PartsTotalCounter int        `json:"parts_total_counter,omitempty"`
+	Parts             []*apiPart `json:"parts,omitempty"`
+}
+
 // [GET] /api/v1/assets
 func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
-	type apiPart struct {
-		ID           int64  `json:"id"`
-		AssetID      int64  `json:"asset_id"`
-		Tag          string `json:"tag"`
-		Name         string `json:"name"`
-		Location     string `json:"location,omitempty"`
-		PositionCode string `json:"position_code,omitempty"`
-		Notes        string `json:"notes,omitempty"`
-	}
-
-	type apiAsset struct {
-		ID            int64  `json:"id"`
-		ParentAssetID int64  `json:"parent_asset_id,omitempty"`
-		Status        Status `json:"status"`
-
-		Tag           string         `json:"tag"`
-		Name          string         `json:"name"`
-		Category      string         `json:"category"`
-		Model         string         `json:"model,omitempty"`
-		ModelNo       string         `json:"model_no,omitempty"`
-		SerialNo      string         `json:"serial_no,omitempty"`
-		Manufacturer  string         `json:"manufacturer,omitempty"`
-		Notes         string         `json:"notes,omitempty"`
-		ImageURL      string         `json:"image_url,omitempty"`
-		ThumbnailURL  string         `json:"thumbnail_url,omitempty"`
-		WarrantyUntil time.Time      `json:"warranty_until,omitempty"`
-		CustomAttrs   map[string]any `json:"custom_attrs,omitempty"`
-
-		Location     string `json:"location,omitempty"`
-		PositionCode string `json:"position_code,omitempty"`
-
-		PurchaseSupplier string         `json:"purchase_supplier"`
-		PurchaseOrderNo  string         `json:"purchase_order_no"`
-		PurchaseDate     time.Time      `json:"purchase_date,omitempty"`
-		PurchaseAmount   MonetaryAmount `json:"purchase_amount"`
-		PurchaseCurrency string         `json:"purchase_currency"`
-
-		PartsTotalCounter int        `json:"parts_total_counter,omitempty"`
-		Parts             []*apiPart `json:"parts,omitempty"`
-	}
-
 	type response struct {
 		Assets []*apiAsset `json:"assets"`
 	}

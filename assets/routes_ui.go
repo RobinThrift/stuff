@@ -43,6 +43,9 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
+
+	mux.Get("/assets/export/json", views.HTTPHandlerFuncErr(rt.handleAssetsExportJSON))
+	mux.Get("/assets/export/csv", views.HTTPHandlerFuncErr(rt.handleAssetsExportCSV))
 }
 
 // [GET] /
@@ -290,10 +293,34 @@ func (rt *UIRouter) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Requ
 	return nil
 }
 
+// [GET] /assets/export/json
+func (rt *UIRouter) handleAssetsExportJSON(w http.ResponseWriter, r *http.Request) error {
+	assets, err := rt.Control.listAssets(r.Context(), ListAssetsQuery{})
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("content-disposition", `attachment; filename="assets_export.json"`)
+	w.Header().Add("content-type", "application/json; charset=utf-8")
+
+	return exportAssetsAsJSON(w, assets.Assets)
+}
+
+// [GET] /assets/export/csv
+func (rt *UIRouter) handleAssetsExportCSV(w http.ResponseWriter, r *http.Request) error {
+	assets, err := rt.Control.listAssets(r.Context(), ListAssetsQuery{})
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("content-disposition", `attachment; filename="assets_export.csv"`)
+	w.Header().Add("content-type", "text/csv; charset=utf-8")
+	return exportAssetsAsCSV(w, assets.Assets)
+}
+
 func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
-	q := ListAssetsQuery{
-		PageSize: 50,
-		OrderBy:  params.Get("order_by"),
+	q := ListAssetsQuery{ //nolint: varnamelen
+		OrderBy: params.Get("order_by"),
 	}
 
 	if query := params.Get("query"); query != "" {
@@ -316,6 +343,14 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 		if orderDir == "ASC" || orderDir == "DESC" {
 			q.OrderDir = orderDir
 		}
+	}
+
+	if q.PageSize == 0 {
+		q.PageSize = 50
+	}
+
+	if q.PageSize > 100 {
+		q.PageSize = 100
 	}
 
 	return q

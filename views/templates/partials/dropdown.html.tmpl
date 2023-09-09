@@ -1,33 +1,79 @@
-{{ define "dropdown_x_data" }}
-{
-	open: false,
-	position(el) {
-		let pos = el.getBoundingClientRect()
-		let top = pos.top + window.scrollY
-		let left = pos.left + window.scrollX
-		this.$refs.dropdown.style.left = left + 'px';
-		this.$refs.dropdown.style.top = top + el.offsetHeight + 'px';
-		this.$refs.dropdown.style.minWidth = el.offsetWidth + 'px';
-	},
-}
-{{ end }}
+{{/*
+Dropdown
+	Class string
+	Text  string
+	Items []{ Text string; URL string; Class string }
 
-{{ define "dropdown_button_on_click" }}
-position($el); open = !open
-{{ end }}
+*/}}
+{{ define "__dropdown" }}
+<div
+	{{ if ne .Class "" -}}
+	class="{{ .Class }}"
+	{{- end -}}
 
-{{ define "dropdown_content_start" }}
-<template x-teleport="body">
-	<div
-		x-ref="dropdown" x-show="open"
-		class="absolute top-0 mt-1"
-		@click.outside="open = false"
-	>
-		<div class="flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70">
-{{ end }}
-
-{{ define "dropdown_content_end" }}
+	x-data="{
+		open: false,
+		position(el) {
+			let pos = el.getBoundingClientRect()
+			let top = pos.top + window.scrollY
+			let left = pos.left + window.scrollX
+			this.$refs.dropdown.style.left = left + 'px';
+			this.$refs.dropdown.style.top = top + el.offsetHeight + 'px';
+			this.$refs.dropdown.style.minWidth = el.offsetWidth + 'px';
+		},
+	}"
+>
+	<button class="btn btn-primary flex items-center" x-on:click="open = !open; position($el)">
+		{{- .Text }}
+		{{- template "icon" dict "Icon" "caret-down"  "Class" "w-[16px] h-[16px] ms-2" -}}
+	</button>
+	<template x-teleport="body">
+		<div
+			x-ref="dropdown" x-show="open"
+			class="absolute top-0 mt-1"
+			@click.outside="open = false"
+		>
+			<div class="flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70">
+				<ul class="text-sm w-full">
+					{{ range .Items }}
+					<li>
+						<a href={{ .URL }} class="block px-4 py-2 hover:bg-gray-100 {{- if has . "Class" }} {{ .Class }} {{- end -}}">{{ .Text }}</a>
+					</li>
+					{{ end }}
+				</ul>
+			</div>
 		</div>
+	</template>
+</div>
+{{ end }}
+
+{{ define "dropdown" }}
+<div
+	x-data="{ open: false }"
+	class="relative {{ if ne .Class "" -}} {{ .Class }} {{- end -}}"
+>
+	<button x-ref="button" class="btn btn-primary flex items-center" x-on:click="open = !open">
+		{{- .Text }}
+		{{- template "icon" dict "Icon" "caret-up-down"  "Class" "w-[16px] h-[16px] ms-2" -}}
+	</button>
+
+	<div
+		class="absolute end-0 z-10 mt-1 min-w-max bg-white border rounded-md shadow-sm border-neutral-200/70"
+		role="menu"
+		x-cloak
+		x-ref="dropdown"
+		x-transition
+		x-show="open"
+		x-on:click.away="open = false"
+		x-on:keydown.escape.window="open = false"
+	>
+		<ul class="p-2 text-sm w-full">
+			{{ range .Items }}
+			<li>
+				<a href={{ .URL }} class="block rounded px-4 py-2 hover:bg-gray-100 {{- if has . "Class" }} {{ .Class }} {{- end -}}">{{ .Text }}</a>
+			</li>
+			{{ end }}
+		</ul>
 	</div>
-</template>
+</div>
 {{ end }}

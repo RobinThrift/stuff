@@ -18,6 +18,7 @@ linters-settings:
     - e error
     - i int
     - T any
+    - w io.Writer
     - w http.ResponseWriter
     - r *http.Request
 

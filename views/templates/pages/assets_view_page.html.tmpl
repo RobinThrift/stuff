@@ -10,21 +10,15 @@
 		{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
 	</h1>
 
-	<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end" x-data="{{ template "dropdown_x_data" }}">
-		<button class="btn btn-primary flex items-center" x-on:click="{{ template "dropdown_button_on_click" }}">
-			Actions
-			{{ template "icon" dict "Icon" "caret-down" "Class" "w-[16px] h-[16px] ms-2" }}
-		</button>
-		{{ template "dropdown_content_start" }}
-		<ul class="py-2 text-sm w-full">
-			<li>
-				<a href={{ printf "/assets/%d/edit" .ID }} class="block px-4 py-2 hover:bg-gray-100">Edit</a>
-			</li>
-			<li>
-				<a href={{ printf "/assets/%d/delete" .ID }} class="block px-4 py-2 text-red-700 hover:bg-gray-100">Delete</a>
-			</li>
-		</ul>
-		{{ template "dropdown_content_end" }}
+	<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end">
+		{{-
+			template "dropdown" dict 
+			"Text" "Actions"
+			"Items" (list
+				(dict "Text" "Edit" "URL" (printf "/assets/%d/edit" .ID))
+				(dict "Text" "Delete" "URL" (printf "/assets/%d/delete" .ID) "Class" "text-red-700")
+			)
+		-}}
 	</div>
 </header>
 

@@ -49,20 +49,16 @@ func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, id int64) (*As
 
 func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
 	limit := query.PageSize
-
-	if limit == 0 {
-		limit = 50
-	}
-
-	if limit > 100 {
-		limit = 100
-	}
-
 	offset := limit * query.Page
 
-	mods := []bob.Mod[*dialect.SelectQuery]{
-		sm.Limit(limit),
-		sm.Offset(offset),
+	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
+
+	if limit > 0 {
+		mods = append(mods, sm.Limit(limit))
+	}
+
+	if offset > 0 {
+		mods = append(mods, sm.Offset(offset))
 	}
 
 	if query.OrderBy != "" {
@@ -97,12 +93,17 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 		}
 	}
 
+	numPages := 0
+	if limit > 0 {
+		numPages = int(count) / limit
+	}
+
 	page := &AssetListPage{
 		Assets:   make([]*Asset, 0, len(assets)),
 		Total:    int(count),
 		Page:     query.Page,
 		PageSize: query.PageSize,
-		NumPages: int(count) / query.PageSize,
+		NumPages: numPages,
 	}
 
 	for i := range assets {
@@ -299,15 +300,6 @@ func (ar *RepoSQLite) DeleteParts(ctx context.Context, exec bob.Executor, assetI
 
 func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error) {
 	limit := query.PageSize
-
-	if limit == 0 {
-		limit = 50
-	}
-
-	if limit > 100 {
-		limit = 100
-	}
-
 	offset := limit * query.Page
 
 	mods := []bob.Mod[*dialect.SelectQuery]{
