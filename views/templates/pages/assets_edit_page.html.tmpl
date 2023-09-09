@@ -71,7 +71,8 @@
 				"ValidationErr" .ValidationErrs.tag
 				"Value" .Asset.Tag
 				"AutoCompleteSource" "/api/v1/tags?in_use=false"
-				"AutoCompletePath" "tags.tag"
+				"AutoCompleteItemsAt" "tags"
+				"AutoCompleteValueAt" "tag"
 			-}}
 
 			{{-
@@ -85,7 +86,8 @@
 				"ValidationErr" .ValidationErrs.category
 				"Value" .Asset.Category
 				"AutoCompleteSource" "/api/v1/assets/categories"
-				"AutoCompletePath" "categories.name"
+				"AutoCompleteItemsAt" "categories"
+				"AutoCompleteValueAt" "name"
 			-}}
 
 			{{-
@@ -152,6 +154,21 @@
 				"Name" "notes"
 				"ValidationErr" .ValidationErrs.notes
 				"Value" .Asset.Notes
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold text-lg"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Belongs To"
+				"Name" "parent_asset_id"
+				"ValidationErr" .ValidationErrs.parent_asset_id
+				"Value" (default .Asset.ParentAssetID "")
+				"AutoCompleteSource" "/api/v1/assets"
+				"AutoCompleteItemsAt" "assets"
+				"AutoCompleteLabelAt" "name"
+				"AutoCompleteValueAt" "id"
 			-}}
 		</div>
 

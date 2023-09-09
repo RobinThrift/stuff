@@ -24,7 +24,11 @@ import (
 type RepoSQLite struct{}
 
 func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, id int64) (*Asset, error) {
-	asset, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.EQ(id), models.ThenLoadAssetAssetParts()).One()
+	asset, err := models.Assets.Query(ctx, exec,
+		models.SelectWhere.Assets.ID.EQ(id),
+		models.ThenLoadAssetAssetParts(),
+		models.PreloadAssetParentAsset(),
+	).One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: %d", ErrAssetNotFound, id)
@@ -32,7 +36,15 @@ func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, id int64) (*As
 		return nil, fmt.Errorf("error getting assets: %w", err)
 	}
 
-	return mapDBModelToAsset(asset), nil
+	children, err := models.Assets.Query(ctx, exec,
+		sm.Columns(models.Assets.Columns().Only("id", "name", "tag")),
+		models.SelectWhere.Assets.ParentAssetID.EQ(id),
+	).All()
+	if err != nil {
+		return nil, fmt.Errorf("error getting asset children: %w", err)
+	}
+
+	return mapDBModelToAsset(asset, children), nil
 }
 
 func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
@@ -74,8 +86,6 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 			return nil, err
 		}
 	} else {
-		mods = append(mods, models.SelectWhere.Assets.ParentAssetID.IsNull())
-
 		count, err = models.Assets.Query(ctx, exec, mods...).Count()
 		if err != nil {
 			return nil, fmt.Errorf("error counting assets: %w", err)
@@ -96,7 +106,7 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 	}
 
 	for i := range assets {
-		page.Assets = append(page.Assets, mapDBModelToAsset(assets[i]))
+		page.Assets = append(page.Assets, mapDBModelToAsset(assets[i], nil))
 	}
 
 	return page, nil
@@ -184,7 +194,7 @@ func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asse
 		return nil, err
 	}
 
-	return mapDBModelToAsset(inserted), nil
+	return mapDBModelToAsset(inserted, nil), nil
 }
 
 func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
@@ -248,7 +258,7 @@ func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asse
 		return nil, err
 	}
 
-	return mapDBModelToAsset(model), nil
+	return mapDBModelToAsset(model, nil), nil
 }
 
 func (ar *RepoSQLite) Delete(ctx context.Context, exec bob.Executor, id int64) error {
@@ -325,24 +335,8 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 	return cats, nil
 }
 
-func mapDBModelToAsset(model *models.Asset) *Asset {
-	parts := make([]*Part, 0, len(model.R.AssetParts))
-	for _, p := range model.R.AssetParts {
-		parts = append(parts, &Part{
-			ID:           p.ID,
-			AssetID:      p.AssetID,
-			Tag:          p.Tag,
-			Name:         p.Name,
-			Notes:        p.Notes.GetOrZero(),
-			Location:     p.Location.GetOrZero(),
-			PositionCode: p.PositionCode.GetOrZero(),
-			CreatedBy:    p.CreatedBy,
-			CreatedAt:    p.CreatedAt.Time,
-			UpdatedAt:    p.UpdatedAt.Time,
-		})
-	}
-
-	return &Asset{
+func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
+	asset := &Asset{
 		ID:            model.ID,
 		ParentAssetID: model.ParentAssetID.GetOrZero(),
 		Status:        Status(model.Status),
@@ -371,7 +365,6 @@ func mapDBModelToAsset(model *models.Asset) *Asset {
 		},
 
 		PartsTotalCounter: int(model.PartsTotalCounter),
-		Parts:             parts,
 
 		MetaInfo: MetaInfo{
 			CreatedBy: model.CreatedBy,
@@ -379,6 +372,35 @@ func mapDBModelToAsset(model *models.Asset) *Asset {
 			UpdatedAt: model.UpdatedAt.Time,
 		},
 	}
+
+	asset.Parts = make([]*Part, 0, len(model.R.AssetParts))
+	for _, p := range model.R.AssetParts {
+		asset.Parts = append(asset.Parts, &Part{
+			ID:           p.ID,
+			AssetID:      p.AssetID,
+			Tag:          p.Tag,
+			Name:         p.Name,
+			Notes:        p.Notes.GetOrZero(),
+			Location:     p.Location.GetOrZero(),
+			PositionCode: p.PositionCode.GetOrZero(),
+			CreatedBy:    p.CreatedBy,
+			CreatedAt:    p.CreatedAt.Time,
+			UpdatedAt:    p.UpdatedAt.Time,
+		})
+	}
+
+	if len(children) != 0 {
+		asset.Children = make([]*Asset, 0, len(children))
+		for _, child := range children {
+			asset.Children = append(asset.Children, mapDBModelToAsset(child, nil))
+		}
+	}
+
+	if model.R.ParentAsset != nil {
+		asset.Parent = mapDBModelToAsset(model.R.ParentAsset, nil)
+	}
+
+	return asset
 }
 
 func omitnullStr(str string) omitnull.Val[string] {

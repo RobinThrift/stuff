@@ -29,7 +29,8 @@ Input:
 	Icon string
 	ValidationErr string
 	AutoCompleteSource string
-	AutoCompletePath string
+	AutoCompleteValueAt string
+	AutoCompleteLabelAt string
 
 	XRef string
 	XData string
@@ -42,7 +43,13 @@ Input:
 	{{ if has . "XData" -}} x-data="{{ .XData }}" {{- end -}}
 
 	{{ if has . "AutoCompleteSource" }}
-	x-data="autocompleter({ 'source': '{{ .AutoCompleteSource}}', 'valueAt': '{{ .AutoCompletePath }}', 'value': '{{ .Value }}' })"
+	x-data="autocompleter({
+		'source': '{{ .AutoCompleteSource}}',
+		'itemsAt': '{{ .AutoCompleteItemsAt }}',
+		'valueAt': '{{ .AutoCompleteValueAt }}',
+		'labelAt': '{{ .AutoCompleteLabelAt }}',
+		'value': '{{ .Value }}',
+	})"
 	{{- end }}
 >
 	{{ if ne .Label "" }}
@@ -124,7 +131,7 @@ Input:
 						<template x-for="item in items">
 							<li class="w-100">
 								<button
-									x-text="item"
+									x-text="item.label"
 									class="p-2 blcok w-full hover:bg-blue-500 hover:text-white text-left"
 									@click="onClickSuggestion(item)"
 								></button>

@@ -23,9 +23,13 @@ const (
 )
 
 type Asset struct {
-	ID            int64  `form:"-"`
-	ParentAssetID int64  `form:"parent_asset_id"`
-	Status        Status `form:"status"`
+	ID int64 `form:"-"`
+
+	ParentAssetID int64    `form:"parent_asset_id"`
+	Parent        *Asset   `form:"-"`
+	Children      []*Asset `form:"-"`
+
+	Status Status `form:"status"`
 
 	Tag           string         `form:"tag"`
 	Name          string         `form:"name"`
@@ -67,7 +71,7 @@ type MetaInfo struct {
 }
 
 type Part struct {
-	ID      int64
+	ID      int64 `from:"id"`
 	AssetID int64 `form:"asset_id"`
 
 	Tag          string `form:"tag"`
@@ -76,9 +80,9 @@ type Part struct {
 	PositionCode string `form:"position_code"`
 	Notes        string `form:"notes"`
 
-	CreatedBy int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedBy int64     `form:"-"`
+	CreatedAt time.Time `form:"-"`
+	UpdatedAt time.Time `form:"-"`
 }
 
 type File struct {

@@ -191,6 +191,11 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
+	// manually set to allow the removal of the parent ID when sending an empty string
+	if r.PostForm.Get("parent_asset_id") == "" {
+		asset.ParentAssetID = 0
+	}
+
 	validationErrs := map[string]string{}
 
 	if asset.Name == "" {

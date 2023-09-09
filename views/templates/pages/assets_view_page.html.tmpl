@@ -32,6 +32,15 @@
 	<div class="lg:col-span-2">
 		<div class="flow-root">
 			<dl class="divide-y divide-gray-100 text-sm">
+				{{ with .Parent }}
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-bold">Belongs to</dt>
+					<dd class="sm:col-span-2">
+						<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
+					</dd>
+				</div>
+				{{ end }}
+
 				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 sm:grid-cols-3 sm:gap-4" >
 					<dt class="font-medium text-gray-900">Category</dt>
 					<dd class="text-gray-700 sm:col-span-2">{{ .Category }}</dd>
@@ -121,12 +130,29 @@
 		</div>
 	</div>
 
-	<div class="rounded-md bg-gray-100 py-5">
-		{{ if ne .ImageURL "" }}
-		<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
+	<div class="flex flex-col">
+		<div class="rounded bg-gray-100 p-3 w-full">
+			{{ if ne .ImageURL "" }}
+			<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
+			{{ end }}
+		</div>
+
+		{{ with .Children }}
+		<div class="mt-5 rounded bg-gray-100 p-3 w-full">
+			<h3 class="mb-5 md:text-md lg:text-xl font-bold">Assets belonging to this Asset</h3>
+
+			<ul>
+			{{ range . }}
+				<li>
+					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
+				</li>
+			{{ end }}
+			</ul>
+		</div>
 		{{ end }}
 	</div>
 
+	{{ with .Parts }}
 	<div class="lg:col-span-2">
 		<h2 class="mt-8 mb-5 md:text-xl lg:text-3xl font-bold">Parts</h2>
 
@@ -134,7 +160,7 @@
 			{{ template "table_head" list "Tag" "Name" "Location" "Notes" }}
 
 			<tbody>
-			{{ range .Parts }}
+			{{ range . }}
 				<tr class="odd:bg-gray-50">
 					<td class="pr-5 py-4 text-sm whitespace-nowrap">
 						<strong>{{ .Tag }}</strong>
@@ -156,6 +182,7 @@
 			</tbody>
 		</table>
 	</div>
+	{{ end }}
 </div>
 {{ end }}
 {{ end }}
