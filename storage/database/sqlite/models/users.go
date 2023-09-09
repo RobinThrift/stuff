@@ -51,6 +51,7 @@ type UsersStmt = bob.QueryStmt[*User, UserSlice]
 // userR is where relationships are stored.
 type userR struct {
 	CreatedByAssetFiles AssetFileSlice // fk_asset_files_0
+	CreatedByAssetParts AssetPartSlice // fk_asset_parts_0
 	CreatedByAssets     AssetSlice     // fk_assets_0
 	CheckedOutToAssets  AssetSlice     // fk_assets_1
 }
@@ -194,6 +195,7 @@ type userColumnNames struct {
 
 type userRelationshipJoins[Q dialect.Joinable] struct {
 	CreatedByAssetFiles bob.Mod[Q]
+	CreatedByAssetParts bob.Mod[Q]
 	CreatedByAssets     bob.Mod[Q]
 	CheckedOutToAssets  bob.Mod[Q]
 }
@@ -201,6 +203,7 @@ type userRelationshipJoins[Q dialect.Joinable] struct {
 func builduserRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) userRelationshipJoins[Q] {
 	return userRelationshipJoins[Q]{
 		CreatedByAssetFiles: usersJoinCreatedByAssetFiles[Q](ctx, typ),
+		CreatedByAssetParts: usersJoinCreatedByAssetParts[Q](ctx, typ),
 		CreatedByAssets:     usersJoinCreatedByAssets[Q](ctx, typ),
 		CheckedOutToAssets:  usersJoinCheckedOutToAssets[Q](ctx, typ),
 	}
@@ -356,6 +359,13 @@ func usersJoinCreatedByAssetFiles[Q dialect.Joinable](ctx context.Context, typ s
 		),
 	}
 }
+func usersJoinCreatedByAssetParts[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, AssetParts.Name(ctx)).On(
+			AssetPartColumns.CreatedBy.EQ(UserColumns.ID),
+		),
+	}
+}
 func usersJoinCreatedByAssets[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Assets.Name(ctx)).On(
@@ -386,6 +396,24 @@ func (os UserSlice) CreatedByAssetFiles(ctx context.Context, exec bob.Executor, 
 
 	return AssetFiles.Query(ctx, exec, append(mods,
 		sm.Where(sqlite.Group(AssetFileColumns.CreatedBy).In(PKArgs...)),
+	)...)
+}
+
+// CreatedByAssetParts starts a query for related objects on asset_parts
+func (o *User) CreatedByAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPartsQuery {
+	return AssetParts.Query(ctx, exec, append(mods,
+		sm.Where(AssetPartColumns.CreatedBy.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os UserSlice) CreatedByAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPartsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return AssetParts.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetPartColumns.CreatedBy).In(PKArgs...)),
 	)...)
 }
 
@@ -438,6 +466,15 @@ func (o *User) Preload(name string, retrieved any) error {
 		}
 
 		o.R.CreatedByAssetFiles = rels
+
+		return nil
+	case "CreatedByAssetParts":
+		rels, ok := retrieved.(AssetPartSlice)
+		if !ok {
+			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.CreatedByAssetParts = rels
 
 		return nil
 	case "CreatedByAssets":
@@ -523,6 +560,72 @@ func (os UserSlice) LoadUserCreatedByAssetFiles(ctx context.Context, exec bob.Ex
 			}
 
 			o.R.CreatedByAssetFiles = append(o.R.CreatedByAssetFiles, rel)
+		}
+	}
+
+	return nil
+}
+
+func ThenLoadUserCreatedByAssetParts(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadUserCreatedByAssetParts(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load UserCreatedByAssetParts", retrieved)
+		}
+
+		err := loader.LoadUserCreatedByAssetParts(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadUserCreatedByAssetParts loads the user's CreatedByAssetParts into the .R struct
+func (o *User) LoadUserCreatedByAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.CreatedByAssetParts = nil
+
+	related, err := o.CreatedByAssetParts(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.CreatedByAssetParts = related
+	return nil
+}
+
+// LoadUserCreatedByAssetParts loads the user's CreatedByAssetParts into the .R struct
+func (os UserSlice) LoadUserCreatedByAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assetParts, err := os.CreatedByAssetParts(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.CreatedByAssetParts = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range assetParts {
+			if o.ID != rel.CreatedBy {
+				continue
+			}
+
+			o.R.CreatedByAssetParts = append(o.R.CreatedByAssetParts, rel)
 		}
 	}
 
@@ -716,6 +819,65 @@ func (user0 *User) AttachCreatedByAssetFiles(ctx context.Context, exec bob.Execu
 	}
 
 	user0.R.CreatedByAssetFiles = append(user0.R.CreatedByAssetFiles, assetFile1...)
+
+	return nil
+}
+
+func insertUserCreatedByAssetParts0(ctx context.Context, exec bob.Executor, assetParts1 []*AssetPartSetter, user0 *User) (AssetPartSlice, error) {
+	for _, assetPart1 := range assetParts1 {
+		assetPart1.CreatedBy = omit.From(user0.ID)
+	}
+
+	ret, err := AssetParts.InsertMany(ctx, exec, assetParts1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertUserCreatedByAssetParts0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachUserCreatedByAssetParts0(ctx context.Context, exec bob.Executor, assetParts1 AssetPartSlice, user0 *User) error {
+	setter := &AssetPartSetter{
+		CreatedBy: omit.From(user0.ID),
+	}
+
+	err := AssetParts.Update(ctx, exec, setter, assetParts1...)
+	if err != nil {
+		return fmt.Errorf("attachUserCreatedByAssetParts0: %w", err)
+	}
+
+	return nil
+}
+
+func (user0 *User) InsertCreatedByAssetParts(ctx context.Context, exec bob.Executor, related ...*AssetPartSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	assetPart1, err := insertUserCreatedByAssetParts0(ctx, exec, related, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.CreatedByAssetParts = append(user0.R.CreatedByAssetParts, assetPart1...)
+
+	return nil
+}
+
+func (user0 *User) AttachCreatedByAssetParts(ctx context.Context, exec bob.Executor, related ...*AssetPart) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	assetPart1 := AssetPartSlice(related)
+
+	err = attachUserCreatedByAssetParts0(ctx, exec, assetPart1, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.CreatedByAssetParts = append(user0.R.CreatedByAssetParts, assetPart1...)
 
 	return nil
 }

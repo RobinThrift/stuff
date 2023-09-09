@@ -29,6 +29,9 @@ type AssetRepo interface {
 	Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Delete(ctx context.Context, exec bob.Executor, id int64) error
 
+	CreateParts(ctx context.Context, exec bob.Executor, parts []*Part) error
+	DeleteParts(ctx context.Context, exec bob.Executor, assetID int64) error
+
 	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
 }
 
@@ -92,6 +95,20 @@ func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*A
 
 	updated, err := database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
 		_, err := c.TagCtrl.CreateIfNotExists(ctx, asset.Tag)
+		if err != nil {
+			return nil, err
+		}
+
+		err = c.AssetRepo.DeleteParts(ctx, tx, asset.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range asset.Parts {
+			asset.Parts[i].AssetID = asset.ID
+		}
+
+		err = c.AssetRepo.CreateParts(ctx, tx, asset.Parts)
 		if err != nil {
 			return nil, err
 		}

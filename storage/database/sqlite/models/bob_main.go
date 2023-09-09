@@ -12,6 +12,7 @@ import (
 
 var TableNames = struct {
 	AssetFiles      string
+	AssetParts      string
 	Assets          string
 	AssetsFTS       string
 	LocalAuthUsers  string
@@ -26,6 +27,7 @@ var TableNames = struct {
 	Suppliers       string
 }{
 	AssetFiles:      "asset_files",
+	AssetParts:      "asset_parts",
 	Assets:          "assets",
 	AssetsFTS:       "assets_fts",
 	LocalAuthUsers:  "local_auth_users",
@@ -42,6 +44,7 @@ var TableNames = struct {
 
 var ColumnNames = struct {
 	AssetFiles      assetFileColumnNames
+	AssetParts      assetPartColumnNames
 	Assets          assetColumnNames
 	AssetsFTS       assetsFTColumnNames
 	LocalAuthUsers  localAuthUserColumnNames
@@ -66,33 +69,46 @@ var ColumnNames = struct {
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
 	},
+	AssetParts: assetPartColumnNames{
+		ID:           "id",
+		AssetID:      "asset_id",
+		Tag:          "tag",
+		Name:         "name",
+		Location:     "location",
+		PositionCode: "position_code",
+		Notes:        "notes",
+		CreatedBy:    "created_by",
+		CreatedAt:    "created_at",
+		UpdatedAt:    "updated_at",
+	},
 	Assets: assetColumnNames{
-		ID:               "id",
-		ParentAssetID:    "parent_asset_id",
-		Status:           "status",
-		Tag:              "tag",
-		Name:             "name",
-		Category:         "category",
-		Model:            "model",
-		ModelNo:          "model_no",
-		SerialNo:         "serial_no",
-		Manufacturer:     "manufacturer",
-		Notes:            "notes",
-		ImageURL:         "image_url",
-		ThumbnailURL:     "thumbnail_url",
-		WarrantyUntil:    "warranty_until",
-		CustomAttrs:      "custom_attrs",
-		CheckedOutTo:     "checked_out_to",
-		Location:         "location",
-		PositionCode:     "position_code",
-		PurchaseSupplier: "purchase_supplier",
-		PurchaseOrderNo:  "purchase_order_no",
-		PurchaseDate:     "purchase_date",
-		PurchaseAmount:   "purchase_amount",
-		PurchaseCurrency: "purchase_currency",
-		CreatedBy:        "created_by",
-		CreatedAt:        "created_at",
-		UpdatedAt:        "updated_at",
+		ID:                "id",
+		ParentAssetID:     "parent_asset_id",
+		Status:            "status",
+		Tag:               "tag",
+		Name:              "name",
+		Category:          "category",
+		Model:             "model",
+		ModelNo:           "model_no",
+		SerialNo:          "serial_no",
+		Manufacturer:      "manufacturer",
+		Notes:             "notes",
+		ImageURL:          "image_url",
+		ThumbnailURL:      "thumbnail_url",
+		WarrantyUntil:     "warranty_until",
+		CustomAttrs:       "custom_attrs",
+		CheckedOutTo:      "checked_out_to",
+		Location:          "location",
+		PositionCode:      "position_code",
+		PurchaseSupplier:  "purchase_supplier",
+		PurchaseOrderNo:   "purchase_order_no",
+		PurchaseDate:      "purchase_date",
+		PurchaseAmount:    "purchase_amount",
+		PurchaseCurrency:  "purchase_currency",
+		PartsTotalCounter: "parts_total_counter",
+		CreatedBy:         "created_by",
+		CreatedAt:         "created_at",
+		UpdatedAt:         "updated_at",
 	},
 	AssetsFTS: assetsFTColumnNames{
 		ID:           "id",
@@ -171,6 +187,7 @@ var (
 
 func Where[Q sqlite.Filterable]() struct {
 	AssetFiles      assetFileWhere[Q]
+	AssetParts      assetPartWhere[Q]
 	Assets          assetWhere[Q]
 	AssetsFTS       assetsFTWhere[Q]
 	LocalAuthUsers  localAuthUserWhere[Q]
@@ -186,6 +203,7 @@ func Where[Q sqlite.Filterable]() struct {
 } {
 	return struct {
 		AssetFiles      assetFileWhere[Q]
+		AssetParts      assetPartWhere[Q]
 		Assets          assetWhere[Q]
 		AssetsFTS       assetsFTWhere[Q]
 		LocalAuthUsers  localAuthUserWhere[Q]
@@ -200,6 +218,7 @@ func Where[Q sqlite.Filterable]() struct {
 		Suppliers       supplierWhere[Q]
 	}{
 		AssetFiles:      AssetFileWhere[Q](),
+		AssetParts:      AssetPartWhere[Q](),
 		Assets:          AssetWhere[Q](),
 		AssetsFTS:       AssetsFTWhere[Q](),
 		LocalAuthUsers:  LocalAuthUserWhere[Q](),
@@ -228,6 +247,7 @@ type joinSet[Q any] struct {
 
 type joins[Q dialect.Joinable] struct {
 	AssetFiles joinSet[assetFileRelationshipJoins[Q]]
+	AssetParts joinSet[assetPartRelationshipJoins[Q]]
 	Assets     joinSet[assetRelationshipJoins[Q]]
 	Tags       joinSet[tagRelationshipJoins[Q]]
 	Users      joinSet[userRelationshipJoins[Q]]
@@ -236,6 +256,7 @@ type joins[Q dialect.Joinable] struct {
 func getJoins[Q dialect.Joinable](ctx context.Context) joins[Q] {
 	return joins[Q]{
 		AssetFiles: assetFilesJoin[Q](ctx),
+		AssetParts: assetPartsJoin[Q](ctx),
 		Assets:     assetsJoin[Q](ctx),
 		Tags:       tagsJoin[Q](ctx),
 		Users:      usersJoin[Q](ctx),

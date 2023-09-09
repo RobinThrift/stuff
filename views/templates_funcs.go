@@ -69,6 +69,14 @@ var templateFuncs = template.FuncMap{
 		return a + b
 	},
 
+	"json": func(v any) string {
+		j, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return string(j)
+	},
+
 	"debug": func(v any) string {
 		j, err := json.MarshalIndent(v, "", "    ")
 		if err != nil {

@@ -1,3 +1,16 @@
+{{ define "_label" }}
+<label
+	{{ if has . "Name" }}
+	for="{{ .Name }}"
+	{{ else if has . "XBindName" }}
+	x-bind:for="{{ .XBindName }}"
+	{{ end }}
+	class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}"
+>
+	{{ .Label }}
+</label>
+{{ end }}
+
 {{- /*
 Input:
 	Class string
@@ -10,13 +23,18 @@ Input:
 	Name string
 	Placeholder string
 	Required bool
+	Disabled bool
+	Readonly bool
 	AutoComplete string
 	Icon string
 	ValidationErr string
-	XRef string
-	XData string
 	AutoCompleteSource string
 	AutoCompletePath string
+
+	XRef string
+	XData string
+	XBindValue string
+	XBindName string
 */ -}}
 {{ define "field" }}
 <div
@@ -28,7 +46,7 @@ Input:
 	{{- end }}
 >
 	{{ if ne .Label "" }}
-	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
+	{{ template "_label" . }}
 	{{ end }}
 
 	<div class="relative {{ if has . "InputWrapperClass" -}} {{ .InputWrapperClass }} {{- end -}}">
@@ -49,10 +67,23 @@ Input:
 			required="{{ .Required }}"
 			{{ end }}
 
+			{{ if has . "Readonly" }}
+			readonly="{{ .Readonly }}"
+			{{ end }}
+
+			{{ if has . "Disabled" }}
+			disabled="{{ .Disabled }}"
+			{{ end }}
+
 			type="{{ default .Type "text" }}"
 
+			{{ if has . "Name" }}
 			name="{{ .Name }}"
 			id="{{ .Name }}"
+			{{ else if has . "XBindName" }}
+			x-bind:name="{{ .XBindName }}"
+			x-bind:id="{{ .XBindName }}"
+			{{ end }}
 
 			{{ if has . "Placeholder" }}
 			placeholder="{{ .Placeholder }}"
@@ -69,6 +100,10 @@ Input:
 
 			{{ if ne (print .Value ) "" }}
 			value="{{ .Value }}"
+			{{ end }}
+
+			{{ if has . "XBindValue" }}
+			x-bind:value="{{ .XBindValue }}"
 			{{ end }}
 
 			{{ if has . "AutoCompleteSource"}}
@@ -118,17 +153,27 @@ Textarea:
 	Placeholder string
 	Value string
 	ValidationErr string
+	MinHeight string
+
+	XBindValue string
+	XBindName string
 */ -}}
 {{ define "textarea" }}
 <div {{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}>
 	{{ if ne .Label "" }}
-	<label for="{{ .Name }}" class="label {{- if has . "LabelClass" }} {{ .LabelClass }} {{- end -}}">{{ .Label }}</label>
+	{{ template "_label" . }}
 	{{ end }}
 
 	<textarea
-		class="input w-full h-auto min-h-[96px] px-3 py-2 {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
+		class="input w-full h-auto {{ default .MinHeight "min-h-[96px]" }} {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
+
+		{{ if has . "Name" }}
 		name="{{ .Name }}"
 		id="{{ .Name }}"
+		{{ else if has . "XBindName" }}
+		x-bind:name="{{ .XBindName }}"
+		x-bind:id="{{ .XBindName }}"
+		{{ end }}
 
 		{{ if has . "Placeholder" }}
 		placeholder={{ .Placeholder }}
@@ -140,6 +185,10 @@ Textarea:
 		}}"
 		x-init="resize()"
 		x-on:input="resize()"
+
+		{{ if has . "XBindValue" }}
+		x-bind:value="{{ .XBindValue }}"
+		{{ end }}
 	>{{ .Value }}</textarea>
 
 	{{ if ne .ValidationErr "" }}

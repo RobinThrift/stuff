@@ -24,7 +24,7 @@ import (
 type RepoSQLite struct{}
 
 func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, id int64) (*Asset, error) {
-	asset, err := models.FindAsset(ctx, exec, id)
+	asset, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.EQ(id), models.ThenLoadAssetAssetParts()).One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: %d", ErrAssetNotFound, id)
@@ -189,56 +189,58 @@ func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asse
 
 func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
 	model := &models.Asset{
-		ID:               asset.ID,
-		ParentAssetID:    nullInt64(asset.ParentAssetID),
-		Status:           string(asset.Status),
-		Tag:              nullStr(asset.Tag),
-		Name:             asset.Name,
-		Category:         asset.Category,
-		Model:            nullStr(asset.Model),
-		ModelNo:          nullStr(asset.ModelNo),
-		SerialNo:         nullStr(asset.SerialNo),
-		Manufacturer:     nullStr(asset.Manufacturer),
-		Notes:            nullStr(asset.Notes),
-		ImageURL:         nullStr(asset.ImageURL),
-		ThumbnailURL:     nullStr(asset.ThumbnailURL),
-		WarrantyUntil:    nullTime(asset.WarrantyUntil),
-		CustomAttrs:      nullCustomAttrs(asset.CustomAttrs),
-		CheckedOutTo:     nullInt64(asset.CheckedOutTo),
-		Location:         nullStr(asset.Location),
-		PositionCode:     nullStr(asset.PositionCode),
-		PurchaseSupplier: nullStr(asset.PurchaseInfo.Supplier),
-		PurchaseOrderNo:  nullStr(asset.PurchaseInfo.OrderNo),
-		PurchaseDate:     nullTime(asset.PurchaseInfo.Date),
-		PurchaseAmount:   nullInt64(int64(asset.PurchaseInfo.Amount)),
-		PurchaseCurrency: nullStr(asset.PurchaseInfo.Currency),
-		CreatedBy:        asset.MetaInfo.CreatedBy,
+		ID:                asset.ID,
+		ParentAssetID:     nullInt64(asset.ParentAssetID),
+		Status:            string(asset.Status),
+		Tag:               nullStr(asset.Tag),
+		Name:              asset.Name,
+		Category:          asset.Category,
+		Model:             nullStr(asset.Model),
+		ModelNo:           nullStr(asset.ModelNo),
+		SerialNo:          nullStr(asset.SerialNo),
+		Manufacturer:      nullStr(asset.Manufacturer),
+		Notes:             nullStr(asset.Notes),
+		ImageURL:          nullStr(asset.ImageURL),
+		ThumbnailURL:      nullStr(asset.ThumbnailURL),
+		WarrantyUntil:     nullTime(asset.WarrantyUntil),
+		CustomAttrs:       nullCustomAttrs(asset.CustomAttrs),
+		CheckedOutTo:      nullInt64(asset.CheckedOutTo),
+		Location:          nullStr(asset.Location),
+		PositionCode:      nullStr(asset.PositionCode),
+		PurchaseSupplier:  nullStr(asset.PurchaseInfo.Supplier),
+		PurchaseOrderNo:   nullStr(asset.PurchaseInfo.OrderNo),
+		PurchaseDate:      nullTime(asset.PurchaseInfo.Date),
+		PurchaseAmount:    nullInt64(int64(asset.PurchaseInfo.Amount)),
+		PurchaseCurrency:  nullStr(asset.PurchaseInfo.Currency),
+		PartsTotalCounter: int64(asset.PartsTotalCounter),
+		CreatedBy:         asset.MetaInfo.CreatedBy,
 	}
 
 	setter := &models.AssetSetter{
-		ParentAssetID:    omitnullInt64(asset.ParentAssetID),
-		Status:           omit.From(string(asset.Status)),
-		Tag:              omitnullStr(asset.Tag),
-		Name:             omit.From(asset.Name),
-		Category:         omit.From(asset.Category),
-		Model:            omitnullStr(asset.Model),
-		ModelNo:          omitnullStr(asset.ModelNo),
-		SerialNo:         omitnullStr(asset.SerialNo),
-		Manufacturer:     omitnullStr(asset.Manufacturer),
-		Notes:            omitnullStr(asset.Notes),
-		ImageURL:         omitnullStr(asset.ImageURL),
-		ThumbnailURL:     omitnullStr(asset.ThumbnailURL),
-		WarrantyUntil:    omitnullTime(asset.WarrantyUntil),
-		CustomAttrs:      omitnullCustomAttrs(asset.CustomAttrs),
-		CheckedOutTo:     omitnullInt64(asset.CheckedOutTo),
-		Location:         omitnullStr(asset.Location),
-		PositionCode:     omitnullStr(asset.PositionCode),
-		PurchaseSupplier: omitnullStr(asset.PurchaseInfo.Supplier),
-		PurchaseOrderNo:  omitnullStr(asset.PurchaseInfo.OrderNo),
-		PurchaseDate:     omitnullTime(asset.PurchaseInfo.Date),
-		PurchaseAmount:   omitnullInt64(int64(asset.PurchaseInfo.Amount)),
-		PurchaseCurrency: omitnullStr(asset.PurchaseInfo.Currency),
-		UpdatedAt:        omit.From(types.NewSQLiteDatetime(time.Now())),
+		ParentAssetID:     omitnullInt64(asset.ParentAssetID),
+		Status:            omit.From(string(asset.Status)),
+		Tag:               omitnullStr(asset.Tag),
+		Name:              omit.From(asset.Name),
+		Category:          omit.From(asset.Category),
+		Model:             omitnullStr(asset.Model),
+		ModelNo:           omitnullStr(asset.ModelNo),
+		SerialNo:          omitnullStr(asset.SerialNo),
+		Manufacturer:      omitnullStr(asset.Manufacturer),
+		Notes:             omitnullStr(asset.Notes),
+		ImageURL:          omitnullStr(asset.ImageURL),
+		ThumbnailURL:      omitnullStr(asset.ThumbnailURL),
+		WarrantyUntil:     omitnullTime(asset.WarrantyUntil),
+		CustomAttrs:       omitnullCustomAttrs(asset.CustomAttrs),
+		CheckedOutTo:      omitnullInt64(asset.CheckedOutTo),
+		Location:          omitnullStr(asset.Location),
+		PositionCode:      omitnullStr(asset.PositionCode),
+		PurchaseSupplier:  omitnullStr(asset.PurchaseInfo.Supplier),
+		PurchaseOrderNo:   omitnullStr(asset.PurchaseInfo.OrderNo),
+		PurchaseDate:      omitnullTime(asset.PurchaseInfo.Date),
+		PurchaseAmount:    omitnullInt64(int64(asset.PurchaseInfo.Amount)),
+		PurchaseCurrency:  omitnullStr(asset.PurchaseInfo.Currency),
+		PartsTotalCounter: omit.From(int64(asset.PartsTotalCounter)),
+		UpdatedAt:         omit.From(types.NewSQLiteDatetime(time.Now())),
 	}
 
 	err := model.Update(ctx, exec, setter)
@@ -251,6 +253,37 @@ func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asse
 
 func (ar *RepoSQLite) Delete(ctx context.Context, exec bob.Executor, id int64) error {
 	_, err := models.Assets.DeleteQ(ctx, exec, models.DeleteWhere.Assets.ID.EQ(id)).Exec()
+	if err != nil {
+		return err
+	}
+
+	return ar.DeleteParts(ctx, exec, id)
+}
+
+func (ar *RepoSQLite) CreateParts(ctx context.Context, exec bob.Executor, parts []*Part) error {
+	setters := make([]*models.AssetPartSetter, 0, len(parts))
+	for _, part := range parts {
+		setters = append(setters, &models.AssetPartSetter{
+			AssetID:      omit.From(part.AssetID),
+			Tag:          omit.From(part.Tag),
+			Name:         omit.From(part.Name),
+			Notes:        omitnullStr(part.Notes),
+			Location:     omitnullStr(part.Location),
+			PositionCode: omitnullStr(part.PositionCode),
+			CreatedBy:    omit.From(part.CreatedBy),
+		})
+	}
+
+	_, err := models.AssetParts.InsertMany(ctx, exec, setters...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ar *RepoSQLite) DeleteParts(ctx context.Context, exec bob.Executor, assetID int64) error {
+	_, err := models.AssetParts.DeleteQ(ctx, exec, models.DeleteWhere.AssetParts.AssetID.EQ(assetID)).Exec()
 	return err
 }
 
@@ -293,6 +326,22 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 }
 
 func mapDBModelToAsset(model *models.Asset) *Asset {
+	parts := make([]*Part, 0, len(model.R.AssetParts))
+	for _, p := range model.R.AssetParts {
+		parts = append(parts, &Part{
+			ID:           p.ID,
+			AssetID:      p.AssetID,
+			Tag:          p.Tag,
+			Name:         p.Name,
+			Notes:        p.Notes.GetOrZero(),
+			Location:     p.Location.GetOrZero(),
+			PositionCode: p.PositionCode.GetOrZero(),
+			CreatedBy:    p.CreatedBy,
+			CreatedAt:    p.CreatedAt.Time,
+			UpdatedAt:    p.UpdatedAt.Time,
+		})
+	}
+
 	return &Asset{
 		ID:            model.ID,
 		ParentAssetID: model.ParentAssetID.GetOrZero(),
@@ -312,6 +361,7 @@ func mapDBModelToAsset(model *models.Asset) *Asset {
 		CheckedOutTo:  model.CheckedOutTo.GetOrZero(),
 		Location:      model.Location.GetOrZero(),
 		PositionCode:  model.PositionCode.GetOrZero(),
+
 		PurchaseInfo: PurchaseInfo{
 			Supplier: model.PurchaseSupplier.GetOrZero(),
 			OrderNo:  model.PurchaseOrderNo.GetOrZero(),
@@ -319,6 +369,9 @@ func mapDBModelToAsset(model *models.Asset) *Asset {
 			Amount:   MonetaryAmount(model.PurchaseAmount.GetOrZero()),
 			Currency: model.PurchaseCurrency.GetOrZero(),
 		},
+
+		PartsTotalCounter: int(model.PartsTotalCounter),
+		Parts:             parts,
 
 		MetaInfo: MetaInfo{
 			CreatedBy: model.CreatedBy,

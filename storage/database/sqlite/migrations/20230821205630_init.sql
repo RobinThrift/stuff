@@ -74,6 +74,8 @@ CREATE TABLE assets (
     purchase_amount   INT  DEFAULT NULL,
     purchase_currency TEXT DEFAULT NULL,
 
+	parts_total_counter INT NOT NULL DEFAULT 0,
+
     created_by INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
@@ -81,6 +83,25 @@ CREATE TABLE assets (
     FOREIGN KEY(parent_asset_id) REFERENCES assets(id),
     FOREIGN KEY(tag) REFERENCES tags(tag),
     FOREIGN KEY(checked_out_to) REFERENCES users(id),
+    FOREIGN KEY(created_by) REFERENCES users(id)
+);
+
+CREATE TABLE asset_parts (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    asset_id    INTEGER NOT NULL,
+
+    tag            TEXT NOT NULL,
+    name           TEXT NOT NULL,
+    location       TEXT DEFAULT NULL,
+    position_code  TEXT DEFAULT NULL,
+    notes          TEXT DEFAULT NULL,
+
+    created_by INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
+    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
+
+    FOREIGN KEY(asset_id) REFERENCES assets(id),
+    FOREIGN KEY(tag) REFERENCES tags(tag),
     FOREIGN KEY(created_by) REFERENCES users(id)
 );
 
@@ -168,6 +189,7 @@ DROP VIEW manufacturers;
 DROP VIEW categories;
 
 DROP TABLE asset_files;
+DROP TABLE asset_parts;
 DROP TABLE assets;
 
 DROP INDEX unique_tag;

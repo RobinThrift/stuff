@@ -7,8 +7,8 @@
 </header>
 
 {{ with .Data }}
-<table class="min-w-full divide-y divide-neutral-200">
-	{{ template "table_head" list "" "Tag" "Image" "Name" "Category" "Location" "Status" "" }}
+<table class="min-w-full">
+	{{ template "table_head" list "_select_" "" "Tag" "Image" "Name" "Category" "Location" "Status" "" }}
 
 	<tbody class="divide-y divide-neutral-200" x-data="{ open: {} }">
 		{{ range .Page.Assets }}

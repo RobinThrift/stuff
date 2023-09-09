@@ -26,32 +26,33 @@ import (
 
 // Asset is an object representing the database table.
 type Asset struct {
-	ID               int64                                      `db:"id,pk" `
-	ParentAssetID    null.Val[int64]                            `db:"parent_asset_id" `
-	Status           string                                     `db:"status" `
-	Tag              null.Val[string]                           `db:"tag" `
-	Name             string                                     `db:"name" `
-	Category         string                                     `db:"category" `
-	Model            null.Val[string]                           `db:"model" `
-	ModelNo          null.Val[string]                           `db:"model_no" `
-	SerialNo         null.Val[string]                           `db:"serial_no" `
-	Manufacturer     null.Val[string]                           `db:"manufacturer" `
-	Notes            null.Val[string]                           `db:"notes" `
-	ImageURL         null.Val[string]                           `db:"image_url" `
-	ThumbnailURL     null.Val[string]                           `db:"thumbnail_url" `
-	WarrantyUntil    null.Val[types.SQLiteDatetime]             `db:"warranty_until" `
-	CustomAttrs      null.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs" `
-	CheckedOutTo     null.Val[int64]                            `db:"checked_out_to" `
-	Location         null.Val[string]                           `db:"location" `
-	PositionCode     null.Val[string]                           `db:"position_code" `
-	PurchaseSupplier null.Val[string]                           `db:"purchase_supplier" `
-	PurchaseOrderNo  null.Val[string]                           `db:"purchase_order_no" `
-	PurchaseDate     null.Val[types.SQLiteDatetime]             `db:"purchase_date" `
-	PurchaseAmount   null.Val[int64]                            `db:"purchase_amount" `
-	PurchaseCurrency null.Val[string]                           `db:"purchase_currency" `
-	CreatedBy        int64                                      `db:"created_by" `
-	CreatedAt        types.SQLiteDatetime                       `db:"created_at" `
-	UpdatedAt        types.SQLiteDatetime                       `db:"updated_at" `
+	ID                int64                                      `db:"id,pk" `
+	ParentAssetID     null.Val[int64]                            `db:"parent_asset_id" `
+	Status            string                                     `db:"status" `
+	Tag               null.Val[string]                           `db:"tag" `
+	Name              string                                     `db:"name" `
+	Category          string                                     `db:"category" `
+	Model             null.Val[string]                           `db:"model" `
+	ModelNo           null.Val[string]                           `db:"model_no" `
+	SerialNo          null.Val[string]                           `db:"serial_no" `
+	Manufacturer      null.Val[string]                           `db:"manufacturer" `
+	Notes             null.Val[string]                           `db:"notes" `
+	ImageURL          null.Val[string]                           `db:"image_url" `
+	ThumbnailURL      null.Val[string]                           `db:"thumbnail_url" `
+	WarrantyUntil     null.Val[types.SQLiteDatetime]             `db:"warranty_until" `
+	CustomAttrs       null.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs" `
+	CheckedOutTo      null.Val[int64]                            `db:"checked_out_to" `
+	Location          null.Val[string]                           `db:"location" `
+	PositionCode      null.Val[string]                           `db:"position_code" `
+	PurchaseSupplier  null.Val[string]                           `db:"purchase_supplier" `
+	PurchaseOrderNo   null.Val[string]                           `db:"purchase_order_no" `
+	PurchaseDate      null.Val[types.SQLiteDatetime]             `db:"purchase_date" `
+	PurchaseAmount    null.Val[int64]                            `db:"purchase_amount" `
+	PurchaseCurrency  null.Val[string]                           `db:"purchase_currency" `
+	PartsTotalCounter int64                                      `db:"parts_total_counter" `
+	CreatedBy         int64                                      `db:"created_by" `
+	CreatedAt         types.SQLiteDatetime                       `db:"created_at" `
+	UpdatedAt         types.SQLiteDatetime                       `db:"updated_at" `
 
 	R assetR `db:"-" `
 }
@@ -71,47 +72,49 @@ type AssetsStmt = bob.QueryStmt[*Asset, AssetSlice]
 
 // assetR is where relationships are stored.
 type assetR struct {
-	CreatedByUser       *User      // fk_assets_0
-	CheckedOutToUser    *User      // fk_assets_1
-	Tag                 *Tag       // fk_assets_2
-	ParentAsset         *Asset     // fk_assets_3
-	ReverseParentAssets AssetSlice // fk_assets_3__self_join_reverse
+	AssetParts          AssetPartSlice // fk_asset_parts_2
+	CreatedByUser       *User          // fk_assets_0
+	CheckedOutToUser    *User          // fk_assets_1
+	Tag                 *Tag           // fk_assets_2
+	ParentAsset         *Asset         // fk_assets_3
+	ReverseParentAssets AssetSlice     // fk_assets_3__self_join_reverse
 }
 
 // AssetSetter is used for insert/upsert/update operations
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AssetSetter struct {
-	ID               omit.Val[int64]                                `db:"id,pk"`
-	ParentAssetID    omitnull.Val[int64]                            `db:"parent_asset_id"`
-	Status           omit.Val[string]                               `db:"status"`
-	Tag              omitnull.Val[string]                           `db:"tag"`
-	Name             omit.Val[string]                               `db:"name"`
-	Category         omit.Val[string]                               `db:"category"`
-	Model            omitnull.Val[string]                           `db:"model"`
-	ModelNo          omitnull.Val[string]                           `db:"model_no"`
-	SerialNo         omitnull.Val[string]                           `db:"serial_no"`
-	Manufacturer     omitnull.Val[string]                           `db:"manufacturer"`
-	Notes            omitnull.Val[string]                           `db:"notes"`
-	ImageURL         omitnull.Val[string]                           `db:"image_url"`
-	ThumbnailURL     omitnull.Val[string]                           `db:"thumbnail_url"`
-	WarrantyUntil    omitnull.Val[types.SQLiteDatetime]             `db:"warranty_until"`
-	CustomAttrs      omitnull.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs"`
-	CheckedOutTo     omitnull.Val[int64]                            `db:"checked_out_to"`
-	Location         omitnull.Val[string]                           `db:"location"`
-	PositionCode     omitnull.Val[string]                           `db:"position_code"`
-	PurchaseSupplier omitnull.Val[string]                           `db:"purchase_supplier"`
-	PurchaseOrderNo  omitnull.Val[string]                           `db:"purchase_order_no"`
-	PurchaseDate     omitnull.Val[types.SQLiteDatetime]             `db:"purchase_date"`
-	PurchaseAmount   omitnull.Val[int64]                            `db:"purchase_amount"`
-	PurchaseCurrency omitnull.Val[string]                           `db:"purchase_currency"`
-	CreatedBy        omit.Val[int64]                                `db:"created_by"`
-	CreatedAt        omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
-	UpdatedAt        omit.Val[types.SQLiteDatetime]                 `db:"updated_at"`
+	ID                omit.Val[int64]                                `db:"id,pk"`
+	ParentAssetID     omitnull.Val[int64]                            `db:"parent_asset_id"`
+	Status            omit.Val[string]                               `db:"status"`
+	Tag               omitnull.Val[string]                           `db:"tag"`
+	Name              omit.Val[string]                               `db:"name"`
+	Category          omit.Val[string]                               `db:"category"`
+	Model             omitnull.Val[string]                           `db:"model"`
+	ModelNo           omitnull.Val[string]                           `db:"model_no"`
+	SerialNo          omitnull.Val[string]                           `db:"serial_no"`
+	Manufacturer      omitnull.Val[string]                           `db:"manufacturer"`
+	Notes             omitnull.Val[string]                           `db:"notes"`
+	ImageURL          omitnull.Val[string]                           `db:"image_url"`
+	ThumbnailURL      omitnull.Val[string]                           `db:"thumbnail_url"`
+	WarrantyUntil     omitnull.Val[types.SQLiteDatetime]             `db:"warranty_until"`
+	CustomAttrs       omitnull.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs"`
+	CheckedOutTo      omitnull.Val[int64]                            `db:"checked_out_to"`
+	Location          omitnull.Val[string]                           `db:"location"`
+	PositionCode      omitnull.Val[string]                           `db:"position_code"`
+	PurchaseSupplier  omitnull.Val[string]                           `db:"purchase_supplier"`
+	PurchaseOrderNo   omitnull.Val[string]                           `db:"purchase_order_no"`
+	PurchaseDate      omitnull.Val[types.SQLiteDatetime]             `db:"purchase_date"`
+	PurchaseAmount    omitnull.Val[int64]                            `db:"purchase_amount"`
+	PurchaseCurrency  omitnull.Val[string]                           `db:"purchase_currency"`
+	PartsTotalCounter omit.Val[int64]                                `db:"parts_total_counter"`
+	CreatedBy         omit.Val[int64]                                `db:"created_by"`
+	CreatedAt         omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
+	UpdatedAt         omit.Val[types.SQLiteDatetime]                 `db:"updated_at"`
 }
 
 func (s AssetSetter) SetColumns() []string {
-	vals := make([]string, 0, 26)
+	vals := make([]string, 0, 27)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -204,6 +207,10 @@ func (s AssetSetter) SetColumns() []string {
 		vals = append(vals, "purchase_currency")
 	}
 
+	if !s.PartsTotalCounter.IsUnset() {
+		vals = append(vals, "parts_total_counter")
+	}
+
 	if !s.CreatedBy.IsUnset() {
 		vals = append(vals, "created_by")
 	}
@@ -289,6 +296,9 @@ func (s AssetSetter) Overwrite(t *Asset) {
 	if !s.PurchaseCurrency.IsUnset() {
 		t.PurchaseCurrency, _ = s.PurchaseCurrency.GetNull()
 	}
+	if !s.PartsTotalCounter.IsUnset() {
+		t.PartsTotalCounter, _ = s.PartsTotalCounter.Get()
+	}
 	if !s.CreatedBy.IsUnset() {
 		t.CreatedBy, _ = s.CreatedBy.Get()
 	}
@@ -370,6 +380,9 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.PurchaseCurrency.IsUnset() {
 		um.Set("purchase_currency").ToArg(s.PurchaseCurrency).Apply(q)
 	}
+	if !s.PartsTotalCounter.IsUnset() {
+		um.Set("parts_total_counter").ToArg(s.PartsTotalCounter).Apply(q)
+	}
 	if !s.CreatedBy.IsUnset() {
 		um.Set("created_by").ToArg(s.CreatedBy).Apply(q)
 	}
@@ -382,7 +395,7 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 }
 
 func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 26)
+	vals := make([]bob.Expression, 0, 27)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -475,6 +488,10 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.PurchaseCurrency))
 	}
 
+	if !s.PartsTotalCounter.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.PartsTotalCounter))
+	}
+
 	if !s.CreatedBy.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.CreatedBy))
 	}
@@ -491,35 +508,37 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 }
 
 type assetColumnNames struct {
-	ID               string
-	ParentAssetID    string
-	Status           string
-	Tag              string
-	Name             string
-	Category         string
-	Model            string
-	ModelNo          string
-	SerialNo         string
-	Manufacturer     string
-	Notes            string
-	ImageURL         string
-	ThumbnailURL     string
-	WarrantyUntil    string
-	CustomAttrs      string
-	CheckedOutTo     string
-	Location         string
-	PositionCode     string
-	PurchaseSupplier string
-	PurchaseOrderNo  string
-	PurchaseDate     string
-	PurchaseAmount   string
-	PurchaseCurrency string
-	CreatedBy        string
-	CreatedAt        string
-	UpdatedAt        string
+	ID                string
+	ParentAssetID     string
+	Status            string
+	Tag               string
+	Name              string
+	Category          string
+	Model             string
+	ModelNo           string
+	SerialNo          string
+	Manufacturer      string
+	Notes             string
+	ImageURL          string
+	ThumbnailURL      string
+	WarrantyUntil     string
+	CustomAttrs       string
+	CheckedOutTo      string
+	Location          string
+	PositionCode      string
+	PurchaseSupplier  string
+	PurchaseOrderNo   string
+	PurchaseDate      string
+	PurchaseAmount    string
+	PurchaseCurrency  string
+	PartsTotalCounter string
+	CreatedBy         string
+	CreatedAt         string
+	UpdatedAt         string
 }
 
 type assetRelationshipJoins[Q dialect.Joinable] struct {
+	AssetParts          bob.Mod[Q]
 	CreatedByUser       bob.Mod[Q]
 	CheckedOutToUser    bob.Mod[Q]
 	Tag                 bob.Mod[Q]
@@ -529,6 +548,7 @@ type assetRelationshipJoins[Q dialect.Joinable] struct {
 
 func buildassetRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) assetRelationshipJoins[Q] {
 	return assetRelationshipJoins[Q]{
+		AssetParts:          assetsJoinAssetParts[Q](ctx, typ),
 		CreatedByUser:       assetsJoinCreatedByUser[Q](ctx, typ),
 		CheckedOutToUser:    assetsJoinCheckedOutToUser[Q](ctx, typ),
 		Tag:                 assetsJoinTag[Q](ctx, typ),
@@ -546,118 +566,122 @@ func assetsJoin[Q dialect.Joinable](ctx context.Context) joinSet[assetRelationsh
 }
 
 var AssetColumns = struct {
-	ID               sqlite.Expression
-	ParentAssetID    sqlite.Expression
-	Status           sqlite.Expression
-	Tag              sqlite.Expression
-	Name             sqlite.Expression
-	Category         sqlite.Expression
-	Model            sqlite.Expression
-	ModelNo          sqlite.Expression
-	SerialNo         sqlite.Expression
-	Manufacturer     sqlite.Expression
-	Notes            sqlite.Expression
-	ImageURL         sqlite.Expression
-	ThumbnailURL     sqlite.Expression
-	WarrantyUntil    sqlite.Expression
-	CustomAttrs      sqlite.Expression
-	CheckedOutTo     sqlite.Expression
-	Location         sqlite.Expression
-	PositionCode     sqlite.Expression
-	PurchaseSupplier sqlite.Expression
-	PurchaseOrderNo  sqlite.Expression
-	PurchaseDate     sqlite.Expression
-	PurchaseAmount   sqlite.Expression
-	PurchaseCurrency sqlite.Expression
-	CreatedBy        sqlite.Expression
-	CreatedAt        sqlite.Expression
-	UpdatedAt        sqlite.Expression
+	ID                sqlite.Expression
+	ParentAssetID     sqlite.Expression
+	Status            sqlite.Expression
+	Tag               sqlite.Expression
+	Name              sqlite.Expression
+	Category          sqlite.Expression
+	Model             sqlite.Expression
+	ModelNo           sqlite.Expression
+	SerialNo          sqlite.Expression
+	Manufacturer      sqlite.Expression
+	Notes             sqlite.Expression
+	ImageURL          sqlite.Expression
+	ThumbnailURL      sqlite.Expression
+	WarrantyUntil     sqlite.Expression
+	CustomAttrs       sqlite.Expression
+	CheckedOutTo      sqlite.Expression
+	Location          sqlite.Expression
+	PositionCode      sqlite.Expression
+	PurchaseSupplier  sqlite.Expression
+	PurchaseOrderNo   sqlite.Expression
+	PurchaseDate      sqlite.Expression
+	PurchaseAmount    sqlite.Expression
+	PurchaseCurrency  sqlite.Expression
+	PartsTotalCounter sqlite.Expression
+	CreatedBy         sqlite.Expression
+	CreatedAt         sqlite.Expression
+	UpdatedAt         sqlite.Expression
 }{
-	ID:               sqlite.Quote("assets", "id"),
-	ParentAssetID:    sqlite.Quote("assets", "parent_asset_id"),
-	Status:           sqlite.Quote("assets", "status"),
-	Tag:              sqlite.Quote("assets", "tag"),
-	Name:             sqlite.Quote("assets", "name"),
-	Category:         sqlite.Quote("assets", "category"),
-	Model:            sqlite.Quote("assets", "model"),
-	ModelNo:          sqlite.Quote("assets", "model_no"),
-	SerialNo:         sqlite.Quote("assets", "serial_no"),
-	Manufacturer:     sqlite.Quote("assets", "manufacturer"),
-	Notes:            sqlite.Quote("assets", "notes"),
-	ImageURL:         sqlite.Quote("assets", "image_url"),
-	ThumbnailURL:     sqlite.Quote("assets", "thumbnail_url"),
-	WarrantyUntil:    sqlite.Quote("assets", "warranty_until"),
-	CustomAttrs:      sqlite.Quote("assets", "custom_attrs"),
-	CheckedOutTo:     sqlite.Quote("assets", "checked_out_to"),
-	Location:         sqlite.Quote("assets", "location"),
-	PositionCode:     sqlite.Quote("assets", "position_code"),
-	PurchaseSupplier: sqlite.Quote("assets", "purchase_supplier"),
-	PurchaseOrderNo:  sqlite.Quote("assets", "purchase_order_no"),
-	PurchaseDate:     sqlite.Quote("assets", "purchase_date"),
-	PurchaseAmount:   sqlite.Quote("assets", "purchase_amount"),
-	PurchaseCurrency: sqlite.Quote("assets", "purchase_currency"),
-	CreatedBy:        sqlite.Quote("assets", "created_by"),
-	CreatedAt:        sqlite.Quote("assets", "created_at"),
-	UpdatedAt:        sqlite.Quote("assets", "updated_at"),
+	ID:                sqlite.Quote("assets", "id"),
+	ParentAssetID:     sqlite.Quote("assets", "parent_asset_id"),
+	Status:            sqlite.Quote("assets", "status"),
+	Tag:               sqlite.Quote("assets", "tag"),
+	Name:              sqlite.Quote("assets", "name"),
+	Category:          sqlite.Quote("assets", "category"),
+	Model:             sqlite.Quote("assets", "model"),
+	ModelNo:           sqlite.Quote("assets", "model_no"),
+	SerialNo:          sqlite.Quote("assets", "serial_no"),
+	Manufacturer:      sqlite.Quote("assets", "manufacturer"),
+	Notes:             sqlite.Quote("assets", "notes"),
+	ImageURL:          sqlite.Quote("assets", "image_url"),
+	ThumbnailURL:      sqlite.Quote("assets", "thumbnail_url"),
+	WarrantyUntil:     sqlite.Quote("assets", "warranty_until"),
+	CustomAttrs:       sqlite.Quote("assets", "custom_attrs"),
+	CheckedOutTo:      sqlite.Quote("assets", "checked_out_to"),
+	Location:          sqlite.Quote("assets", "location"),
+	PositionCode:      sqlite.Quote("assets", "position_code"),
+	PurchaseSupplier:  sqlite.Quote("assets", "purchase_supplier"),
+	PurchaseOrderNo:   sqlite.Quote("assets", "purchase_order_no"),
+	PurchaseDate:      sqlite.Quote("assets", "purchase_date"),
+	PurchaseAmount:    sqlite.Quote("assets", "purchase_amount"),
+	PurchaseCurrency:  sqlite.Quote("assets", "purchase_currency"),
+	PartsTotalCounter: sqlite.Quote("assets", "parts_total_counter"),
+	CreatedBy:         sqlite.Quote("assets", "created_by"),
+	CreatedAt:         sqlite.Quote("assets", "created_at"),
+	UpdatedAt:         sqlite.Quote("assets", "updated_at"),
 }
 
 type assetWhere[Q sqlite.Filterable] struct {
-	ID               sqlite.WhereMod[Q, int64]
-	ParentAssetID    sqlite.WhereNullMod[Q, int64]
-	Status           sqlite.WhereMod[Q, string]
-	Tag              sqlite.WhereNullMod[Q, string]
-	Name             sqlite.WhereMod[Q, string]
-	Category         sqlite.WhereMod[Q, string]
-	Model            sqlite.WhereNullMod[Q, string]
-	ModelNo          sqlite.WhereNullMod[Q, string]
-	SerialNo         sqlite.WhereNullMod[Q, string]
-	Manufacturer     sqlite.WhereNullMod[Q, string]
-	Notes            sqlite.WhereNullMod[Q, string]
-	ImageURL         sqlite.WhereNullMod[Q, string]
-	ThumbnailURL     sqlite.WhereNullMod[Q, string]
-	WarrantyUntil    sqlite.WhereNullMod[Q, types.SQLiteDatetime]
-	CustomAttrs      sqlite.WhereNullMod[Q, types.SQLiteJSON[map[string]any]]
-	CheckedOutTo     sqlite.WhereNullMod[Q, int64]
-	Location         sqlite.WhereNullMod[Q, string]
-	PositionCode     sqlite.WhereNullMod[Q, string]
-	PurchaseSupplier sqlite.WhereNullMod[Q, string]
-	PurchaseOrderNo  sqlite.WhereNullMod[Q, string]
-	PurchaseDate     sqlite.WhereNullMod[Q, types.SQLiteDatetime]
-	PurchaseAmount   sqlite.WhereNullMod[Q, int64]
-	PurchaseCurrency sqlite.WhereNullMod[Q, string]
-	CreatedBy        sqlite.WhereMod[Q, int64]
-	CreatedAt        sqlite.WhereMod[Q, types.SQLiteDatetime]
-	UpdatedAt        sqlite.WhereMod[Q, types.SQLiteDatetime]
+	ID                sqlite.WhereMod[Q, int64]
+	ParentAssetID     sqlite.WhereNullMod[Q, int64]
+	Status            sqlite.WhereMod[Q, string]
+	Tag               sqlite.WhereNullMod[Q, string]
+	Name              sqlite.WhereMod[Q, string]
+	Category          sqlite.WhereMod[Q, string]
+	Model             sqlite.WhereNullMod[Q, string]
+	ModelNo           sqlite.WhereNullMod[Q, string]
+	SerialNo          sqlite.WhereNullMod[Q, string]
+	Manufacturer      sqlite.WhereNullMod[Q, string]
+	Notes             sqlite.WhereNullMod[Q, string]
+	ImageURL          sqlite.WhereNullMod[Q, string]
+	ThumbnailURL      sqlite.WhereNullMod[Q, string]
+	WarrantyUntil     sqlite.WhereNullMod[Q, types.SQLiteDatetime]
+	CustomAttrs       sqlite.WhereNullMod[Q, types.SQLiteJSON[map[string]any]]
+	CheckedOutTo      sqlite.WhereNullMod[Q, int64]
+	Location          sqlite.WhereNullMod[Q, string]
+	PositionCode      sqlite.WhereNullMod[Q, string]
+	PurchaseSupplier  sqlite.WhereNullMod[Q, string]
+	PurchaseOrderNo   sqlite.WhereNullMod[Q, string]
+	PurchaseDate      sqlite.WhereNullMod[Q, types.SQLiteDatetime]
+	PurchaseAmount    sqlite.WhereNullMod[Q, int64]
+	PurchaseCurrency  sqlite.WhereNullMod[Q, string]
+	PartsTotalCounter sqlite.WhereMod[Q, int64]
+	CreatedBy         sqlite.WhereMod[Q, int64]
+	CreatedAt         sqlite.WhereMod[Q, types.SQLiteDatetime]
+	UpdatedAt         sqlite.WhereMod[Q, types.SQLiteDatetime]
 }
 
 func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
 	return assetWhere[Q]{
-		ID:               sqlite.Where[Q, int64](AssetColumns.ID),
-		ParentAssetID:    sqlite.WhereNull[Q, int64](AssetColumns.ParentAssetID),
-		Status:           sqlite.Where[Q, string](AssetColumns.Status),
-		Tag:              sqlite.WhereNull[Q, string](AssetColumns.Tag),
-		Name:             sqlite.Where[Q, string](AssetColumns.Name),
-		Category:         sqlite.Where[Q, string](AssetColumns.Category),
-		Model:            sqlite.WhereNull[Q, string](AssetColumns.Model),
-		ModelNo:          sqlite.WhereNull[Q, string](AssetColumns.ModelNo),
-		SerialNo:         sqlite.WhereNull[Q, string](AssetColumns.SerialNo),
-		Manufacturer:     sqlite.WhereNull[Q, string](AssetColumns.Manufacturer),
-		Notes:            sqlite.WhereNull[Q, string](AssetColumns.Notes),
-		ImageURL:         sqlite.WhereNull[Q, string](AssetColumns.ImageURL),
-		ThumbnailURL:     sqlite.WhereNull[Q, string](AssetColumns.ThumbnailURL),
-		WarrantyUntil:    sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.WarrantyUntil),
-		CustomAttrs:      sqlite.WhereNull[Q, types.SQLiteJSON[map[string]any]](AssetColumns.CustomAttrs),
-		CheckedOutTo:     sqlite.WhereNull[Q, int64](AssetColumns.CheckedOutTo),
-		Location:         sqlite.WhereNull[Q, string](AssetColumns.Location),
-		PositionCode:     sqlite.WhereNull[Q, string](AssetColumns.PositionCode),
-		PurchaseSupplier: sqlite.WhereNull[Q, string](AssetColumns.PurchaseSupplier),
-		PurchaseOrderNo:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseOrderNo),
-		PurchaseDate:     sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.PurchaseDate),
-		PurchaseAmount:   sqlite.WhereNull[Q, int64](AssetColumns.PurchaseAmount),
-		PurchaseCurrency: sqlite.WhereNull[Q, string](AssetColumns.PurchaseCurrency),
-		CreatedBy:        sqlite.Where[Q, int64](AssetColumns.CreatedBy),
-		CreatedAt:        sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.CreatedAt),
-		UpdatedAt:        sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.UpdatedAt),
+		ID:                sqlite.Where[Q, int64](AssetColumns.ID),
+		ParentAssetID:     sqlite.WhereNull[Q, int64](AssetColumns.ParentAssetID),
+		Status:            sqlite.Where[Q, string](AssetColumns.Status),
+		Tag:               sqlite.WhereNull[Q, string](AssetColumns.Tag),
+		Name:              sqlite.Where[Q, string](AssetColumns.Name),
+		Category:          sqlite.Where[Q, string](AssetColumns.Category),
+		Model:             sqlite.WhereNull[Q, string](AssetColumns.Model),
+		ModelNo:           sqlite.WhereNull[Q, string](AssetColumns.ModelNo),
+		SerialNo:          sqlite.WhereNull[Q, string](AssetColumns.SerialNo),
+		Manufacturer:      sqlite.WhereNull[Q, string](AssetColumns.Manufacturer),
+		Notes:             sqlite.WhereNull[Q, string](AssetColumns.Notes),
+		ImageURL:          sqlite.WhereNull[Q, string](AssetColumns.ImageURL),
+		ThumbnailURL:      sqlite.WhereNull[Q, string](AssetColumns.ThumbnailURL),
+		WarrantyUntil:     sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.WarrantyUntil),
+		CustomAttrs:       sqlite.WhereNull[Q, types.SQLiteJSON[map[string]any]](AssetColumns.CustomAttrs),
+		CheckedOutTo:      sqlite.WhereNull[Q, int64](AssetColumns.CheckedOutTo),
+		Location:          sqlite.WhereNull[Q, string](AssetColumns.Location),
+		PositionCode:      sqlite.WhereNull[Q, string](AssetColumns.PositionCode),
+		PurchaseSupplier:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseSupplier),
+		PurchaseOrderNo:   sqlite.WhereNull[Q, string](AssetColumns.PurchaseOrderNo),
+		PurchaseDate:      sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.PurchaseDate),
+		PurchaseAmount:    sqlite.WhereNull[Q, int64](AssetColumns.PurchaseAmount),
+		PurchaseCurrency:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseCurrency),
+		PartsTotalCounter: sqlite.Where[Q, int64](AssetColumns.PartsTotalCounter),
+		CreatedBy:         sqlite.Where[Q, int64](AssetColumns.CreatedBy),
+		CreatedAt:         sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.CreatedAt),
+		UpdatedAt:         sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.UpdatedAt),
 	}
 }
 
@@ -756,6 +780,13 @@ func (o AssetSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+func assetsJoinAssetParts[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, AssetParts.Name(ctx)).On(
+			AssetPartColumns.AssetID.EQ(AssetColumns.ID),
+		),
+	}
+}
 func assetsJoinCreatedByUser[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Users.Name(ctx)).On(
@@ -790,6 +821,24 @@ func assetsJoinReverseParentAssets[Q dialect.Joinable](ctx context.Context, typ 
 			AssetColumns.ParentAssetID.EQ(AssetColumns.ID),
 		),
 	}
+}
+
+// AssetParts starts a query for related objects on asset_parts
+func (o *Asset) AssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPartsQuery {
+	return AssetParts.Query(ctx, exec, append(mods,
+		sm.Where(AssetPartColumns.AssetID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os AssetSlice) AssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPartsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return AssetParts.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetPartColumns.AssetID).In(PKArgs...)),
+	)...)
 }
 
 // CreatedByUser starts a query for related objects on users
@@ -888,6 +937,15 @@ func (o *Asset) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "AssetParts":
+		rels, ok := retrieved.(AssetPartSlice)
+		if !ok {
+			return fmt.Errorf("asset cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.AssetParts = rels
+
+		return nil
 	case "CreatedByUser":
 		rel, ok := retrieved.(*User)
 		if !ok {
@@ -936,6 +994,72 @@ func (o *Asset) Preload(name string, retrieved any) error {
 	default:
 		return fmt.Errorf("asset has no relationship %q", name)
 	}
+}
+
+func ThenLoadAssetAssetParts(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadAssetAssetParts(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load AssetAssetParts", retrieved)
+		}
+
+		err := loader.LoadAssetAssetParts(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadAssetAssetParts loads the asset's AssetParts into the .R struct
+func (o *Asset) LoadAssetAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.AssetParts = nil
+
+	related, err := o.AssetParts(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.AssetParts = related
+	return nil
+}
+
+// LoadAssetAssetParts loads the asset's AssetParts into the .R struct
+func (os AssetSlice) LoadAssetAssetParts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assetParts, err := os.AssetParts(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.AssetParts = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range assetParts {
+			if o.ID != rel.AssetID {
+				continue
+			}
+
+			o.R.AssetParts = append(o.R.AssetParts, rel)
+		}
+	}
+
+	return nil
 }
 
 func PreloadAssetCreatedByUser(opts ...sqlite.PreloadOption) sqlite.Preloader {
@@ -1336,6 +1460,65 @@ func (os AssetSlice) LoadAssetReverseParentAssets(ctx context.Context, exec bob.
 			o.R.ReverseParentAssets = append(o.R.ReverseParentAssets, rel)
 		}
 	}
+
+	return nil
+}
+
+func insertAssetAssetParts0(ctx context.Context, exec bob.Executor, assetParts1 []*AssetPartSetter, asset0 *Asset) (AssetPartSlice, error) {
+	for _, assetPart1 := range assetParts1 {
+		assetPart1.AssetID = omit.From(asset0.ID)
+	}
+
+	ret, err := AssetParts.InsertMany(ctx, exec, assetParts1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertAssetAssetParts0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachAssetAssetParts0(ctx context.Context, exec bob.Executor, assetParts1 AssetPartSlice, asset0 *Asset) error {
+	setter := &AssetPartSetter{
+		AssetID: omit.From(asset0.ID),
+	}
+
+	err := AssetParts.Update(ctx, exec, setter, assetParts1...)
+	if err != nil {
+		return fmt.Errorf("attachAssetAssetParts0: %w", err)
+	}
+
+	return nil
+}
+
+func (asset0 *Asset) InsertAssetParts(ctx context.Context, exec bob.Executor, related ...*AssetPartSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	assetPart1, err := insertAssetAssetParts0(ctx, exec, related, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetParts = append(asset0.R.AssetParts, assetPart1...)
+
+	return nil
+}
+
+func (asset0 *Asset) AttachAssetParts(ctx context.Context, exec bob.Executor, related ...*AssetPart) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	assetPart1 := AssetPartSlice(related)
+
+	err = attachAssetAssetParts0(ctx, exec, assetPart1, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetParts = append(asset0.R.AssetParts, assetPart1...)
 
 	return nil
 }

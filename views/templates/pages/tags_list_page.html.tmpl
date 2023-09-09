@@ -7,7 +7,7 @@
 
 {{ with .Data }}
 <table class="min-w-full divide-y divide-neutral-200">
-	{{ template "table_head" list "Tag" "In Use" "Last Updated" }}
+	{{ template "table_head" list "_select_" "Tag" "In Use" "Last Updated" }}
 
 	<tbody class="divide-y divide-neutral-200">
 		{{ range .Page.Tags }}

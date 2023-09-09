@@ -2,7 +2,12 @@
 
 {{ define "main" }}
 {{ with .Data }}
-<div class="container mx-auto">
+<form
+	class="container mx-auto"
+	method="post"
+	action="{{- if .IsNew -}} /assets/new {{- else -}} {{ printf "/assets/%v/edit" .Asset.ID }} {{- end -}}"
+	enctype="multipart/form-data"
+>
 	<header class="my-5 flex items-end">
 		<h1 class="font-extrabold md:text-2xl lg:text-4xl">
 		{{ if .IsNew }}
@@ -11,6 +16,10 @@
 			Edit {{ .Asset.Name }}
 		{{ end }}
 		</h1>
+
+		<button type="submit" class="btn btn-primary mt-5">
+			Save Asset
+		</button>
 	</header>
 
 	
@@ -18,270 +27,379 @@
 	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
 	{{ end }}
 
-	<form
-		method="post"
-		action="{{- if .IsNew -}} /assets/new {{- else -}} {{ printf "/assets/%v/edit" .Asset.ID }} {{- end -}}"
-		enctype="multipart/form-data"
-	>
-		<input type="hidden" name="stuff.csrf.token" value={{ $.Global.CSRFToken }} />
+	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
 
-		<div class="grid grid-cols-4 gap-5">
-			<div class="col-span-3 gap-5 grid grid-cols-4">
+	<div class="grid grid-cols-4 gap-5">
+		<div class="col-span-3 gap-5 grid grid-cols-4">
+			{{-
+				template "field" dict
+				"Class" "col-span-3"
+				"InputWrapperClass" "flex-grow"
+				"Required" true
+				"Label" "Name"
+				"Name" "name"
+				"ValidationErr" .ValidationErrs.name
+				"Value" .Asset.Name
+			-}}
+
+			{{-
+				template "select" dict
+				"Class" "col-span-1"
+				"Label" "Status"
+				"Name" "status"
+				"ValidationErr" .ValidationErrs.status
+				"Value" .Asset.Status
+				"Options" (list
+					(list "In Storage" "IN_STORAGE")
+					(list "In Use" "IN_USE")
+					(list "Archived" "ARCHIVED")
+				)
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Required" true
+				"Label" "Tag"
+				"Name" "tag"
+				"ValidationErr" .ValidationErrs.tag
+				"Value" .Asset.Tag
+				"AutoCompleteSource" "/api/v1/tags?in_use=false"
+				"AutoCompletePath" "tags.tag"
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Required" true
+				"Label" "Category"
+				"Name" "category"
+				"ValidationErr" .ValidationErrs.category
+				"Value" .Asset.Category
+				"AutoCompleteSource" "/api/v1/assets/categories"
+				"AutoCompletePath" "categories.name"
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Model"
+				"Name" "model"
+				"ValidationErr" .ValidationErrs.model
+				"Value" .Asset.Model
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Model No."
+				"Name" "model_no"
+				"ValidationErr" .ValidationErrs.model_no
+				"Value" .Asset.ModelNo
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Manufacturer"
+				"Name" "manufacturer"
+				"ValidationErr" .ValidationErrs.manufacturer
+				"Value" .Asset.Manufacturer
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-2"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Serial No"
+				"Name" "serial_no"
+				"ValidationErr" .ValidationErrs.serial_no
+				"Value" .Asset.SerialNo
+			-}}
+
+			{{-
+				template "datepicker" dict
+				"Class" "col-span-1 col-start-4"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Warranty Until"
+				"Name" "warranty_until"
+				"ValidationErr" .ValidationErrs.warranty_until
+				"Value" .Asset.WarrantyUntil
+				"Format" "2006-01-02"
+			-}}
+
+			{{-
+				template "textarea" dict
+				"Class" "col-span-4"
+				"LabelClass" "font-bold"
+				"Label" "Notes"
+				"Name" "notes"
+				"ValidationErr" .ValidationErrs.notes
+				"Value" .Asset.Notes
+			-}}
+		</div>
+
+		<div
+			class="col-span-1 row-span-4 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
+			x-data="{{ printf "{ img: '%s' }" .Asset.ImageURL }}"
+		>
+			<label
+				for="image"
+				class="block w-full flex-1 cursor-pointer relative"
+				x-on:dragover.prevent="$refs.icons.classList.add('drag-over')"
+				x-on:dragleave.prevent="$refs.icons.classList.remove('drag-over')" 
+			>
+				<div class="flex flex-col items-center justify-center">
+					<div x-show="!img" class="group flex justify-center items-center w-full h-full" x-ref="icons">
+						{{ template "icon" dict "Icon" "file-arrow-up" "Class" "drag-over-show pointer-events-none" }}
+						{{ template "icon" dict "Icon" "images-square" "Class" "drag-over-hide pointer-events-none" }}
+					</div>
+
+					<p x-show="!img" class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Drop to upload</span> or click to select</p>
+					<p x-show="!img" class="text-xs text-gray-500 dark:text-gray-400">PNG, JPEG, WebP</p>
+
+					<img x-show="img" x-bind:src="img" class="w-full h-auto" />
+				</div>
+
+				<input
+					class="absolute top-0 left-0 bottom-0 right-0 text-sm file:text-transparent text-transparent file:border-0 file:bg-transparent"
+					name="image"
+					id="image"
+					type="file"
+					accept="image/*"
+					x-ref="fileInput"
+					x-on:change="
+						if (!$event.target.files) {
+							return
+						}
+						reader = new FileReader();
+						reader.readAsDataURL($event.target.files[0])
+						reader.onload = e => img = e.target.result
+					"
+				/>
+			</label>
+
+			<button
+				x-show="img" class="btn btn-outline btn-danger flex justify-center items-center"
+				x-on:click.prevent="$refs.fileInput.value = ''; img = ''"
+			>
+				{{ template "icon" dict "Icon" "file-x" "Class" "w-[24px] h-[24px]" }}
+				Clear
+			</button>
+		</div>
+
+		<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Location</h3>
+		<div class="col-span-3 grid grid-cols-4 gap-5">
+			{{-
+				template "field" dict
+				"Class" "col-span-3"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Location"
+				"Name" "location"
+				"ValidationErr" .ValidationErrs.location
+				"Value" .Asset.Location
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-1"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Position Code"
+				"Name" "position_code"
+				"ValidationErr" .ValidationErrs.position_code
+				"Value" .Asset.PositionCode
+			-}}
+		</div>
+
+		<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Purchase Info</h3>
+		<div class="col-span-3 grid grid-cols-4 gap-5">
+			{{-
+				template "field" dict
+				"Class" "col-span-3"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Order No."
+				"Name" "purchase.order_no"
+				"ValidationErr" (index .ValidationErrs "purchase.order_no")
+				"Value" .Asset.PurchaseInfo.OrderNo
+			-}}
+
+			{{-
+				template "datepicker" dict
+				"Class" "col-span-1"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Purchase Date"
+				"Name" "purchase.date"
+				"Format" "2006-01-02"
+				"ValidationErr" (index .ValidationErrs "purchase.date")
+				"Value" .Asset.PurchaseInfo.Date
+			-}}
+
+			{{-
+				template "field" dict
+				"Class" "col-span-4"
+				"LabelClass" "font-bold"
+				"InputWrapperClass" "flex-grow"
+				"Label" "Supplier"
+				"Name" "purchase.supplier"
+				"ValidationErr" (index .ValidationErrs "purchase.supplier")
+				"Value" .Asset.PurchaseInfo.Supplier
+			-}}
+
+			<div class="col-span-1 col-start-4 flex items-center mb-5">
+				<label for="purchase.amount" class="label font-bold mt-2 mr-5 flex items-center">Cost</label>
+				<div class="flex-grow flex w-full items-center">
+					<input name="purchase.amount" id="purchase.amount" class="input rounded-r-none flex-1 text-right" value="{{ .Asset.PurchaseInfo.Amount.Format .DecimalSeparator }}" />
+					<input
+						type="text"
+						name="purchase.currency"
+						id="purchase.currency"
+						value="{{ .Asset.PurchaseInfo.Currency }}"
+						class="input rounded-l-none w-[64px] border-l-0"
+					/>
+
+					{{ if has .ValidationErrs "purchase.amount" }}
+					<span class="block text-red-500">{{ (index .ValidationErrs "purchase.amount") }}</span>
+					{{ end }}
+				</div>
+			</div>
+		</div>
+
+		{{ template "edit_parts" .Asset }}
+	</div>
+
+	<div class="flex flex-col items-end">
+		<button type="submit" class="btn btn-primary mt-5">
+			Save Asset
+		</button>
+	</div>
+</form>
+{{ end }}
+{{ end }}
+
+
+{{ define "edit_parts" }}
+<div
+	class="col-span-4 md:col-span-3"
+	x-data="{{
+		printf `{
+			parts: %v,
+			parentTag: '%v',
+			totalCounter: %v,
+
+			addItem() {
+				this.totalCounter++
+				this.parts.push({
+					ID: 0,
+					Tag: this.parentTag + '-' + this.totalCounter,
+					Name: '',
+					Location: '',
+					PositionCode: '',
+					Notes: '',
+				})
+			},
+
+			removeItem(i) {
+				console.log(this.parts.splice(i, 1))
+			}
+		}` (json .Parts) .Tag .PartsTotalCounter
+	}}"
+>
+	{{-
+		template "field" dict
+		"Required" true
+		"Readonly" true
+		"Type" "hidden"
+		"Name" "`parts_total_counter`"
+		"XBindValue" "totalCounter"
+	-}}
+
+	<h2 class="mt-8 mb-5 md:text-xl lg:text-3xl font-bold">Parts</h2>
+	<ul>
+		<li class="hidden md:flex flex-col md:flex-row justify-items-stretch">
+			<span class="block label flex-1 mr-2">Tag</span>
+			<span class="block label flex-1 mr-2">Name</span>
+			<span class="block label flex-1 mr-2">Location</span>
+			<span class="block label flex-1 mr-2">Position Code</span>
+			<span class="block label flex-1 mr-2">Notes</span>
+			<span class="block ml-3 w-[80px]"></span>
+		</li>
+
+		<template x-for="(part, i) in parts">
+			<li class="flex flex-col md:flex-row">
+				<input type="hidden" x-bind:name="`parts[${i}].id`" x-bind:value="part.ID" />
+
 				{{-
 					template "field" dict
-					"Class" "col-span-3"
-					"InputWrapperClass" "flex-grow"
+					"Class" "mr-2"
+					"LabelClass" "md:hidden"
+					"Required" true
+					"Readonly" true
+					"Label" "Tag"
+					"XBindName" "`parts[${i}].tag`"
+					"XBindValue" "part.Tag"
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "mr-2"
+					"LabelClass" "md:hidden"
 					"Required" true
 					"Label" "Name"
-					"Name" "name"
-					"ValidationErr" .ValidationErrs.name
-					"Value" .Asset.Name
-				-}}
-
-				{{-
-					template "select" dict
-					"Class" "col-span-1"
-					"Label" "Status"
-					"Name" "status"
-					"ValidationErr" .ValidationErrs.status
-					"Value" .Asset.Status
-					"Options" (list
-						(list "In Storage" "IN_STORAGE")
-						(list "In Use" "IN_USE")
-						(list "Archived" "ARCHIVED")
-					)
+					"XBindName" "`parts[${i}].name`"
+					"XBindValue" "part.Name"
 				-}}
 
 				{{-
 					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
+					"Class" "mr-2"
+					"LabelClass" "md:hidden"
 					"Required" true
-					"Label" "Tag"
-					"Name" "tag"
-					"ValidationErr" .ValidationErrs.tag
-					"Value" .Asset.Tag
-					"AutoCompleteSource" "/api/v1/tags?in_use=false"
-					"AutoCompletePath" "tags.tag"
+					"Label" "Location"
+					"XBindName" "`parts[${i}].location`"
+					"XBindValue" "part.Location"
 				-}}
 
 				{{-
 					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
+					"Class" "mr-2"
+					"LabelClass" "md:hidden"
 					"Required" true
-					"Label" "Category"
-					"Name" "category"
-					"ValidationErr" .ValidationErrs.category
-					"Value" .Asset.Category
-					"AutoCompleteSource" "/api/v1/assets/categories"
-					"AutoCompletePath" "categories.name"
-				-}}
-
-				{{-
-					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Model"
-					"Name" "model"
-					"ValidationErr" .ValidationErrs.model
-					"Value" .Asset.Model
-				-}}
-
-				{{-
-					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Model No."
-					"Name" "model_no"
-					"ValidationErr" .ValidationErrs.model_no
-					"Value" .Asset.ModelNo
-				-}}
-
-				{{-
-					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Manufacturer"
-					"Name" "manufacturer"
-					"ValidationErr" .ValidationErrs.manufacturer
-					"Value" .Asset.Manufacturer
-				-}}
-
-				{{-
-					template "field" dict
-					"Class" "col-span-2"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Serial No"
-					"Name" "serial_no"
-					"ValidationErr" .ValidationErrs.serial_no
-					"Value" .Asset.SerialNo
-				-}}
-
-				{{-
-					template "datepicker" dict
-					"Class" "col-span-1 col-start-4"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Warranty Until"
-					"Name" "warranty_until"
-					"ValidationErr" .ValidationErrs.warranty_until
-					"Value" .Asset.WarrantyUntil
-					"Format" "2006-01-02"
+					"Label" "Position Code"
+					"XBindName" "`parts[${i}].position_code`"
+					"XBindValue" "part.PositionCode"
 				-}}
 
 				{{-
 					template "textarea" dict
-					"Class" "col-span-4"
-					"LabelClass" "font-bold"
+					"Class" "flex-grow"
+					"LabelClass" "md:hidden"
+					"MinHeight" "min-h-[42px]"
 					"Label" "Notes"
-					"Name" "notes"
-					"ValidationErr" .ValidationErrs.notes
-					"Value" .Asset.Notes
-				-}}
-			</div>
-
-			<div
-				class="col-span-1 row-span-4 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
-				x-data="{{ printf "{ img: '%s' }" .Asset.ImageURL }}"
-			>
-				<label
-					for="image"
-					class="block w-full flex-1 cursor-pointer relative"
-					x-on:dragover.prevent="$refs.icons.classList.add('drag-over')"
-					x-on:dragleave.prevent="$refs.icons.classList.remove('drag-over')" 
-				>
-					<div class="flex flex-col items-center justify-center">
-						<div x-show="!img" class="group flex justify-center items-center w-full h-full" x-ref="icons">
-							{{ template "icon" dict "Icon" "file-arrow-up" "Class" "drag-over-show pointer-events-none" }}
-							{{ template "icon" dict "Icon" "images-square" "Class" "drag-over-hide pointer-events-none" }}
-						</div>
-
-						<p x-show="!img" class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Drop to upload</span> or click to select</p>
-						<p x-show="!img" class="text-xs text-gray-500 dark:text-gray-400">PNG, JPEG, WebP</p>
-
-						<img x-show="img" x-bind:src="img" class="w-full h-auto" />
-					</div>
-
-					<input
-						class="absolute top-0 left-0 bottom-0 right-0 text-sm file:text-transparent text-transparent file:border-0 file:bg-transparent"
-						name="image"
-						id="image"
-						type="file"
-						accept="image/*"
-						x-ref="fileInput"
-						x-on:change="
-							if (!$event.target.files) {
-								return
-							}
-							reader = new FileReader();
-							reader.readAsDataURL($event.target.files[0])
-							reader.onload = e => img = e.target.result
-						"
-					/>
-				</label>
-
-				<button
-					x-show="img" class="btn btn-outline btn-danger flex justify-center items-center"
-					x-on:click.prevent="$refs.fileInput.value = ''; img = ''"
-				>
-					{{ template "icon" dict "Icon" "file-x" "Class" "w-[24px] h-[24px]" }}
-					Clear
-				</button>
-			</div>
-
-			<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Location</h3>
-			<div class="col-span-3 grid grid-cols-4 gap-5">
-				{{-
-					template "field" dict
-					"Class" "col-span-3"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Location"
-					"Name" "location"
-					"ValidationErr" .ValidationErrs.location
-					"Value" .Asset.Location
+					"XBindName" "`parts[${i}].notes`"
+					"XBindValue" "part.Notes"
 				-}}
 
-				{{-
-					template "field" dict
-					"Class" "col-span-1"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Position Code"
-					"Name" "position_code"
-					"ValidationErr" .ValidationErrs.position_code
-					"Value" .Asset.PositionCode
-				-}}
-			</div>
+				<button class="btn btn-danger h-[32px] ml-3 mt-1" x-on:click.prevent="removeItem(i)">{{ template "icon" dict "Icon" "x-square" "Class" "w-[16px] h-[16px]"}}</button>
+			</li>
+		</template>
+	</ul>
 
-			<h3 class="col-span-4 font-bold text-lg md:text-xl mt-5">Purchase Info</h3>
-			<div class="col-span-3 grid grid-cols-4 gap-5">
-				{{-
-					template "field" dict
-					"Class" "col-span-3"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Order No."
-					"Name" "purchase.order_no"
-					"ValidationErr" (index .ValidationErrs "purchase.order_no")
-					"Value" .Asset.PurchaseInfo.OrderNo
-				-}}
-
-				{{-
-					template "datepicker" dict
-					"Class" "col-span-1"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Purchase Date"
-					"Name" "purchase.date"
-					"Format" "2006-01-02"
-					"ValidationErr" (index .ValidationErrs "purchase.date")
-					"Value" .Asset.PurchaseInfo.Date
-				-}}
-
-				{{-
-					template "field" dict
-					"Class" "col-span-4"
-					"LabelClass" "font-bold"
-					"InputWrapperClass" "flex-grow"
-					"Label" "Supplier"
-					"Name" "purchase.supplier"
-					"ValidationErr" (index .ValidationErrs "purchase.supplier")
-					"Value" .Asset.PurchaseInfo.Supplier
-				-}}
-
-				<div class="col-span-1 col-start-4 flex items-center mb-5">
-					<label for="purchase.amount" class="label font-bold mt-2 mr-5 flex items-center">Cost</label>
-					<div class="flex-grow flex w-full items-center">
-						<input name="purchase.amount" id="purchase.amount" class="input rounded-r-none flex-1 text-right" value="{{ .Asset.PurchaseInfo.Amount.Format .DecimalSeparator }}" />
-						<input
-							type="text"
-							name="purchase.currency"
-							id="purchase.currency"
-							value="{{ .Asset.PurchaseInfo.Currency }}"
-							class="input rounded-l-none w-[64px] border-l-0"
-						/>
-
-						{{ if has .ValidationErrs "purchase.amount" }}
-						<span class="block text-red-500">{{ (index .ValidationErrs "purchase.amount") }}</span>
-						{{ end }}
-					</div>
-				</div>
-			</div>
-
-		</div>
-
-		<button type="submit" class="btn btn-primary mt-5">
-			Save Asset
-		</button>
-	</form>
+	<button class="btn btn-primary mt-5" x-on:click.prevent="addItem()">Add Part</button>
 </div>
-{{ end }}
 {{ end }}

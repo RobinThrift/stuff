@@ -1,14 +1,17 @@
 {{ define "table_head" }}
 <thead>
 	<tr class="text-neutral-500">
+		{{ range . }}
+		{{ if eq . "_select_" }}
 		<th class="first:pl-0 last:pr-0 py-3 text-xs font-medium text-left uppercase">
 			<div class="flex items-center">
 				<input id="selected_all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
 				<label for="selected_all" class="sr-only">checkbox</label>
 			</div>
 		</th>
-		{{ range . }}
+		{{ else }}
 		<th class="first:pl-0 last:pr-0 px-5 py-3 text-xs font-medium text-left uppercase">{{ . }}</th>
+		{{ end }}
 		{{ end }}
 	</tr>
 </thead>

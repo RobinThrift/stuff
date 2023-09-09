@@ -24,6 +24,7 @@ type EditAssetsPageViewModel struct {
 type ViewAssetsPageViewModel struct {
 	Asset            *Asset
 	DecimalSeparator string
+	ValidationErrs   map[string]string
 }
 
 type DeleteAssetsPageViewModel struct {
@@ -106,6 +107,7 @@ func renderViewAssetPage(w http.ResponseWriter, r *http.Request, model ViewAsset
 		Global: views.Global{
 			Title:        model.Asset.Name,
 			FlashMessage: infomsg,
+			CSRFToken:    csrf.Token(r),
 		},
 		Data: model,
 	})

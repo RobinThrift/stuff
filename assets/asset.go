@@ -46,6 +46,9 @@ type Asset struct {
 
 	PurchaseInfo PurchaseInfo `form:"purchase"`
 
+	PartsTotalCounter int     `form:"parts_total_counter"`
+	Parts             []*Part `form:"parts"`
+
 	MetaInfo MetaInfo `form:"-"`
 }
 
@@ -58,6 +61,21 @@ type PurchaseInfo struct {
 }
 
 type MetaInfo struct {
+	CreatedBy int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Part struct {
+	ID      int64
+	AssetID int64 `form:"asset_id"`
+
+	Tag          string `form:"tag"`
+	Name         string `form:"name"`
+	Location     string `form:"location"`
+	PositionCode string `form:"position_code"`
+	Notes        string `form:"notes"`
+
 	CreatedBy int64
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -163,6 +163,11 @@ func (rt *UIRouter) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) 
 
 // [POST] /assets/{id}/edit
 func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) error {
+	user, ok := session.Get[*users.User](r.Context(), "user")
+	if !ok {
+		return errors.New("can't find user in session")
+	}
+
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
@@ -178,6 +183,8 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		return err
 	}
+
+	asset.Parts = nil
 
 	err = rt.Decoder.Decode(asset, r.PostForm)
 	if err != nil {
@@ -208,6 +215,12 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		validationErrs["general"] = err.Error()
 		return rt.renderEditAssetPage(w, r, EditAssetsPageViewModel{Asset: asset, IsNew: true, ValidationErrs: validationErrs})
+	}
+
+	for i := range asset.Parts {
+		if asset.Parts[i].CreatedBy == 0 {
+			asset.Parts[i].CreatedBy = user.ID
+		}
 	}
 
 	updated, err := rt.Control.updateAsset(r.Context(), asset, file)
