@@ -60,7 +60,7 @@ _watch-js:
 
 _watch-icons:
     wgo \
-        -file 'static/src/\/icons\/.*\.svg' \
+        -file 'static/src/icons/.*\.svg' \
         just build-icons
 
 new-migration name: _go-tools
