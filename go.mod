@@ -3,14 +3,12 @@ module github.com/kodeshack/stuff
 go 1.21.0
 
 require (
-	github.com/a-h/templ v0.2.316
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
 	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/csrf v1.7.1
-	github.com/jaswdr/faker v1.19.0
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/microcosm-cc/bluemonday v1.0.25
 	github.com/pressly/goose/v3 v3.15.0

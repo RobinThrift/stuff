@@ -20,6 +20,7 @@ func renderListTagsPage(w http.ResponseWriter, r *http.Request, query ListTagsQu
 		Global: views.Global{
 			Title:        "Tags",
 			FlashMessage: infomsg,
+			CurrentPage:  r.URL.Path,
 		},
 		Data: ListTagsPageViewModel{
 			Page:  page,

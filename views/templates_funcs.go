@@ -53,6 +53,17 @@ var templateFuncs = template.FuncMap{
 		return false
 	},
 
+	"get": func(m any, k string) any {
+		switch m := m.(type) {
+		case map[string]any:
+			return m[k]
+		case map[string]string:
+			return m[k]
+		}
+
+		return nil
+	},
+
 	"default": func(val any, d any) any {
 		if isZeroValue(val) {
 			return d

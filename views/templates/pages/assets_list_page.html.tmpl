@@ -1,24 +1,23 @@
 {{ template "layout.html.tmpl" . }}
 
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
+
+<div class="flex-1 flex flex-col md:flex-row justify-end items-center">
+	<a href="/assets/new" class="btn btn-primary inline-block">New Asset</a>
+
+	<x-dropdown
+		button-text="Export"
+		class="md:ms-2"
+		items='[
+			{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
+			{ "text": "Export All (JSON)", "url": "/assets/export/json" }
+		]'
+	/>
+</flex>
+{{ end }}
+
 {{ define "main" }}
-<header class="my-5 flex items-end">
-	<h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
-
-	<div class="flex-1 flex flex-col md:flex-row justify-end items-center">
-		<a href="/assets/new" class="btn btn-primary inline-block">New Asset</a>
-
-		{{-
-			template "dropdown" dict 
-			"Class" "md:ms-2"
-			"Text" "Export"
-			"Items" (list
-				(dict "Text" "Export All (CSV)" "URL" "/assets/export/csv")
-				(dict "Text" "Export All (JSON)" "URL" "/assets/export/json")
-			)
-		-}}
-	</flex>
-</header>
-
 {{ with .Data }}
 <table class="min-w-full">
 	{{ template "table_head" list "_select_" "" "Tag" "Image" "Name" "Category" "Location" "Status" "" }}
@@ -42,7 +41,7 @@
 					hx-select="#main"
 				>
 					<span x-bind:class="{{ printf "open['%d'] ? 'rotate-90' : ''" .ID }}" class="transition-transform inline-block">
-						{{ template "icon" dict "Icon" "caret-right" "Class" "w-[16px] h-[16px]" }}
+						<x-icon icon="caret-right" class="w-[16px] h-[16px]" />
 					</span>
 				</button>
 			</td>

@@ -1,37 +1,31 @@
 {{ template "layout.html.tmpl" . }}
 
+{{ define "header" }}
+{{ with .Data }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">
+{{ if .IsNew }}
+	New Asset
+{{ else }}
+	Editing "{{ .Asset.Name }}"
+{{ end }}
+</h1>
+{{ end }}
+{{ end }}
+
 {{ define "main" }}
 {{ with .Data }}
 <form
-	class="container mx-auto"
 	method="post"
 	action="{{- if .IsNew -}} /assets/new {{- else -}} {{ printf "/assets/%v/edit" .Asset.ID }} {{- end -}}"
 	enctype="multipart/form-data"
 >
-	<header class="my-5 flex items-end">
-		<h1 class="font-extrabold md:text-2xl lg:text-4xl">
-		{{ if .IsNew }}
-			New Asset
-		{{ else }}
-			Edit {{ .Asset.Name }}
-		{{ end }}
-		</h1>
-
-		<div class="flex-1 flex flex-col justify-items-center items-end">
-			<button type="submit" class="btn btn-primary mt-5">
-				Save Asset
-			</button>
-		</flex>
-	</header>
-
-	
 	{{ if has .ValidationErrs "general" }}
 	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
 	{{ end }}
 
 	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
 
-	<div class="grid grid-cols-4 gap-5">
+	<div class="grid grid-cols-4 gap-5 2xl:grid-cols-5">
 		<div class="col-span-3 gap-5 grid grid-cols-4">
 			{{-
 				template "field" dict
@@ -173,7 +167,7 @@
 		</div>
 
 		<div
-			class="col-span-1 row-span-4 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
+			class="col-span-1 2xl:col-span-2 row-span-4 2xl:row-span-1 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
 			x-data="{{ printf "{ img: '%s' }" .Asset.ImageURL }}"
 		>
 			<label
@@ -184,8 +178,8 @@
 			>
 				<div class="flex flex-col items-center justify-center">
 					<div x-show="!img" class="group flex justify-center items-center w-full h-full" x-ref="icons">
-						{{ template "icon" dict "Icon" "file-arrow-up" "Class" "drag-over-show pointer-events-none" }}
-						{{ template "icon" dict "Icon" "images-square" "Class" "drag-over-hide pointer-events-none" }}
+						<x-icon icon="file-arrow-up" class="drag-over-show pointer-events-none" />
+						<x-icon icon="images-square" class="drag-over-hide pointer-events-none" />
 					</div>
 
 					<p x-show="!img" class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Drop to upload</span> or click to select</p>
@@ -216,7 +210,7 @@
 				x-show="img" class="btn btn-outline btn-danger flex justify-center items-center"
 				x-on:click.prevent="$refs.fileInput.value = ''; img = ''"
 			>
-				{{ template "icon" dict "Icon" "file-x" "Class" "w-[24px] h-[24px]" }}
+				<x-icon icon="file-x" class="w-[24px] h-[24px]" />
 				Clear
 			</button>
 		</div>
@@ -416,7 +410,7 @@
 					"XBindValue" "part.Notes"
 				-}}
 
-				<button class="btn btn-danger h-[32px] ml-3 mt-1" x-on:click.prevent="removeItem(i)">{{ template "icon" dict "Icon" "x-square" "Class" "w-[16px] h-[16px]"}}</button>
+				<button class="btn btn-danger h-[32px] ml-3 mt-1" x-on:click.prevent="removeItem(i)"><x-icon icon="x-square" class="w-[16px] h-[16px]" /></button>
 			</li>
 		</template>
 	</ul>

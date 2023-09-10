@@ -10,6 +10,7 @@ type Global struct {
 	CSRFToken    string
 	FlashMessage string
 	Search       string
+	CurrentPage  string
 }
 
 type DocumentViewModel struct {

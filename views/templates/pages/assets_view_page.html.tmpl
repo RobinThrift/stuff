@@ -1,27 +1,28 @@
 {{ template "layout.html.tmpl" . }}
 
+{{ define "header" }}
+{{ with .Data.Asset }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
+	{{ .Name }}
+	<span class="ms-2 text-slate-400"> ({{ .Tag }})</span>
+
+	{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
+</h1>
+
+<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end">
+	<x-dropdown
+		button-text="Actions"
+		items='[
+			{ "text": "Edit", "url": "(printf \"/assets/%d/edit\" .ID)" },
+			{ "text": "Delete", "url": "(printf \"/assets/%d/delete\" .ID)", "class": "text-red-700" }
+		]'
+	/>
+</div>
+{{ end }}
+{{ end }}
+
 {{ define "main" }}
 {{ with .Data.Asset }}
-<header class="my-5 flex flex-row items-start justify-start lg:items-center">
-	<h1 class="font-extrabold md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
-		{{ .Name }}
-		<span class="ms-2 text-slate-400"> ({{ .Tag }})</span>
-
-		{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
-	</h1>
-
-	<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end">
-		{{-
-			template "dropdown" dict 
-			"Text" "Actions"
-			"Items" (list
-				(dict "Text" "Edit" "URL" (printf "/assets/%d/edit" .ID))
-				(dict "Text" "Delete" "URL" (printf "/assets/%d/delete" .ID) "Class" "text-red-700")
-			)
-		-}}
-	</div>
-</header>
-
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
 	<div class="lg:col-span-2">
 		<div class="flow-root">

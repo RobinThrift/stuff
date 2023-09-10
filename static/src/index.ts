@@ -1,4 +1,5 @@
 import _Alpine from "alpinejs"
+import persist from "@alpinejs/persist"
 import { plugin as autocomplete } from "./autocompleter"
 import { plugin as commandpalette } from "./command_palette"
 
@@ -9,6 +10,7 @@ declare global {
     }
 }
 
+_Alpine.plugin(persist)
 _Alpine.plugin(autocomplete)
 _Alpine.plugin(commandpalette)
 

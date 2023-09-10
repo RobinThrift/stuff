@@ -1,63 +1,91 @@
 {{ template "document_head" . }}
+<div class="min-h-screen sm:h-screen flex">
+	<nav class="sm:w-56 lg:w-60 flex-none">
+		{{ template "sidebar" . }}
+	</nav>
 
-<div class="md:h-screen md:w-screen w-full h-full flex flex-col">
-	<header class="w-full bg-white border-b">
-		<div x-data="{ open: false }" class="relative flex flex-col w-full bg-white md:items-center md:justify-between md:flex-row py-3 px-3 md:px-6 lg:px-8">
-			{{ template "site_nav" . }}
-			{{ template "site_nav_items" . }}
-		</div>
-	</header>
-
-	<div class="overflow flex-1 flex flex-col">
+	<main class="sm:overflow-auto flex-1 flex flex-col">
 		<main id="main" class="px-3 md:px-6 lg:px-8 pb-5 flex-1">
+			<header class="my-5 flex flex-row items-start justify-start lg:items-center">
+				{{ block "header" . }}{{ end }}
+			</header>
+
 			{{ block "main" . }}{{ end }}
 		</main>
 		{{ template "footer" . }}
-	</div>
+	</main>
 </div>
-
 {{ template "command_palette" }}
 
 {{ template "document_footer" . }}
 
-{{ define "site_nav" }}
-<div class="flex flex-row items-center justify-start">
-	<button @click="open = !open" class="inline-flex items-center justify-center p-2 text-neutral hover:text-blue-500 focus:outline-none focus:text-black md:hidden">
-		{{ template "icon" dict "Icon" "hamburger-menu" "Class" "w-6 h-6" }}
-	</button>
+{{ define "sidebar" }}
+<div class="flex h-screen flex-col justify-between border-e bg-white" x-data="{ open: $persist({}) }">
+	<div class="px-4 py-6">
+		<a class="block" href="/">
+			{{ template "logo" dict "Class" "text-xl justify-start" "IconClass" "h-6"}}
+		</a>
+	
+		<ul class="mt-6 space-y-1">
+			<li>
+				<button
+					class="flex w-full items-center justify-between rounded px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+					x-on:click="open['assets'] = !open['assets']"
+				>
+					<span class="text-sm font-medium">Assets</span>
+					<x-icon icon="caret-down" class="mr-1 w-[16px] h-[16px] shrink-0 transition duration-300" x-bind:class=" { 'rotate-180' : open['assets'] }" />
+				</button>
 
-	<a class="block" href="/">
-		{{ template "logo" dict "Class" "text-xl" "IconClass" "h-6"}}
-	</a>
+				<ul x-cloak x-show="open['assets']" class="mt-2 space-y-1 ps-4">
+					<li>
+						<a
+							href="/assets"
+							{{ if eq $.Global.CurrentPage "/assets" }}
+							class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
+							{{ else }}
+							class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+							{{ end }}
+						>
+							List Assets
+						</a>
+					</li>
+					<li>
+						<a
+							href="/assets/new"
+							{{ if eq $.Global.CurrentPage "/assets/new" }}
+							class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
+							{{ else }}
+							class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+							{{ end }}
+						>
+							New Assset
+						</a>
+					</li>
+				</ul>
+			</li>
+
+			<li>
+				<a
+					href="/tags"
+					{{ if eq $.Global.CurrentPage "/tags" }}
+					class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
+					{{ else }}
+					class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+					{{ end }}
+				>
+					Tags
+				</a>
+			</li>
+		</ul>
+	</div>
+
+	<div class="sticky inset-x-0 bottom-0 border-t border-gray-100">
+		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500 flex flex-row items-center" href="/logout">
+			<x-icon icon="sign-out" class="mr-1 w-[16px] h-[16px] rotate-180" />
+			Logout
+		</a>
+	</div>
 </div>
-{{ end }}
-
-{{ define "site_nav_items" }}
-	<nav x-bind:class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow hidden md:pb-0 md:flex md:items-center  md:items-center md:flex-row md:ml-5">
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/assets">Assets</a>
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/tags">Tags</a>
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500" href="/users">Users</a>
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500 block md:hidden flex flex-row items-center" href="/logout">
-			 Logout
-			{{ template "icon" dict "Icon" "sign-out" "Class" "ml-1 w-[16px] h-[16px]" }}
-		</a>
-
-		<form method="get" action="/assets" class="w-full md:w-auto md:ml-auto flex items-center">
-			{{-
-				template "field" dict
-				"Class" "w-full md:w-auto md:ml-auto flex items-center"
-				"Type" "search"
-				"Placeholder" "Search"
-				"Name" "query"
-				"Icon" "magnifying-glass"
-				"Value" .Global.Search
-			-}}
-		</form>
-
-		<a href="/logout" class="hidden md:block hover:text-purple-500 ml-5">
-			{{ template "icon" dict "Icon" "sign-out" "Class" "w-[24px] h-[24px]" }}
-		</a>
-	</nav>
 {{ end }}
 
 {{ define "footer" }}
@@ -66,8 +94,8 @@
 		{{ template "logo" dict "Class" "text-sm" "IconClass" "h-0" }}
 		<span class="px-5">Version X</span>
 		<a href="https://github.com/kodeshack/stuff" class="inline-block group flex flex-row justify-center items-center text-blue-400 hover:text-purple-500" rel="noopener noreferrer">
-			{{ template "icon" dict "Icon" "github-logo-duotone" "Class" "h-[16px] w-[16px] !hidden group-hover:!inline-block" }}
-			{{ template "icon" dict "Icon" "github-logo" "Class" "h-[16px] w-[16px] group-hover:!hidden" }}
+			<x-icon icon="github-logo-duotone" class="h-[16px] w-[16px] !hidden group-hover:!inline-block" />
+			<x-icon icon="github-logo" class="h-[16px] w-[16px] group-hover:!hidden" />
 			GitHub
 		</a>
 	</div>
@@ -91,7 +119,7 @@
 >
 	<div class="flex flex-col w-full h-full overflow-hidden bg-white border rounded shadow-md">
 		<div class="flex items-center px-3 border-b">
-			{{ template "icon" dict "Icon" "magnifying-glass" "Class" "w-[24px] h-[24px] text-neutral-400" }}
+			<x-icon icon="magnifying-glass" class="w-[24px] h-[24px] text-neutral-400" />
 			<input x-model="search" x-ref="input" type="text" class="input h-11 bg-transparent border-0 outline-none focus:outline-none shadow-none focus:ring-0" placeholder="Type a command or search..." autocomplete="off" autocorrect="off" spellcheck="false">
 		</div>
 

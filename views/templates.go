@@ -25,9 +25,11 @@ var templates = func() map[string]*template.Template {
 		panic(fmt.Errorf("error globbing pages template FS: %w", err))
 	}
 
+	cfs := &componentFS{fs: templateFS}
+
 	for _, page := range pages {
 		name := strings.ReplaceAll(path.Base(page), ".html.tmpl", "")
-		tmpls[name] = template.Must(template.New(name).Funcs(templateFuncs).ParseFS(templateFS, page, "templates/partials/*.html.tmpl"))
+		tmpls[name] = template.Must(template.New(name).Funcs(templateFuncs).ParseFS(cfs, page, "templates/partials/*.html.tmpl"))
 	}
 
 	return tmpls

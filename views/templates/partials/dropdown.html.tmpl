@@ -1,60 +1,17 @@
 {{/*
 Dropdown
-	Class string
-	Text  string
-	Items []{ Text string; URL string; Class string }
-
+	class string
+	text  string
+	ttems []{ text string; url string; class string }
 */}}
-{{ define "__dropdown" }}
-<div
-	{{ if ne .Class "" -}}
-	class="{{ .Class }}"
-	{{- end -}}
-
-	x-data="{
-		open: false,
-		position(el) {
-			let pos = el.getBoundingClientRect()
-			let top = pos.top + window.scrollY
-			let left = pos.left + window.scrollX
-			this.$refs.dropdown.style.left = left + 'px';
-			this.$refs.dropdown.style.top = top + el.offsetHeight + 'px';
-			this.$refs.dropdown.style.minWidth = el.offsetWidth + 'px';
-		},
-	}"
->
-	<button class="btn btn-primary flex items-center" x-on:click="open = !open; position($el)">
-		{{- .Text }}
-		{{- template "icon" dict "Icon" "caret-down"  "Class" "w-[16px] h-[16px] ms-2" -}}
-	</button>
-	<template x-teleport="body">
-		<div
-			x-ref="dropdown" x-show="open"
-			class="absolute top-0 mt-1"
-			@click.outside="open = false"
-		>
-			<div class="flex justify-center w-100 h-auto overflow-hidden bg-white border rounded-md shadow-sm border-neutral-200/70">
-				<ul class="text-sm w-full">
-					{{ range .Items }}
-					<li>
-						<a href={{ .URL }} class="block px-4 py-2 hover:bg-gray-100 {{- if has . "Class" }} {{ .Class }} {{- end -}}">{{ .Text }}</a>
-					</li>
-					{{ end }}
-				</ul>
-			</div>
-		</div>
-	</template>
-</div>
-{{ end }}
-
 {{ define "dropdown" }}
 <div
 	x-data="{ open: false }"
-	class="relative {{ if ne .Class "" -}} {{ .Class }} {{- end -}}"
+	class="relative {{ if ne .class "" -}} {{ .class }} {{- end -}}"
 >
 	<button x-ref="button" class="btn btn-primary flex items-center" x-on:click="open = !open">
-		{{- .Text }}
-		{{- template "icon" dict "Icon" "caret-up-down"  "Class" "w-[16px] h-[16px] ms-2" -}}
+		{{- get . "button-text" }}
+		<x-icon icon="caret-up-down" class="w-[16px] h-[16px] ms-2" />
 	</button>
 
 	<div
@@ -68,9 +25,9 @@ Dropdown
 		x-on:keydown.escape.window="open = false"
 	>
 		<ul class="p-2 text-sm w-full">
-			{{ range .Items }}
+			{{ range .items }}
 			<li>
-				<a href={{ .URL }} class="block rounded px-4 py-2 hover:bg-gray-100 {{- if has . "Class" }} {{ .Class }} {{- end -}}">{{ .Text }}</a>
+				<a href={{ .url }} class="block rounded px-4 py-2 hover:bg-gray-100 {{- if has . "class" }} {{ .class }} {{- end -}}">{{ .text }}</a>
 			</li>
 			{{ end }}
 		</ul>

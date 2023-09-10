@@ -8,6 +8,8 @@ import (
 type Config struct {
 	Addr string `json:"address"`
 
+	BaseURL string `json:"baseURL"`
+
 	Database Database `json:"database"`
 	FileDir  string   `json:"fileDir"`
 

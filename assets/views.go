@@ -45,6 +45,7 @@ func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAsse
 			Title:        "Assets",
 			FlashMessage: infomsg,
 			Search:       search,
+			CurrentPage:  r.URL.Path,
 		},
 		Data: ListAssetsPageViewModel{
 			Page:  page,
@@ -90,6 +91,7 @@ func (rt *UIRouter) renderEditAssetPage(w http.ResponseWriter, r *http.Request, 
 			Title:        title,
 			CSRFToken:    csrf.Token(r),
 			FlashMessage: infomsg,
+			CurrentPage:  r.URL.Path,
 		},
 		Data: model,
 	})
@@ -108,6 +110,7 @@ func renderViewAssetPage(w http.ResponseWriter, r *http.Request, model ViewAsset
 			Title:        model.Asset.Name,
 			FlashMessage: infomsg,
 			CSRFToken:    csrf.Token(r),
+			CurrentPage:  r.URL.Path,
 		},
 		Data: model,
 	})
@@ -135,6 +138,7 @@ func renderDeleteAssetPage(w http.ResponseWriter, r *http.Request, model DeleteA
 			Title:        model.Asset.Name,
 			FlashMessage: infomsg,
 			CSRFToken:    csrf.Token(r),
+			CurrentPage:  r.URL.Path,
 		},
 		Data: model,
 	})

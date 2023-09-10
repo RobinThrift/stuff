@@ -1,5 +1,5 @@
 {{define "icon"}}
-<svg class="{{ default .Class "" }}">
-	<use xlink:href="/static/icons.svg#{{ .Icon }}"></use>
+<svg class="{{ default .class "" }}" {{ if has . "x-bind:class" -}} x-bind:class="{{ get . "x-bind:class"}}" {{- end }}>
+	<use xlink:href="/static/icons.svg#{{ .icon }}"></use>
 </svg>
 {{end}}
