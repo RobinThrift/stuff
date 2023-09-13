@@ -9,9 +9,13 @@ Dropdown
 	x-data="{ open: false }"
 	class="relative {{ if ne .class "" -}} {{ .class }} {{- end -}}"
 >
+	{{ $iconClass := "w-[16px] h-[16px]" }}
+	{{ if ne (get . "button-text") "" }}
+	{{ $iconClass = "w-[16px] h-[16px] ms-2" }}
+	{{- end }}
 	<button x-ref="button" class="btn btn-primary flex items-center" x-on:click="open = !open">
 		{{- get . "button-text" }}
-		<x-icon icon="caret-up-down" class="w-[16px] h-[16px] ms-2" />
+		<x-icon icon="{{ default .icon `caret-up-down` }}" class="{{ $iconClass }}" />
 	</button>
 
 	<div

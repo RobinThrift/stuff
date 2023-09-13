@@ -3,12 +3,24 @@
 {{ define "header" }}
 <h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
 
-<div class="flex-1 flex flex-col md:flex-row justify-end items-center">
+<div class="sm:hidden flex-1 flex justify-end">
+	<x-dropdown
+		button-text=""
+		icon="dots-three-vertical"
+		items='[
+			{ "text": "New Asset", "url": "/assets/new" },
+			{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
+			{ "text": "Export All (JSON)", "url": "/assets/export/json" }
+		]'
+	/>
+</div>
+
+<div class="hidden sm:flex flex-1 flex flex-col sm:flex-row justify-center items-end sm:justify-end sm:items-center">
 	<a href="/assets/new" class="btn btn-primary inline-block">New Asset</a>
 
 	<x-dropdown
 		button-text="Export"
-		class="md:ms-2"
+		class="ms-2"
 		items='[
 			{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
 			{ "text": "Export All (JSON)", "url": "/assets/export/json" }

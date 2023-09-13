@@ -25,8 +25,8 @@
 
 	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
 
-	<div class="grid grid-cols-4 gap-5 2xl:grid-cols-5">
-		<div class="col-span-3 gap-5 grid grid-cols-4">
+	<div class="flex flex-col md:grid grid-cols-1 md:grid-cols-4 gap-5 2xl:grid-cols-5">
+		<div class="flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
 			{{-
 				template "field" dict
 				"Class" "col-span-3"
@@ -167,7 +167,7 @@
 		</div>
 
 		<div
-			class="col-span-1 2xl:col-span-2 row-span-4 2xl:row-span-1 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
+			class="md:col-span-1 2xl:col-span-2 row-span-4 2xl:row-span-1 rounded-md bg-gray-100 mt-2 p-5 flex flex-col"
 			x-data="{{ printf "{ img: '%s' }" .Asset.ImageURL }}"
 		>
 			<label
@@ -276,10 +276,10 @@
 				"Value" .Asset.PurchaseInfo.Supplier
 			-}}
 
-			<div class="col-span-1 col-start-4 flex items-center mb-5">
+			<div class="md:col-span-1 md:col-start-4 flex items-center mb-5">
 				<label for="purchase.amount" class="label font-bold mt-2 mr-5 flex items-center">Cost</label>
 				<div class="flex-grow flex w-full items-center">
-					<input name="purchase.amount" id="purchase.amount" class="input rounded-r-none flex-1 text-right" value="{{ .Asset.PurchaseInfo.Amount.Format .DecimalSeparator }}" />
+					<input name="purchase.amount" id="purchase.amount" class="input rounded-r-none min-w-[90px] flex-1 text-right" value="{{ .Asset.PurchaseInfo.Amount.Format .DecimalSeparator }}" />
 					<input
 						type="text"
 						name="purchase.currency"

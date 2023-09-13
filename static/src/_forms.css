@@ -4,7 +4,7 @@
 	}
 
 	.input {
-		@apply w-full px-3 py-2 placeholder:text-neutral-400  border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50;
+		@apply w-full px-3 py-2 placeholder:text-neutral-400 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-100 focus:border-blue-300 disabled:cursor-not-allowed disabled:opacity-50;
 	}
 
 	.input[readonly="true"] {

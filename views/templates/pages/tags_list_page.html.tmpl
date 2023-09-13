@@ -1,10 +1,10 @@
 {{ template "layout.html.tmpl" . }}
 
-{{ define "main" }}
-<header class="my-5 flex items-end">
-	<h1 class="font-extrabold md:text-2xl lg:text-4xl">Tags</h1>
-</header>
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">Tags</h1>
+{{ end }}
 
+{{ define "main" }}
 {{ with .Data }}
 <table class="min-w-full divide-y divide-neutral-200">
 	{{ template "table_head" list "_select_" "Tag" "In Use" "Last Updated" }}
@@ -19,7 +19,7 @@
 				</div>
 			</td>
 			<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{{ .Tag }}</strong></td>
-			<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{{ .InUse }}</strong></td>
+			<td class="px-5 py-4 text-sm whitespace-nowrap">{{ .InUse }}</td>
 			<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{{ .UpdatedAt.Format "2006-01-02T15:04:05Z07:00" }}</strong></td>
 		</tr>
 		{{ end }}

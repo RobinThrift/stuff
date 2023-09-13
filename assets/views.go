@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/csrf"
 	"github.com/kodeshack/stuff/server/session"
 	"github.com/kodeshack/stuff/views"
 )
@@ -33,20 +32,16 @@ type DeleteAssetsPageViewModel struct {
 }
 
 func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAssetsQuery, page *AssetListPage) error {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
 	search := ""
 	if query.Search != nil {
 		search = query.Search.Raw
 	}
 
+	global := views.NewGlobal("Assets", r)
+	global.Search = search
+
 	err := views.Render(w, "assets_list_page", views.Model[ListAssetsPageViewModel]{
-		Global: views.Global{
-			Title:        "Assets",
-			FlashMessage: infomsg,
-			Search:       search,
-			CurrentPage:  r.URL.Path,
-		},
+		Global: global,
 		Data: ListAssetsPageViewModel{
 			Page:  page,
 			Query: query,
@@ -84,16 +79,9 @@ func (rt *UIRouter) renderEditAssetPage(w http.ResponseWriter, r *http.Request, 
 		model.ValidationErrs["general"] = csrfErr
 	}
 
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
 	err := views.Render(w, "assets_edit_page", views.Model[EditAssetsPageViewModel]{
-		Global: views.Global{
-			Title:        title,
-			CSRFToken:    csrf.Token(r),
-			FlashMessage: infomsg,
-			CurrentPage:  r.URL.Path,
-		},
-		Data: model,
+		Global: views.NewGlobal(title, r),
+		Data:   model,
 	})
 	if err != nil {
 		return fmt.Errorf("error rendering edit asset page: %w", err)
@@ -103,16 +91,9 @@ func (rt *UIRouter) renderEditAssetPage(w http.ResponseWriter, r *http.Request, 
 }
 
 func renderViewAssetPage(w http.ResponseWriter, r *http.Request, model ViewAssetsPageViewModel) error {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
 	err := views.Render(w, "assets_view_page", views.Model[ViewAssetsPageViewModel]{
-		Global: views.Global{
-			Title:        model.Asset.Name,
-			FlashMessage: infomsg,
-			CSRFToken:    csrf.Token(r),
-			CurrentPage:  r.URL.Path,
-		},
-		Data: model,
+		Global: views.NewGlobal(model.Asset.Name, r),
+		Data:   model,
 	})
 	if err != nil {
 		return fmt.Errorf("error rendering view assets page: %w", err)
@@ -123,8 +104,6 @@ func renderViewAssetPage(w http.ResponseWriter, r *http.Request, model ViewAsset
 }
 
 func renderDeleteAssetPage(w http.ResponseWriter, r *http.Request, model DeleteAssetsPageViewModel) error {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
 	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
 	if ok {
 		if model.Message != "" {
@@ -134,13 +113,8 @@ func renderDeleteAssetPage(w http.ResponseWriter, r *http.Request, model DeleteA
 	}
 
 	err := views.Render(w, "assets_delete_page", views.Model[DeleteAssetsPageViewModel]{
-		Global: views.Global{
-			Title:        model.Asset.Name,
-			FlashMessage: infomsg,
-			CSRFToken:    csrf.Token(r),
-			CurrentPage:  r.URL.Path,
-		},
-		Data: model,
+		Global: views.NewGlobal(model.Asset.Name, r),
+		Data:   model,
 	})
 	if err != nil {
 		return fmt.Errorf("error rendering delete assets page: %w", err)

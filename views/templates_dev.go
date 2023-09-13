@@ -10,34 +10,45 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"regexp"
 )
 
 var templateDir = path.Join("views", "templates")
+
+var partialsDir = path.Join(templateDir, "partials")
 
 var templateFS = os.DirFS(".")
 
 func execTemplate(w io.Writer, name string, data any) error {
 	cfs := &componentFS{fs: templateFS}
 
-	templates, err := template.New(name).Funcs(templateFuncs).ParseFS(cfs, path.Join(templateDir, "pages", name+".html.tmpl"), "views/templates/partials/*.html.tmpl")
+	templates, err := template.New(name).Funcs(templateFuncs).ParseFS(cfs, path.Join(templateDir, "pages", name+".html.tmpl"), path.Join(partialsDir, "*.html.tmpl"))
 	if err != nil {
-		printTemplate(cfs, name)
-		return err
+		return enhanceErrorMessage(cfs, err)
 	}
 
 	err = templates.ExecuteTemplate(w, name+".html.tmpl", data)
 	if err != nil {
-		printTemplate(cfs, name)
-		return err
+		return enhanceErrorMessage(cfs, err)
 	}
 
 	return nil
 }
 
-func printTemplate(fs fs.FS, name string) {
-	file, err := fs.Open(path.Join(templateDir, "pages", name+".html.tmpl"))
+var extractFileLineRegex = regexp.MustCompile(`template: (.*):(\d+)`)
+
+func enhanceErrorMessage(fs fs.FS, tmplErr error) error {
+	matches := extractFileLineRegex.FindStringSubmatch(tmplErr.Error())
+	if len(matches) == 0 {
+		return tmplErr
+	}
+
+	name := matches[1]
+
+	file, err := fs.Open(path.Join(partialsDir, name))
 	if err != nil {
-		panic(err)
+		// ignore error
+		return tmplErr
 	}
 	defer file.Close()
 
@@ -46,6 +57,5 @@ func printTemplate(fs fs.FS, name string) {
 		panic(err)
 	}
 
-	fmt.Println(name + ".html.tmpl:")
-	fmt.Println(string(contents))
+	return fmt.Errorf("%w: %s:\n%s", tmplErr, name, contents)
 }

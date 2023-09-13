@@ -1,95 +1,92 @@
 {{ template "document_head" . }}
-<div class="min-h-screen sm:h-screen flex">
-	<nav class="sm:w-56 lg:w-60 flex-none">
+<div class="min-h-screen md:h-screen flex" x-data="{ sidebarOpen: false, sidebarDesktopClosed: {{ $.Global.SidebarClosed }}  }">
+	<nav
+		class="sidebar {{- if $.Global.SidebarClosed }} sidebar-desktop-closed {{- end }}"
+		x-bind:class="{ 'translate-x-0': sidebarOpen, 'sidebar-desktop-closed': sidebarDesktopClosed }"
+		x-on:keydown.escape.window="sidebarOpen = false"
+	>
 		{{ template "sidebar" . }}
 	</nav>
 
-	<main class="sm:overflow-auto flex-1 flex flex-col">
-		<main id="main" class="px-3 md:px-6 lg:px-8 pb-5 flex-1">
-			<header class="my-5 flex flex-row items-start justify-start lg:items-center">
-				{{ block "header" . }}{{ end }}
-			</header>
+	<div class="bg-slate-950/80 absolute md:hidden top-0 left-0 bottom-0 right-0 z-10 duration-300" x-cloak x-on:click="sidebarOpen = false" x-show="sidebarOpen" x-transition.opacity></div>
 
-			{{ block "main" . }}{{ end }}
+	<div class="md:overflow-auto flex-1 flex flex-col">
+		<header class="h-20 max-w-screen px-2 md:px-6 lg:px-8 py-2 md:py-5 flex flex-row items-center md:justify-start">
+			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-blue-500 focus:outline-none focus:text-black md:hidden mr-2">
+				<span class="sr-only">Show Menu</span>
+				<x-icon icon="hamburger-menu" class="w-[24px] h-[24px]" />
+			</button>
+
+			{{ block "header" . }}{{ end }}
+		</header>
+
+		<main id="main" class="overflow-x-auto max-w-screen md:max-w-none md:overflow-x-auto px-2 md:px-6 lg:px-8 pb-5 flex-1">
+		{{ block "main" . }}{{ end }}
 		</main>
+
 		{{ template "footer" . }}
-	</main>
+	</div>
 </div>
 {{ template "command_palette" }}
 
 {{ template "document_footer" . }}
 
 {{ define "sidebar" }}
-<div class="flex h-screen flex-col justify-between border-e bg-white" x-data="{ open: $persist({}) }">
-	<div class="px-4 py-6">
-		<a class="block" href="/">
-			{{ template "logo" dict "Class" "text-xl justify-start" "IconClass" "h-6"}}
-		</a>
+<div class="sidebar-content">
+	<button
+		class="sidebar-desktop-toggle-btn"
+		x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $sidebar(sidebarDesktopClosed, '{{ $.Global.CSRFToken }}')"
+	>
+		<x-icon icon="caret-left" class="mr-1 w-5 h-5 sidebar-desktop-closed-hide" />
+		<x-icon icon="hamburger-menu" class="mr-1 w-5 h-5 sidebar-desktop-closed-show" />
+	</button>
+
+	<div class="pb-4">
+		<div class="h-20 flex items-center justify-center sidebar-desktop-closed-hide">
+			<a class="block flex items-center justify-center w-full h-full" href="/assets">
+				{{ template "logo" dict "Class" "text-3xl justify-start" "IconClass" "h-6" }}
+			</a>
+		</div>
+
+		<form method="get" action="/assets" class="px-4 w-full relative sidebar-desktop-closed-hide">
+			<span class="pointer-events-none absolute ml-2.5 translate-y-1/2 -mt-0.5 text-gray-500">
+				<x-icon icon="magnifying-glass" class="w-5 h-5 text-neutral-400" />
+			</span>
+			<input type="search" class="input px-1 py-1 pl-10" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false">
+		</form>
 	
-		<ul class="mt-6 space-y-1">
-			<li>
-				<button
-					class="flex w-full items-center justify-between rounded px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-					x-on:click="open['assets'] = !open['assets']"
-				>
-					<span class="text-sm font-medium">Assets</span>
-					<x-icon icon="caret-down" class="mr-1 w-[16px] h-[16px] shrink-0 transition duration-300" x-bind:class=" { 'rotate-180' : open['assets'] }" />
-				</button>
-
-				<ul x-cloak x-show="open['assets']" class="mt-2 space-y-1 ps-4">
-					<li>
-						<a
-							href="/assets"
-							{{ if eq $.Global.CurrentPage "/assets" }}
-							class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
-							{{ else }}
-							class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-							{{ end }}
-						>
-							List Assets
-						</a>
-					</li>
-					<li>
-						<a
-							href="/assets/new"
-							{{ if eq $.Global.CurrentPage "/assets/new" }}
-							class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
-							{{ else }}
-							class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-							{{ end }}
-						>
-							New Assset
-						</a>
-					</li>
-				</ul>
-			</li>
-
+		<ul class="sidebar-links">
 			<li>
 				<a
-					href="/tags"
-					{{ if eq $.Global.CurrentPage "/tags" }}
-					class="block rounded px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700"
-					{{ else }}
-					class="block rounded px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-					{{ end }}
+					href="/assets"
+					class="sidebar-link {{ if eq $.Global.CurrentPage "/assets" }} active {{ end }}"
 				>
-					Tags
+					<x-icon icon="package-thin" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Assets</span>
+				</a>
+			</li>
+
+			<li class="mt-1">
+				<a
+					href="/tags"
+					class="sidebar-link {{ if eq $.Global.CurrentPage "/tags" }} active {{ end }}"
+				>
+					<x-icon icon="tag-thin" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Tags</span>
 				</a>
 			</li>
 		</ul>
 	</div>
 
-	<div class="sticky inset-x-0 bottom-0 border-t border-gray-100">
-		<a class="px-2 py-2 text-sm text-neutral hover:text-purple-500 flex flex-row items-center" href="/logout">
+	<div class="sidebar-footer">
+		<a class="px-3 py-5 text-sm text-neutral hover:text-blue-500 flex flex-row items-center" href="/logout">
 			<x-icon icon="sign-out" class="mr-1 w-[16px] h-[16px] rotate-180" />
-			Logout
+			<span class="sidebar-desktop-closed-hide">Logout</span>
 		</a>
 	</div>
 </div>
 {{ end }}
 
 {{ define "footer" }}
-<footer class="px-3 md:px-6 lg:px-8 py-5 bg-gray-50 w-full">
+<footer class="px-3 md:px-6 lg:px-8 py-5 bg-gray-50 w-full border-t border-gray-100 h-14">
 	<div class="flex flex-wrap justify-center text-sm">
 		{{ template "logo" dict "Class" "text-sm" "IconClass" "h-0" }}
 		<span class="px-5">Version X</span>

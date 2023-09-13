@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kodeshack/stuff/server/session"
 	"github.com/kodeshack/stuff/views"
 )
 
@@ -14,14 +13,8 @@ type ListTagsPageViewModel struct {
 }
 
 func renderListTagsPage(w http.ResponseWriter, r *http.Request, query ListTagsQuery, page *TagListPage) error {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
-
 	err := views.Render(w, "tags_list_page", views.Model[ListTagsPageViewModel]{
-		Global: views.Global{
-			Title:        "Tags",
-			FlashMessage: infomsg,
-			CurrentPage:  r.URL.Path,
-		},
+		Global: views.NewGlobal("Tagsl", r),
 		Data: ListTagsPageViewModel{
 			Page:  page,
 			Query: query,

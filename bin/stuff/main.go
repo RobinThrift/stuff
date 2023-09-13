@@ -100,6 +100,8 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	tagsUIRouter := &tags.UIRouter{Control: tagCtrl}
 	tagAPIRouter := &tags.APIRouter{Control: tagCtrl}
 
+	usersUIRouter := &users.UIRouter{}
+
 	sm := scs.New()
 	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
 	sm.Lifetime = 24 * time.Hour
@@ -113,6 +115,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		assetsAPIRouter.RegisterRoutes,
 		tagsUIRouter.RegisterRoutes,
 		tagAPIRouter.RegisterRoutes,
+		usersUIRouter.RegisterRoutes,
 	)
 	if err != nil {
 		return nil, err

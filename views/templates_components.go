@@ -182,19 +182,33 @@ func convertTokenToTemplateCall(token html.Token, hasChildren bool, counter int,
 		return err
 	}
 
-	for _, attr := range token.Attr {
-		_, err = fmt.Fprintf(buf, `"%s" `, attr.Key)
+	_, err = fmt.Fprintf(buf, `"%s" `, token.Attr[0].Key)
+	if err != nil {
+		return err
+	}
+
+	err = valueToTemplate(token.Attr[0].Val, buf)
+	if err != nil {
+		return err
+	}
+
+	for _, attr := range token.Attr[1:] {
+		if len(attr.Val) == 0 {
+			continue
+		}
+
+		_, err = fmt.Fprintf(buf, ` "%s" `, attr.Key)
 		if err != nil {
 			return err
 		}
 
-		switch attr.Val[0] {
-		case '{':
+		switch {
+		case len(attr.Val) > 1 && attr.Val[0] == '{' && attr.Val[1] != '{':
 			err = jsonMapToTemplate(attr.Val, buf)
-		case '[':
+		case attr.Val[0] == '[':
 			err = jsonArrayToTemplate(attr.Val, buf)
 		default:
-			_, err = fmt.Fprintf(buf, `"%s" `, attr.Val)
+			err = valueToTemplate(attr.Val, buf)
 		}
 
 		if err != nil {
@@ -258,7 +272,12 @@ func valueToTemplate(v any, b *bytes.Buffer) error {
 	case map[string]any:
 		return valueMapToTemplate(v, b)
 	case string:
-		if v[0] != '(' {
+		if len(v) > 1 && v[0] == '{' && v[1] == '{' {
+			_, err := fmt.Fprintf(b, `(%s)`, v[2:len(v)-2])
+			return err
+		}
+
+		if len(v) == 0 || v[0] != '(' {
 			_, err := fmt.Fprintf(b, `"%s"`, v)
 			return err
 		}

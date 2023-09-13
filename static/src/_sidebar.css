@@ -1,0 +1,72 @@
+@layer components {
+	.sidebar {
+		@apply fixed z-50 top-0 left-0 md:static w-[80%] -translate-x-full md:-translate-x-0 transition duration-300 md:w-56 lg:w-64 flex-none;
+	}
+
+	.sidebar-content {
+		@apply shadow-md md:shadow-none flex h-screen flex-col justify-between border-e bg-white relative transition;
+	}
+
+	.sidebar-links {
+		@apply mt-3 md:mt-4 px-2;
+	}
+
+	.sidebar-link {
+		@apply flex px-3 py-1 text-gray-500 font-medium transition duration-200 ease-in-out rounded;
+		@apply hover:text-blue-500 hover:bg-gray-100;
+	}
+
+	.sidebar-link.active {
+		@apply text-blue-500;
+	}
+
+
+	.sidebar-desktop-closed-show {
+		display: none;
+	}
+
+	.sidebar-desktop-toggle-btn {
+		@apply z-10 p-5 hidden md:block text-gray-400 hover:text-blue-500 flex flex-row items-center absolute -left-1 top-10 -translate-y-1/2;
+	}
+
+	.sidebar-footer {
+		@apply sticky inset-x-0 bottom-0 border-t border-gray-100 h-14;
+	}
+
+	.sidebar-desktop-closed {
+		@apply md:!w-16 lg:!w-16;
+
+		.sidebar-links {
+			@apply mt-0;
+		}
+
+		.sidebar-footer {
+			@apply w-full flex items-center fixed;
+
+			& a {
+				@apply justify-center w-full;
+			}
+		}
+
+		.sidebar-content {
+			@apply  justify-start items-start;
+		}
+
+		.sidebar-desktop-toggle-btn {
+			@apply static h-20 translate-y-0 flex flex-col justify-center items-center;
+		}
+
+		.logo {
+			display: none;
+		}
+
+		.sidebar-desktop-closed-hide {
+			display: none;
+		}
+
+		.sidebar-desktop-closed-show {
+			display: block;
+		}
+	}
+}
+
