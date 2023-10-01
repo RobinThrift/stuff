@@ -23,22 +23,29 @@ import (
 
 type RepoSQLite struct{}
 
-func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, id int64) (*Asset, error) {
-	asset, err := models.Assets.Query(ctx, exec,
-		models.SelectWhere.Assets.ID.EQ(id),
+func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error) {
+	mods := []bob.Mod[*dialect.SelectQuery]{
 		models.ThenLoadAssetAssetParts(),
 		models.PreloadAssetParentAsset(),
-	).One()
+	}
+
+	if id, err := strconv.ParseInt(idOrTag, 10, 64); err == nil {
+		mods = append(mods, sqlite.WhereOr(models.SelectWhere.Assets.ID.EQ(id), models.SelectWhere.Assets.Tag.EQ(idOrTag)))
+	} else {
+		mods = append(mods, models.SelectWhere.Assets.Tag.EQ(idOrTag))
+	}
+
+	asset, err := models.Assets.Query(ctx, exec, mods...).One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%w: %d", ErrAssetNotFound, id)
+			return nil, fmt.Errorf("%w: %s", ErrAssetNotFound, idOrTag)
 		}
 		return nil, fmt.Errorf("error getting assets: %w", err)
 	}
 
 	children, err := models.Assets.Query(ctx, exec,
 		sm.Columns(models.Assets.Columns().Only("id", "name", "tag")),
-		models.SelectWhere.Assets.ParentAssetID.EQ(id),
+		models.SelectWhere.Assets.ParentAssetID.EQ(asset.ID),
 	).All()
 	if err != nil {
 		return nil, fmt.Errorf("error getting asset children: %w", err)

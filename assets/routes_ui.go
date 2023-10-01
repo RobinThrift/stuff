@@ -63,15 +63,10 @@ func (rt *UIRouter) handleAssetsListGet(w http.ResponseWriter, r *http.Request) 
 
 // [GET] /assets/{id}
 func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) error {
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
+	id := chi.URLParam(r, "id")
+	if id == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
 		return nil
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return err
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
@@ -145,15 +140,10 @@ func (rt *UIRouter) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) 
 
 // [GET] /assets/{id}/edit
 func (rt *UIRouter) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) error {
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
+	id := chi.URLParam(r, "id")
+	if id == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
 		return nil
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return err
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
@@ -171,15 +161,10 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 		return errors.New("can't find user in session")
 	}
 
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
+	id := chi.URLParam(r, "id")
+	if id == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
 		return nil
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return err
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
@@ -244,15 +229,10 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 
 // [GET] /assets/{id}/delete
 func (rt *UIRouter) handleAssetsDeleteGet(w http.ResponseWriter, r *http.Request) error {
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
+	id := chi.URLParam(r, "id")
+	if id == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
 		return nil
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return err
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)
@@ -265,15 +245,10 @@ func (rt *UIRouter) handleAssetsDeleteGet(w http.ResponseWriter, r *http.Request
 
 // [DELETE] /assets/{id}/delete
 func (rt *UIRouter) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Request) error {
-	idStr := chi.URLParam(r, "id")
-	if idStr == "" {
+	id := chi.URLParam(r, "id")
+	if id == "" {
 		http.Redirect(w, r, "/assets", http.StatusFound)
 		return nil
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return err
 	}
 
 	asset, err := rt.Control.getAsset(r.Context(), id)

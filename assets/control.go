@@ -23,7 +23,7 @@ type Control struct {
 }
 
 type AssetRepo interface {
-	Get(ctx context.Context, exec bob.Executor, id int64) (*Asset, error)
+	Get(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error)
 	List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
 	Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
@@ -39,9 +39,9 @@ func (c *Control) generateTag(ctx context.Context) (string, error) {
 	return c.TagCtrl.GetNext(ctx)
 }
 
-func (c *Control) getAsset(ctx context.Context, id int64) (*Asset, error) {
+func (c *Control) getAsset(ctx context.Context, idOrTag string) (*Asset, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
-		return c.AssetRepo.Get(ctx, tx, id)
+		return c.AssetRepo.Get(ctx, tx, idOrTag)
 	})
 }
 
@@ -69,6 +69,7 @@ func (c *Control) createAsset(ctx context.Context, asset *Asset, file *File) (*A
 			return nil, err
 		}
 
+		asset.PartsTotalCounter = len(asset.Parts)
 		asset.ImageURL = fileURL
 		asset.ThumbnailURL = fileURL
 
@@ -115,6 +116,7 @@ func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*A
 
 		asset.ImageURL = fileURL
 		asset.ThumbnailURL = fileURL
+		asset.PartsTotalCounter = len(asset.Parts)
 
 		return c.AssetRepo.Update(ctx, tx, asset)
 	})
