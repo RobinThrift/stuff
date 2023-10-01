@@ -4,7 +4,8 @@
 	}
 
 	.sidebar-content {
-		@apply shadow-md md:shadow-none flex h-screen flex-col justify-between border-e bg-white relative transition;
+		@apply shadow-md md:shadow-none flex h-screen flex-col justify-between border-e bg-background-200 relative transition;
+		@apply dark:border-primary-700;
 	}
 
 	.sidebar-links {
@@ -13,11 +14,13 @@
 
 	.sidebar-link {
 		@apply flex px-3 py-1 text-gray-500 font-medium transition duration-200 ease-in-out rounded;
-		@apply hover:text-blue-500 hover:bg-gray-100;
+		@apply hover:text-primary-500 hover:bg-background-300;
+		@apply dark:text-primary-400 dark:hover:text-secondary-500;
 	}
 
 	.sidebar-link.active {
-		@apply text-blue-500;
+		@apply text-primary-500;
+		@apply dark:text-primary-100;
 	}
 
 
@@ -26,11 +29,12 @@
 	}
 
 	.sidebar-desktop-toggle-btn {
-		@apply z-10 p-5 hidden md:block text-gray-400 hover:text-blue-500 flex flex-row items-center absolute -left-1 top-10 -translate-y-1/2;
+		@apply z-10 p-5 hidden md:block text-gray-400 hover:text-primary-500 flex flex-row items-center absolute -left-1 top-10 -translate-y-1/2;
 	}
 
 	.sidebar-footer {
 		@apply sticky inset-x-0 bottom-0 border-t border-gray-100 h-14;
+		@apply dark:border-primary-700;
 	}
 
 	.sidebar-desktop-closed {
@@ -49,7 +53,7 @@
 		}
 
 		.sidebar-content {
-			@apply  justify-start items-start;
+			@apply justify-start items-start;
 		}
 
 		.sidebar-desktop-toggle-btn {

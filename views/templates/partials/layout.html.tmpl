@@ -12,7 +12,7 @@
 
 	<div class="md:overflow-auto flex-1 flex flex-col">
 		<header class="h-20 max-w-screen px-2 md:px-6 lg:px-8 py-2 md:py-5 flex flex-row items-center md:justify-start">
-			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-blue-500 focus:outline-none focus:text-black md:hidden mr-2">
+			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-primary-500 focus:outline-none focus:text-black md:hidden mr-2">
 				<span class="sr-only">Show Menu</span>
 				<x-icon icon="hamburger-menu" class="w-[24px] h-[24px]" />
 			</button>
@@ -20,7 +20,7 @@
 			{{ block "header" . }}{{ end }}
 		</header>
 
-		<main id="main" class="overflow-x-auto max-w-screen md:max-w-none md:overflow-x-auto px-2 md:px-6 lg:px-8 pb-5 flex-1">
+		<main id="main" class="overflow-x-auto max-w-screen md:max-w-none md:overflow-x-auto flex-1">
 		{{ block "main" . }}{{ end }}
 		</main>
 
@@ -35,7 +35,7 @@
 <div class="sidebar-content">
 	<button
 		class="sidebar-desktop-toggle-btn"
-		x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $sidebar(sidebarDesktopClosed, '{{ $.Global.CSRFToken }}')"
+		x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $setting({ sidebar: { closed: sidebarDesktopClosed }})"
 	>
 		<x-icon icon="caret-left" class="mr-1 w-5 h-5 sidebar-desktop-closed-hide" />
 		<x-icon icon="hamburger-menu" class="mr-1 w-5 h-5 sidebar-desktop-closed-show" />
@@ -52,7 +52,7 @@
 			<span class="pointer-events-none absolute ml-2.5 translate-y-1/2 -mt-0.5 text-gray-500">
 				<x-icon icon="magnifying-glass" class="w-5 h-5 text-neutral-400" />
 			</span>
-			<input type="search" class="input px-1 py-1 pl-10" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false">
+			<input type="search" id="query" name="query" class="input px-1 py-1 pl-10" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false">
 		</form>
 	
 		<ul class="sidebar-links">
@@ -73,11 +73,20 @@
 					<x-icon icon="tag-thin" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Tags</span>
 				</a>
 			</li>
+
+			<li class="mt-1">
+				<a
+					href="/users"
+					class="sidebar-link {{ if eq $.Global.CurrentPage "/users" }} active {{ end }}"
+				>
+					<x-icon icon="user" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Users</span>
+				</a>
+			</li>
 		</ul>
 	</div>
 
 	<div class="sidebar-footer">
-		<a class="px-3 py-5 text-sm text-neutral hover:text-blue-500 flex flex-row items-center" href="/logout">
+		<a class="px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/logout">
 			<x-icon icon="sign-out" class="mr-1 w-[16px] h-[16px] rotate-180" />
 			<span class="sidebar-desktop-closed-hide">Logout</span>
 		</a>
@@ -86,63 +95,15 @@
 {{ end }}
 
 {{ define "footer" }}
-<footer class="px-3 md:px-6 lg:px-8 py-5 bg-gray-50 w-full border-t border-gray-100 h-14">
+<footer class="px-3 md:px-6 lg:px-8 py-5 bg-background-200 w-full border-t border-gray-100 h-14 dark:border-primary-700">
 	<div class="flex flex-wrap justify-center text-sm">
 		{{ template "logo" dict "Class" "text-sm" "IconClass" "h-0" }}
 		<span class="px-5">Version X</span>
-		<a href="https://github.com/kodeshack/stuff" class="inline-block group flex flex-row justify-center items-center text-blue-400 hover:text-purple-500" rel="noopener noreferrer">
+		<a href="https://github.com/kodeshack/stuff" class="inline-block group flex flex-row justify-center items-center text-primary-400 hover:text-primary-500" rel="noopener noreferrer">
 			<x-icon icon="github-logo-duotone" class="h-[16px] w-[16px] !hidden group-hover:!inline-block" />
 			<x-icon icon="github-logo" class="h-[16px] w-[16px] group-hover:!hidden" />
 			GitHub
 		</a>
 	</div>
 </footer>
-{{ end }}
-
-
-{{ define "command_palette" }}
-<div
-	class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start"
-	x-cloak
-	x-data="commandpalette"
-	x-show="show"
-
-	x-on:keydown.down.prevent="selectNext()" 
-	x-on:keydown.up.prevent="selectPrev()" 
-	x-on:keydown.enter.prevent="exec()" 
-	x-on:keydown.escape.prevent="show = false" 
-	x-on:keydown.window.prevent.meta.k="show = true; setTimeout(() => { $refs.input.focus() }, 100)"
-	x-on:click.outside="show = false"
->
-	<div class="flex flex-col w-full h-full overflow-hidden bg-white border rounded shadow-md">
-		<div class="flex items-center px-3 border-b">
-			<x-icon icon="magnifying-glass" class="w-[24px] h-[24px] text-neutral-400" />
-			<input x-model="search" x-ref="input" type="text" class="input h-11 bg-transparent border-0 outline-none focus:outline-none shadow-none focus:ring-0" placeholder="Type a command or search..." autocomplete="off" autocorrect="off" spellcheck="false">
-		</div>
-
-		<div x-ref="cmdsList" class="max-h-[320px] overflow-y-auto overflow-x-hidden">
-			<div x-show="shown.length === 0">
-				<span class="px-2 py-1 my-1 text-neutral-400">Search for <strong x-text="search"></strong></span>
-			</div>
-			<template x-for="(cat, i) in shown" :key="cat[0]">
-				<ul class="space-y-1">
-					<li class="block px-2 py-1 my-1 font-medium text-neutral-500" x-text="cat[0]"></li>
-					<template x-for="(cmd, j) in cat[1]" :key="cmd.name">
-						<li
-							x-on:click="curr=[i, j]; exec()"
-							x-on:mousemove="curr=[i, j]"
-							x-bind:class="{ 'bg-neutral-100 text-gray-900 command-palette-active': curr && curr[0] == i && curr[1] == j  }"
-							class="px-1 flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 outline-none"
-						>
-							<svg class="h-[24px] w-[24px]">
-								<use x-bin:xlink:href="`/static/icons.svg#${cmd.icon}`"></use>
-							</svg>
-							<span x-html="cmd.name"></span>
-						</li>
-					</template>
-				</ul>
-			</template>
-		</div>
-	</div>
-</div>
 {{ end }}

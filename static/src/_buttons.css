@@ -1,15 +1,41 @@
 @layer components {
 	.btn {
-		@apply px-3 py-2 focus:outline-none rounded-md;
+		@apply flex items-center justify-center px-3 py-2 focus:outline-none rounded-lg;
+
+		.icon {
+			@apply w-4 h-4 me-1;
+		}
+	}
+
+	.btn-sm {
+		@apply text-sm;
+	}
+
+	.btn-xs {
+		@apply text-sm px-2 py-1;
 	}
 
 	.btn.btn-primary {
-		@apply text-white bg-blue-500 hover:bg-blue-600 focus:bg-blue-700;
+		@apply text-white bg-primary-500 hover:bg-primary-700 focus:bg-primary-900;
+		@apply dark:text-content-inverse dark:bg-primary-50 dark:hover:bg-primary-100 dark:focus:bg-primary-200;
+
+		&.btn-outline {
+			@apply bg-transparent border-2 border-primary-300 text-primary-500;
+			@apply hover:bg-transparent hover:text-primary-700 hover:border-primary-700;
+			@apply focus:bg-transparent focus:text-primary-900 focus:border-primary-900;
+		}
 	}
+
+	.btn.btn-secondary {
+		@apply text-white bg-secondary-500 hover:bg-secondary-700 focus:bg-secondary-900;
+		@apply dark:text-content-inverse dark:bg-secondary-50 dark:hover:bg-secondary-100 dark:focus:bg-secondary-200;
+	}
+
 
 	.btn.btn-danger {
 		@apply text-white bg-red-500 hover:bg-red-600 focus:bg-red-700;
 	}
+
 
 	.btn.btn-muted {
 		@apply text-white bg-gray-500 hover:bg-gray-600 focus:bg-gray-700;
@@ -18,5 +44,59 @@
 	.btn.btn-outline.btn-danger {
 		@apply px-3 py-2 bg-transparent border text-red-500 border-red-500 hover:bg-red-600 focus:bg-red-700 hover:text-white focus:text-white;
 	}
+
+
+	.dropdown-content {
+		@apply absolute end-0 z-10 mt-1 min-w-max bg-background-100 border rounded shadow-sm border-neutral-200;
+	}
+
+	.dropdown-items {
+		@apply p-2 w-full;
+
+		a, button {
+			@apply text-sm flex items-center rounded px-4 py-2 hover:bg-background-300;
+		}
+	}
+
+	.dropdown-item {
+		@apply block text-sm rounded px-4 py-2 hover:bg-background-300;
+	}
+
+	.btn-grp {
+		@apply flex items-center justify-center;
+
+		.btn {
+			@apply rounded-none;
+		}
+
+		.btn-primary.btn-outline, .btn-neutral.btn-outline {
+			@apply border-x-transparent -me-1;
+		}
+
+		:first-child .btn, .btn:first-child {
+			@apply rounded-s-lg;
+		}
+
+		:first-child .btn-primary.btn-outline, .btn-primary.btn-outline:first-child {
+			@apply border-s-primary-300 hover:border-s-primary-700 focus:border-s-primary-900;
+		}
+
+		:first-child .btn-neutral.btn-outline, .btn-neutral.btn-outline:first-child {
+			@apply border-s-neutral-100 hover:border-s-neutral-200 focus:border-s-neutral-300;
+		}
+
+		:last-child .btn, .btn:last-child {
+			@apply rounded-e-lg;
+		}
+
+		:last-child .btn-primary.btn-outline, .btn-primary.btn-outline:last-child {
+			@apply border-e-primary-500 hover:border-e-primary-700 focus:border-s-primary-900;
+		}
+
+		:last-child .btn-neutral.btn-outline, .btn-neutral.btn-outline:last-child {
+			@apply border-e-neutral-100 hover:border-e-neutral-200 focus:border-s-neutral-300;
+		}
+	}
+
 }
 

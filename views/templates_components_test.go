@@ -85,7 +85,7 @@ func TestReplaceWithChildren(t *testing.T) {
 >
 	<a href="/assets/new" class="btn btn-primary inline-block">New Asset</a>
 
-	{{ template "dropdown" dict "class" "md:ms-2" "button-text" "Export" "children" (template "x-dropdown-children-1" .) }}
+	{{ template "dropdown" dict "class" "md:ms-2" "button-text" "Export" "children" (children "x-dropdown-children-1" .) }}
 </div>
 {{ define "x-dropdown-children-1" }}
 		<li><a href="/assets/export/csv">Export All (CSV)</a></li>

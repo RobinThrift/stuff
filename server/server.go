@@ -22,7 +22,7 @@ func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*
 
 	mux := chi.NewMux()
 
-	csrfMiddleware, err := csrfMiddleware()
+	csrfMiddleware, err := csrfMiddleware([]string{"/static"})
 	if err != nil {
 		return nil, err
 	}

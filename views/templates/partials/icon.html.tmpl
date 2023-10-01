@@ -1,5 +1,5 @@
 {{define "icon"}}
-<svg class="{{ default .class "" }}"
+<svg class="icon {{ default .class "" }}"
 	{{- if has . "x-bind:class" }} x-bind:class="{{ get . "x-bind:class" }}" {{- end }}
 	{{ if has . "x-show" }} x-show="{{ get . "x-show" }}" {{- end }}
 >

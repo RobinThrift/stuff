@@ -16,13 +16,19 @@ type UIRouter struct {
 }
 
 func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
-	mux.Post("/users/session/sidebar/open", logError(rt.sessionSetSidebarOpen))
+	mux.Post("/users/settings", logError(rt.postUserSettings))
 }
 
-// [POST] /users/session/sidebar/open
-func (rt *UIRouter) sessionSetSidebarOpen(w http.ResponseWriter, r *http.Request) error {
+// [POST] /users/settings
+func (rt *UIRouter) postUserSettings(w http.ResponseWriter, r *http.Request) error {
 	var payload struct {
-		Closed bool `json:"closed"`
+		Sidebar *struct {
+			Closed bool `json:"closed"`
+		} `json:"sidebar,omitempty"`
+		Assets *struct {
+			Columns map[string]bool `json:"columns,omitempty"`
+			Compact *bool           `json:"compact,omitempty"`
+		} `json:"assetsList,omitempty"`
 	}
 
 	body, err := io.ReadAll(r.Body)
@@ -39,7 +45,19 @@ func (rt *UIRouter) sessionSetSidebarOpen(w http.ResponseWriter, r *http.Request
 		return fmt.Errorf("error unmarshalling request body as JSON: %w", err)
 	}
 
-	session.Put(r.Context(), "sidebar_closed", payload.Closed)
+	if payload.Sidebar != nil {
+		session.Put(r.Context(), "sidebar_closed", payload.Sidebar.Closed)
+	}
+
+	if payload.Assets != nil {
+		if len(payload.Assets.Columns) != 0 {
+			session.Put(r.Context(), "assets_list_columns", payload.Assets.Columns)
+		}
+
+		if payload.Assets.Compact != nil {
+			session.Put(r.Context(), "assets_lists_compact", payload.Assets.Compact)
+		}
+	}
 
 	return nil
 }

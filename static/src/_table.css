@@ -1,0 +1,75 @@
+@layer components {
+	.thead {
+		tr {
+			@apply border-0 border-neutral-200 bg-neutral-50 dark:bg-background-200;
+		}
+
+		th {
+			@apply px-4 py-4 text-left text-sm;
+			@apply first:ps-2 first:md:ps-6 first:lg:pe-8;
+			@apply last:pe-2 last:md:pe-6 last:lg:pe-8;
+		}
+	}
+
+	.tbody {
+		tr {
+			@apply border-t border-neutral-200 hover:bg-secondary-100/50 odd:bg-background-200;
+			@apply dark:hover:bg-primary-900 dark:border-primary-700;
+		}
+
+		td {
+			@apply px-4 py-2;
+			@apply first:ps-2 first:md:ps-6 first:lg:pe-8;
+			@apply last:pe-2 last:md:pe-6 last:lg:pe-8;
+
+			&:has(a) {
+				@apply p-0
+			}
+
+			&>a {
+				@apply px-4 py-2;
+			}
+
+			&:first-child:has(a)>a {
+				@apply ps-2 md:ps-6 lg:pe-8;
+			}
+
+			img {
+				@apply h-[50px];
+			}
+		}
+	}
+
+	.table.compact {
+		.thead th {
+			@apply text-xs;
+		}
+
+		.tbody td {
+			@apply text-sm;
+
+			&:has(a) {
+				@apply p-0
+			}
+
+			a {
+				@apply px-2 py-1;
+			}
+
+			&:first-child:has(a) a {
+				@apply ps-1 md:ps-3 lg:pe-4;
+			}
+		}
+
+		.thead th, .tbody td {
+			@apply px-2 py-1;
+			@apply first:ps-1 first:md:ps-3 first:lg:pe-4;
+			@apply last:pe-1 last:md:pe-3 last:lg:pe-4;
+
+			img {
+				@apply h-[25px];
+			}
+		}
+	}
+}
+

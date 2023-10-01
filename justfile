@@ -79,7 +79,6 @@ generate: _go-tools
 _copy-js-libs: _npm-install
     -mkdir static/build
     cp static/node_modules/flatpickr/dist/flatpickr.min.js static/build/flatpickr.min.js
-    cp static/node_modules/htmx.org/dist/htmx.min.js static/build/htmx.min.js
 
 install:
     just _npm-install

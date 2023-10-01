@@ -33,6 +33,9 @@ func logReqMiddleware(next http.Handler) http.Handler {
 }
 
 func sessionMiddleware(sessionManager *scs.SessionManager) func(next http.Handler) http.Handler {
+	gob.Register(&users.User{})
+	gob.Register(map[string]bool{})
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := session.CtxWithSessionManager(r.Context(), sessionManager)
@@ -42,8 +45,6 @@ func sessionMiddleware(sessionManager *scs.SessionManager) func(next http.Handle
 }
 
 func loginRedirectMiddleware(skipFor []string) func(next http.Handler) http.Handler {
-	gob.Register(&users.User{})
-
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			for _, s := range skipFor {
@@ -64,7 +65,7 @@ func loginRedirectMiddleware(skipFor []string) func(next http.Handler) http.Hand
 	}
 }
 
-func csrfMiddleware() (func(next http.Handler) http.Handler, error) {
+func csrfMiddleware(skipFor []string) (func(next http.Handler) http.Handler, error) {
 	csrfSecret, err := genCSRFSecret()
 	if err != nil {
 		return nil, err
@@ -72,6 +73,8 @@ func csrfMiddleware() (func(next http.Handler) http.Handler, error) {
 
 	csrfProtect := csrf.Protect(
 		csrfSecret,
+		csrf.Path("/"),
+		csrf.SameSite(csrf.SameSiteStrictMode),
 		csrf.CookieName("stuff.csrf.token"),
 		csrf.FieldName("stuff.csrf.token"),
 		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +86,13 @@ func csrfMiddleware() (func(next http.Handler) http.Handler, error) {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			for _, s := range skipFor {
+				if strings.HasPrefix(r.URL.Path, s) {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
 			csrfProtect(next).ServeHTTP(w, r)
 		})
 	}, nil

@@ -217,7 +217,7 @@ func convertTokenToTemplateCall(token html.Token, hasChildren bool, counter int,
 	}
 
 	if hasChildren {
-		_, err = fmt.Fprintf(buf, `"children" (template "%s-children-%d" .)`, token.Data, counter)
+		_, err = fmt.Fprintf(buf, ` "children" (children "%s-children-%d" .)`, token.Data, counter)
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,8 @@
 package views
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -16,13 +18,26 @@ import (
 var templateDir = path.Join("views", "templates")
 
 var partialsDir = path.Join(templateDir, "partials")
+var pagesDir = path.Join(templateDir, "pages")
 
 var templateFS = os.DirFS(".")
 
 func execTemplate(w io.Writer, name string, data any) error {
+	var templates *template.Template
 	cfs := &componentFS{fs: templateFS}
 
-	templates, err := template.New(name).Funcs(templateFuncs).ParseFS(cfs, path.Join(templateDir, "pages", name+".html.tmpl"), path.Join(partialsDir, "*.html.tmpl"))
+	templateFuncs["children"] = func(childname string, data any) template.HTML {
+		var b bytes.Buffer
+
+		err := templates.ExecuteTemplate(&b, childname, data)
+		if err != nil {
+			panic(err)
+		}
+
+		return template.HTML(b.Bytes())
+	}
+
+	templates, err := template.New(name).Funcs(templateFuncs).ParseFS(cfs, path.Join(pagesDir, name+".html.tmpl"), path.Join(partialsDir, "*.html.tmpl"))
 	if err != nil {
 		return enhanceErrorMessage(cfs, err)
 	}
@@ -46,6 +61,10 @@ func enhanceErrorMessage(fs fs.FS, tmplErr error) error {
 	name := matches[1]
 
 	file, err := fs.Open(path.Join(partialsDir, name))
+	if errors.Is(err, os.ErrNotExist) {
+		file, err = fs.Open(path.Join(pagesDir, name))
+	}
+
 	if err != nil {
 		// ignore error
 		return tmplErr

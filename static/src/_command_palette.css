@@ -1,0 +1,6 @@
+@layer components {
+	.command-palette {
+		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start;
+	}
+}
+

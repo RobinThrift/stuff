@@ -1,8 +1,12 @@
 @import "../node_modules/flatpickr/dist/flatpickr.css";
 @import "./_tailwind.css";
+@import "./_themes.css";
 @import "./_buttons.css";
 @import "./_forms.css";
 @import "./_sidebar.css";
+@import "./_table.css";
+@import "./_command_palette.css";
+@import "./_assets.css";
 
 @layer utilities {
 	.max-w-screen {
@@ -12,10 +16,25 @@
 
 @layer base {
 	[x-cloak] { display: none !important; }
+
+    body {
+        @apply bg-background-100 text-content;
+    }
+
+	a {
+		@apply hover:text-primary-500;
+		@apply dark:hover:text-secondary-500;
+	}
+}
+
+@layer components {
+	.main {
+		@apply px-2 md:px-6 lg:px-8 pb-3;
+	}
 }
 
 .rainbow {
-    @apply from-green-300 via-blue-500 to-purple-600;
+    @apply from-green-300 via-primary-500 to-purple-600;
 }
 
 .drag-over .drag-over-show {
@@ -40,11 +59,11 @@
 
 .flatpickr-day.today.selected {
     background: none;
-    @apply bg-blue-500 border-blue-500;
+    @apply bg-primary-500 border-primary-500;
 }
 
 .flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover {
-    @apply text-blue-500;
+    @apply text-primary-500;
 }
 
 .flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {

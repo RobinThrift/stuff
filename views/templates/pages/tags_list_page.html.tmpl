@@ -6,21 +6,37 @@
 
 {{ define "main" }}
 {{ with .Data }}
-<table class="min-w-full divide-y divide-neutral-200">
-	{{ template "table_head" list "_select_" "Tag" "In Use" "Last Updated" }}
-
-	<tbody class="divide-y divide-neutral-200">
-		{{ range .Page.Tags }}
-		<tr class="text-neutral-800">
-			<td class="first:pl-0 last:pr-0 py-4 text-sm whitespace-nowrap">
+<table class="table min-w-full">
+	<thead class="thead">
+		<tr>
+			<th>
 				<div class="flex items-center">
-					<input id="selected_{{ .ID }}" name="selected_{{ .ID }}" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+					<input id="selected_all" type="checkbox" class="checkbox" />
+					<label for="selected_all" class="sr-only">checkbox</label>
+				</div>
+			</th>
+			<th>Tag</th>
+			<th>In Use</th>
+			<th>Last Updated</th>
+		</tr>
+	</thead>
+
+		<tbody class="tbody">
+		{{ range .Page.Tags }}
+		<tr>
+			<td class="w-4">
+				<div class="flex items-center">
+					<input id="selected_{{ .ID }}" name="selected_{{ .ID }}" type="checkbox" class="checkbox" />
 					<label id="selected_{{ .ID }}" class="sr-only">Select Tag {{ .Tag }}</label>
 				</div>
 			</td>
-			<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{{ .Tag }}</strong></td>
-			<td class="px-5 py-4 text-sm whitespace-nowrap">{{ .InUse }}</td>
-			<td class="px-5 py-4 text-sm whitespace-nowrap"><strong>{{ .UpdatedAt.Format "2006-01-02T15:04:05Z07:00" }}</strong></td>
+			<td>
+				<a class="block w-full h-full" href="{{ printf "/assets/%v" .Tag }}">
+					<strong>{{ .Tag }}</strong>
+				</a>
+			</td>
+			<td>{{ .InUse }}</td>
+			<td><strong>{{ .UpdatedAt.Format "2006-01-02T15:04:05Z07:00" }}</strong></td>
 		</tr>
 		{{ end }}
 	</tbody>

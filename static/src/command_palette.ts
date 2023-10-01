@@ -1,34 +1,14 @@
 import type _Alpine from "alpinejs"
-import { quickScore, RangeTuple } from "quick-score"
+import { hasMatch } from "fzy.js"
 
 interface Cmd {
     name: string
     icon: string
     url: string
+    tags: string[]
 }
 
 type CmdCategroy = [string, Cmd[]]
-
-function highlightMatches(str: string, matches: RangeTuple[]): string {
-    if (!matches) {
-        return str
-    }
-
-    let substrings = []
-    let previousEnd = 0
-
-    for (let [start, end] of matches) {
-        const prefix = str.substring(previousEnd, start)
-        const match = `<strong>${str.substring(start, end)}</strong>`
-
-        substrings.push(prefix, match)
-        previousEnd = end
-    }
-
-    substrings.push(str.substring(previousEnd))
-
-    return substrings.join("")
-}
 
 export function plugin(Alpine: typeof _Alpine) {
     Alpine.data("commandpalette", () => ({
@@ -47,11 +27,13 @@ export function plugin(Alpine: typeof _Alpine) {
                         name: "Add Asset",
                         icon: "plus",
                         url: "/assets/new",
+                        tags: ["create"],
                     },
                     {
                         name: "All Assets",
-                        icon: "list",
+                        icon: "package-thin",
                         url: "/assets",
+                        tags: ["list"],
                     },
                 ],
             ],
@@ -60,8 +42,20 @@ export function plugin(Alpine: typeof _Alpine) {
                 [
                     {
                         name: "All Tags",
-                        icon: "list",
+                        icon: "tag-thin",
                         url: "/tags",
+                        tags: ["list"],
+                    },
+                ],
+            ],
+            [
+                "Users",
+                [
+                    {
+                        name: "All Users",
+                        icon: "user",
+                        url: "/users",
+                        tags: ["list"],
                     },
                 ],
             ],
@@ -82,11 +76,13 @@ export function plugin(Alpine: typeof _Alpine) {
                     cmds[0],
                     cmds[1]
                         .map((c) => {
-                            let matches: RangeTuple[] = []
-                            let score = quickScore(c.name, this.search, matches)
+                            let score = Math.max(
+                                hasMatch(this.search, c.name),
+                                ...c.tags.map((t) => hasMatch(this.search, t)),
+                            )
                             return {
                                 ...c,
-                                name: highlightMatches(c.name, matches),
+                                name: c.name,
                                 score,
                             }
                         })
@@ -130,7 +126,7 @@ export function plugin(Alpine: typeof _Alpine) {
                 return
             }
 
-            if (cmd - 1 < 0 && cat != 0) {
+            if (cmd - 1 < 0 && cat !== 0) {
                 this.curr = [cat - 1, this.shown[cat - 1][1].length - 1]
                 this.scrollToActive()
             }
@@ -141,8 +137,7 @@ export function plugin(Alpine: typeof _Alpine) {
                 if (!this.search) {
                     return
                 }
-                window.location.href =
-                    location.origin + "/assets?query=" + this.search
+                window.location.href = `${location.origin}/assets?query=${this.search}`
                 return
             }
 

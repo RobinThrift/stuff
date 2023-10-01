@@ -9,8 +9,10 @@ import (
 )
 
 type ListAssetsPageViewModel struct {
-	Page  *AssetListPage
-	Query ListAssetsQuery
+	Page    *AssetListPage
+	Query   ListAssetsQuery
+	Columns map[string]bool
+	Compact bool
 }
 
 type EditAssetsPageViewModel struct {
@@ -40,11 +42,22 @@ func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAsse
 	global := views.NewGlobal("Assets", r)
 	global.Search = search
 
+	columns, _ := session.Get[map[string]bool](r.Context(), "assets_list_columns")
+	if len(columns) == 0 {
+		columns = map[string]bool{
+			"Tag": true, "Image": true, "Name": true, "Category": true, "Location": true, "Status": true,
+		}
+	}
+
+	compact, _ := session.Get[bool](r.Context(), "assets_lists_compact")
+
 	err := views.Render(w, "assets_list_page", views.Model[ListAssetsPageViewModel]{
 		Global: global,
 		Data: ListAssetsPageViewModel{
-			Page:  page,
-			Query: query,
+			Page:    page,
+			Query:   query,
+			Columns: columns,
+			Compact: compact,
 		},
 	})
 	if err != nil {

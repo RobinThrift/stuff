@@ -1,0 +1,58 @@
+{{ define "command_palette" }}
+<div
+	class="command-palette"
+	x-data="commandpalette"
+	x-cloak
+	x-show="show"
+
+	x-on:keydown.down.prevent="selectNext()" 
+	x-on:keydown.up.prevent="selectPrev()" 
+	x-on:keydown.enter.prevent="exec()" 
+	x-on:keydown.escape.prevent="show = false; search = ''; curr = [0, 0]" 
+	x-on:keydown.window.prevent.meta.k="show = true; setTimeout(() => { $refs.input.focus() }, 100)"
+	x-on:click.outside="show = false"
+>
+	<div class="flex flex-col w-full h-full overflow-hidden bg-white dark:bg-background-200 border dark:border-primary-700 rounded-md shadow-lg">
+		<div class="flex items-center p-3 border-b dark:border-primary-700 relative">
+			<span class="pointer-events-none absolute ml-2.5 top-1/2 -translate-y-1/2 text-neutral-400">
+				<x-icon icon="magnifying-glass" class="w-6 h-6" />
+			</span>
+			<input
+				x-model="search"
+				x-ref="input"
+				type="text"
+				class="input h-11 bg-background-200 pl-10 outline-none focus:outline-none shadow-none focus:ring-0"
+				placeholder="Type a command or search..."
+				autocomplete="off"
+				autocorrect="off"
+				spellcheck="false"
+			/>
+		</div>
+
+		<div x-ref="cmdsList" class="max-h-[320px] overflow-y-auto overflow-x-hidden">
+			<div x-show="shown.length === 0">
+				<span class="block px-3 py-3 text-neutral-400">Search for <strong x-text="search"></strong></span>
+			</div>
+			<template x-for="(cat, i) in shown" :key="cat[0]">
+				<ul class="py-2 px-3">
+					<li class="block py-1 my-1 text-sm text-gray-500 dark:text-accent-200" x-text="cat[0]"></li>
+					<template x-for="(cmd, j) in cat[1]" :key="cmd.name">
+						<li
+							x-on:click="curr=[i, j]; exec()"
+							x-on:mousemove="curr=[i, j]"
+							x-bind:class="{ 'bg-neutral-100 dark:bg-primary-900 dark:text-primary-100 text-primary-500 command-palette-active': curr && curr[0] == i && curr[1] == j  }"
+							class="px-1 flex cursor-pointer select-none items-center rounded-md px-2 py-2 outline-none"
+						>
+							<svg class="h-4 w-4 me-2">
+								<use x-bind:href="`/static/icons.svg#${cmd.icon}`"></use>
+							</svg>
+							<span x-text="cmd.name"></span>
+						</li>
+					</template>
+				</ul>
+			</template>
+		</div>
+	</div>
+</div>
+{{ end }}
+

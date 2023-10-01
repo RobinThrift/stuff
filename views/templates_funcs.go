@@ -80,12 +80,12 @@ var templateFuncs = template.FuncMap{
 		return a + b
 	},
 
-	"json": func(v any) string {
+	"json": func(v any) template.JS {
 		j, err := json.Marshal(v)
 		if err != nil {
 			panic(err)
 		}
-		return string(j)
+		return template.JS(j)
 	},
 
 	"debug": func(v any) string {
