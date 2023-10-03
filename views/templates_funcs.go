@@ -1,6 +1,7 @@
 package views
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -94,6 +95,10 @@ var templateFuncs = template.FuncMap{
 			panic(err)
 		}
 		return string(j)
+	},
+
+	"bytesToPNG": func(b []byte) template.URL {
+		return template.URL("data:image/png;base64," + base64.StdEncoding.EncodeToString(b))
 	},
 }
 

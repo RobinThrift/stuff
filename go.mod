@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
 	github.com/alexedwards/scs/v2 v2.5.1
+	github.com/boombuler/barcode v1.0.1
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/google/uuid v1.3.0

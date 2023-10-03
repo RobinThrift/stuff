@@ -138,6 +138,19 @@
 			{{ end }}
 		</div>
 
+		<div class="mt-5 rounded border bg-white-100 p-3 w-full">
+			{{ $label := index (.Labels nil 100) 0 }}
+			<div class="flex">
+				<img src="{{ bytesToPNG $label.Barcode.Image }}" class="h-[100px] w-[100px]" />
+				<div class="flex flex-col">
+					<span class="block">{{ $label.Tag }}</span>
+					<span class="block">{{ $label.Name }}</span>
+					<span class="block">{{ $label.LocationCode }}</span>
+					<span class="block">{{ $label.URL }}</span>
+				</div>
+			</div>
+		</div>
+
 		{{ with .Children }}
 		<div class="mt-5 rounded bg-gray-100 p-3 w-full">
 			<h3 class="mb-5 md:text-md lg:text-xl font-bold">Assets belonging to this Asset</h3>
