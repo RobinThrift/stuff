@@ -16,4 +16,9 @@
 		@apply w-4 h-4 rounded  text-primary-500 bg-background-200 border-neutral-200 focus:ring-primary-500;
 		@apply dark:text-primary-500 dark:bg-background-200 dark:border-neutral-800 dark:focus:ring-primary-500;
 	}
+
+	.checkbox-input {
+		@apply px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-primary-300 disabled:cursor-not-allowed disabled:opacity-50;
+		@apply dark:bg-background-200 dark:border-primary-700 dark:focus:ring-primary-300;
+	}
 }

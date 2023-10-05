@@ -1,0 +1,62 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">New User</h1>
+{{ end }}
+
+{{ define "main" }}
+{{ with .Data }}
+<form
+	class="main max-w-screen-xl"
+	method="post"
+	action="/users/new"
+	enctype="multipart/form-data"
+>
+	{{ if has .ValidationErrs "general" }}
+	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
+	{{ end }}
+
+	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+
+	{{-
+		template "field" dict
+		"Class" "mb-2"
+		"Required" true
+		"Label" "Username"
+		"Name" "username"
+		"ValidationErr" .ValidationErrs.username
+		"Value" .User.Username
+	-}}
+
+	{{-
+		template "field" dict
+		"Class" "mb-2"
+		"Required" true
+		"Label" "Display Name"
+		"Name" "display_name"
+		"ValidationErr" .ValidationErrs.display_name
+		"Value" .User.DisplayName
+	-}}
+
+	{{-
+		template "field" dict
+		"Class" "mb-2"
+		"Type" "password"
+		"Required" true
+		"Label" "Initial Password"
+		"Name" "init_password"
+		"ValidationErr" .ValidationErrs.init_password
+	-}}
+
+	<x-checkbox label="Is Admin" name="is_admin" checked="{{ .User.IsAdmin }}" validation-error="{{ .ValidationErrs.is_admin }}" />
+
+	<div class="flex flex-col items-start mt-2">
+		<button type="submit" class="btn btn-primary mt-5">
+			Create User
+		</button>
+	</div>
+</form>
+{{ end }}
+{{ end }}
+
+

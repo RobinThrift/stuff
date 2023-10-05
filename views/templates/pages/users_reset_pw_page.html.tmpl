@@ -1,0 +1,32 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">Reset Password</h1>
+{{ end }}
+
+{{ define "main" }}
+<div class="main">
+	<form class="flex flex-col align-start max-w-sm" method="post">
+		{{ if has .Data.ValidationErrs "general" }}
+		<span class="block text-red-500">{{ .Data.ValidationErrs.general }}</span>
+		{{ end }}
+
+		<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+
+		{{-
+			template "field" dict
+			"Required" true
+			"Type" "password"
+			"Label" "Temporary Password"
+			"Name" "temp_password"
+			"ValidationErr" .Data.ValidationErrs.temp_password
+		-}}
+
+		<div class="mt-5">
+			<button type="submit" class="btn btn-primary btn-sm">Reset Password</button>
+		</div>
+	</form>
+</div>
+{{ end }}
+
+

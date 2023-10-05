@@ -1,7 +1,7 @@
 {{ define "command_palette" }}
 <div
 	class="command-palette"
-	x-data="commandpalette"
+	x-data="commandpalette({isAdmin: {{ $.Global.CurrentUserIsAdmin }} })"
 	x-cloak
 	x-show="show"
 

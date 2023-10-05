@@ -14,8 +14,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/form/v4"
+	"github.com/kodeshack/stuff/auth"
 	"github.com/kodeshack/stuff/server/session"
-	"github.com/kodeshack/stuff/users"
 	"github.com/kodeshack/stuff/views"
 	"github.com/microcosm-cc/bluemonday"
 )
@@ -87,7 +87,7 @@ func (rt *UIRouter) handleAssetsNewGet(w http.ResponseWriter, r *http.Request) e
 
 // [POST] /assets/new
 func (rt *UIRouter) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) error {
-	user, ok := session.Get[*users.User](r.Context(), "user")
+	user, ok := session.Get[*auth.User](r.Context(), "user")
 	if !ok {
 		return errors.New("can't find user in session")
 	}
@@ -156,7 +156,7 @@ func (rt *UIRouter) handleAssetsEditGet(w http.ResponseWriter, r *http.Request) 
 
 // [POST] /assets/{id}/edit
 func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request) error {
-	user, ok := session.Get[*users.User](r.Context(), "user")
+	user, ok := session.Get[*auth.User](r.Context(), "user")
 	if !ok {
 		return errors.New("can't find user in session")
 	}

@@ -12,31 +12,26 @@ type Database struct {
 }
 
 func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Context, tx bob.Tx) error) error {
-	tx, ok := txFromCtx(ctx)
+	if tx, ok := txFromCtx(ctx); ok {
+		return fn(ctx, tx)
+	}
 
-	if !ok {
-		var err error
-		tx, err = db.BeginTx(ctx, nil)
-		if err != nil {
-			return fmt.Errorf("error beginning transaction: %w", err)
-		}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("error beginning transaction: %w", err)
 	}
 
 	ctx = ctxWithTx(ctx, tx)
 
 	if err := fn(ctx, tx); err != nil {
-		if !ok {
-			if rbErr := tx.Rollback(); rbErr != nil {
-				return fmt.Errorf("error rolling back: %w. original error: %v", rbErr, err)
-			}
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("error rolling back: %w. original error: %v", rbErr, err)
 		}
 		return err
 	}
 
-	if !ok {
-		if err := tx.Commit(); err != nil {
-			return fmt.Errorf("error committing transaction: %w", err)
-		}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("error committing transaction: %w", err)
 	}
 
 	return nil

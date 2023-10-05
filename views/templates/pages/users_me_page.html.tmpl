@@ -1,0 +1,43 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">{{ .Data.User.DisplayName }} Settings</h1>
+{{ end }}
+
+{{ define "main" }}
+{{ with .Data }}
+<div class="main">
+	<div class="flex flex-col md:grid md:grid-cols-2">
+		<div>
+			<form class="flex items-center" method="post" action="/users/me">
+				{{ if has .ValidationErrs "general" }}
+				<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
+				{{ end }}
+
+				<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+
+				{{-
+					template "field" dict
+					"Class" "flex items-center"
+					"LabelClass" "mb-0 me-3"
+					"Required" true
+					"Label" "Display Name"
+					"Name" "display_name"
+					"ValidationErr" .ValidationErrs.display_name
+					"Value" .User.DisplayName
+				-}}
+
+				<div class="ms-5">
+					<button type="submit" class="btn btn-primary btn-sm">Update</button>
+				</div>
+			</form>
+
+			<div class="mt-5">
+				<a href="/users/me/changepassword" class="max-w-[200px] btn btn-primary btn-sm">Change Password</a>
+			</div>
+		</div>
+	</div>
+</div>
+{{ end }}
+{{ end }}
+

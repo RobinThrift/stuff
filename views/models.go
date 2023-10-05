@@ -13,12 +13,13 @@ type Model[D any] struct {
 }
 
 type Global struct {
-	Title         string
-	CSRFToken     string
-	FlashMessage  string
-	Search        string
-	CurrentPage   string
-	SidebarClosed bool
+	Title              string
+	CSRFToken          string
+	FlashMessage       string
+	Search             string
+	CurrentPage        string
+	SidebarClosed      bool
+	CurrentUserIsAdmin bool
 }
 
 func NewGlobal(title string, r *http.Request) Global {
@@ -26,12 +27,15 @@ func NewGlobal(title string, r *http.Request) Global {
 
 	sidebarClosed, _ := session.Get[bool](r.Context(), "sidebar_closed")
 
+	currentUserIsAdmin, _ := session.Get[bool](r.Context(), "user_is_admin")
+
 	return Global{
-		Title:         title,
-		CSRFToken:     csrf.Token(r),
-		FlashMessage:  infomsg,
-		CurrentPage:   r.URL.Path,
-		SidebarClosed: sidebarClosed,
+		Title:              title,
+		CSRFToken:          csrf.Token(r),
+		FlashMessage:       infomsg,
+		CurrentPage:        r.URL.Path,
+		SidebarClosed:      sidebarClosed,
+		CurrentUserIsAdmin: currentUserIsAdmin,
 	}
 }
 

@@ -13,9 +13,9 @@ import (
 	"github.com/stephenafamo/bob"
 )
 
-type RepoSQLite struct{}
+type LocalAuthRepoSQLite struct{}
 
-func (*RepoSQLite) GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*LocalAuthUser, error) {
+func (*LocalAuthRepoSQLite) GetLocalUser(ctx context.Context, tx bob.Executor, username string) (*LocalAuthUser, error) {
 	query := models.LocalAuthUsers.Query(ctx, tx, models.SelectWhere.LocalAuthUsers.Username.EQ(username))
 	user, err := query.One()
 	if err != nil {
@@ -39,7 +39,7 @@ func (*RepoSQLite) GetLocalUser(ctx context.Context, tx bob.Executor, username s
 	}, nil
 }
 
-func (*RepoSQLite) CreateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) (*LocalAuthUser, error) {
+func (*LocalAuthRepoSQLite) CreateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) (*LocalAuthUser, error) {
 	inserted, err := models.LocalAuthUsers.Insert(ctx, tx, &models.LocalAuthUserSetter{
 		Username:               omit.From(user.Username),
 		Algorithm:              omit.From(user.Algorithm),
@@ -65,20 +65,34 @@ func (*RepoSQLite) CreateLocalUser(ctx context.Context, tx bob.Executor, user *L
 	}, nil
 }
 
-func (*RepoSQLite) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) error {
-	_, err := models.LocalAuthUsers.UpdateQ(ctx, tx, &models.LocalAuthUserSetter{
+func (*LocalAuthRepoSQLite) UpdateLocalUser(ctx context.Context, tx bob.Executor, user *LocalAuthUser) error {
+	_, err := models.LocalAuthUsers.UpdateQ(ctx, tx, models.UpdateWhere.LocalAuthUsers.ID.EQ(user.ID), &models.LocalAuthUserSetter{
 		Algorithm:              omit.From(user.Algorithm),
 		Params:                 omit.From(user.Params),
 		Salt:                   omit.From(user.Salt),
 		Password:               omit.From(user.Password),
 		RequiresPasswordChange: omit.From(user.RequiresPasswordChange),
 		UpdatedAt:              omit.From(types.NewSQLiteDatetime(time.Now())),
-	}, models.UpdateWhere.LocalAuthUsers.ID.EQ(user.ID)).One()
+	}).Exec()
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("error updating local auth user: %w", ErrLocalAuthUserNotFound)
 		}
+		return err
 	}
 
 	return nil
 }
+
+func (*LocalAuthRepoSQLite) DeleteByUsername(ctx context.Context, tx bob.Executor, username string) error {
+	_, err := models.LocalAuthUsers.DeleteQ(ctx, tx, models.DeleteWhere.LocalAuthUsers.Username.EQ(username)).Exec()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("error deleting local auth user: %w", ErrLocalAuthUserNotFound)
+		}
+		return err
+	}
+
+	return nil
+}
+

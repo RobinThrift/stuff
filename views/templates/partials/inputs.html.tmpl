@@ -285,3 +285,53 @@ Select:
 	)
 -}}
 {{ end }}
+
+{{- /*
+x-checkbox:
+	class string
+	input-class string
+	checked bool
+	label string
+	name string
+	required bool
+	disabled bool
+	readonly bool
+	icon string
+	validation-error string
+*/ -}}
+{{ define "checkbox" }}
+<div class="flex items-center align-center py-2 {{ if ne .class "" -}} {{ .class }} {{- end -}}">
+	<input
+		{{ if has . "required" }} required="{{ .required }}" {{ end }}
+		{{ if has . "readonly" }} readonly="{{ .readonly }}" {{ end }}
+		{{ if has . "disabled" }} disabled="{{ .disabled }}" {{ end }}
+
+		type="checkbox"
+
+		name="{{ .name }}"
+		id="{{ .name }}"
+
+		class="checkbox-input {{ if has . "icon"  -}} pr-11 {{- end }} {{ if has . "input-class" -}} {{ get . "input-class" }} {{- end -}}"
+
+		{{ if .checked }} checked {{ end }}
+	/>
+
+	{{ if has . "icon" }}
+	<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+		<div class="h-4 w-4">
+			{{ template "icon" dict "icon" .icon "class" "w-[24px] h-[24px]" }}
+		</div>
+	</span>
+	{{ end }}
+
+	{{ if ne .Label "" }}
+	{{ template "_label" dict "Name" .name "Label" .label "LabelClass" "m-0 ms-2" }}
+	{{ end }}
+
+	{{ if has . "validation-error" }}
+	<div>
+		<span class="block text-red-500">{{ get . "validation-error" }}</span>
+	</div>
+	{{ end }}
+</div>
+{{ end }}

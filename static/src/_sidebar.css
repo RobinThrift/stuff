@@ -33,7 +33,7 @@
 	}
 
 	.sidebar-footer {
-		@apply sticky inset-x-0 bottom-0 border-t border-gray-100 h-14;
+		@apply sticky inset-x-0 bottom-0 border-t border-gray-100 pb-5;
 		@apply dark:border-primary-700;
 	}
 
@@ -45,7 +45,7 @@
 		}
 
 		.sidebar-footer {
-			@apply w-full flex items-center fixed;
+			@apply w-full flex flex-col items-center fixed;
 
 			& a {
 				@apply justify-center w-full;

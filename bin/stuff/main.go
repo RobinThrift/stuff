@@ -18,7 +18,6 @@ import (
 	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite"
 	"github.com/kodeshack/stuff/tags"
-	"github.com/kodeshack/stuff/users"
 	"github.com/stephenafamo/bob"
 )
 
@@ -65,11 +64,10 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	database := &database.Database{DB: bob.NewDB(db)}
 
 	tagCtrl := &tags.Control{Algorithm: config.TagAlgorithm, DB: database, TagRepo: &tags.RepoSQLite{}}
-	userCtrl := &users.Control{DB: database, UserRepo: &users.RepoSQLite{}}
 	authCtrl := &auth.Control{
 		DB:            database,
-		Users:         userCtrl,
-		LocalAuthRepo: &auth.RepoSQLite{},
+		UserRepo:      &auth.UserRepoSQLite{},
+		LocalAuthRepo: &auth.LocalAuthRepoSQLite{},
 		Argon2Params:  auth.Argon2Params(config.Auth.Local.Argon2Params),
 	}
 	assetsCtrl := &assets.Control{
@@ -84,7 +82,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		return nil, errors.Join(db.Close(), err)
 	}
 
-	authRouter := &auth.Router{Control: authCtrl}
+	authRouter := &auth.UIRouter{Control: authCtrl, Decoder: auth.NewDecoder()}
 	assetsUIRouter := &assets.UIRouter{
 		Control:          assetsCtrl,
 		Decoder:          assets.NewDecoder(config.DecimalSeparator),
@@ -100,8 +98,6 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	tagsUIRouter := &tags.UIRouter{Control: tagCtrl}
 	tagAPIRouter := &tags.APIRouter{Control: tagCtrl}
 
-	usersUIRouter := &users.UIRouter{}
-
 	sm := scs.New()
 	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
 	sm.Lifetime = 24 * time.Hour
@@ -115,7 +111,6 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		assetsAPIRouter.RegisterRoutes,
 		tagsUIRouter.RegisterRoutes,
 		tagAPIRouter.RegisterRoutes,
-		usersUIRouter.RegisterRoutes,
 	)
 	if err != nil {
 		return nil, err

@@ -21,13 +21,17 @@
 		</header>
 
 		<main id="main" class="overflow-x-auto max-w-screen md:max-w-none md:overflow-x-auto flex-1">
+		{{ if ne $.Global.FlashMessage "" }}
+		<div class="border rounded p-5 m-5 bg-secondary-500 text-background-200">{{ $.Global.FlashMessage }}</div>
+		{{ end }}
+
 		{{ block "main" . }}{{ end }}
 		</main>
 
 		{{ template "footer" . }}
 	</div>
 </div>
-{{ template "command_palette" }}
+{{ template "command_palette" . }}
 
 {{ template "document_footer" . }}
 
@@ -74,6 +78,7 @@
 				</a>
 			</li>
 
+			{{ if $.Global.CurrentUserIsAdmin }}
 			<li class="mt-1">
 				<a
 					href="/users"
@@ -82,11 +87,17 @@
 					<x-icon icon="user" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Users</span>
 				</a>
 			</li>
+			{{ end }}
 		</ul>
 	</div>
 
 	<div class="sidebar-footer">
-		<a class="px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/logout">
+		<a class="block px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/users/me">
+			<x-icon icon="user-gear" class="mr-1 w-[16px] h-[16px]" />
+			<span class="sidebar-desktop-closed-hide">My Settings</span>
+		</a>
+
+		<a class="block px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/logout">
 			<x-icon icon="sign-out" class="mr-1 w-[16px] h-[16px] rotate-180" />
 			<span class="sidebar-desktop-closed-hide">Logout</span>
 		</a>

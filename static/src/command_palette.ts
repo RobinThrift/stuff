@@ -11,15 +11,10 @@ interface Cmd {
 type CmdCategroy = [string, Cmd[]]
 
 export function plugin(Alpine: typeof _Alpine) {
-    Alpine.data("commandpalette", () => ({
-        init() {
-            this.shown = this.commands
-            this.$watch("search", () => this.onSearch())
-        },
+    Alpine.data("commandpalette", (initParam) => {
+        let { isAdmin } = initParam as { isAdmin?: boolean }
 
-        show: false,
-
-        commands: [
+        let commands: CmdCategroy[] = [
             [
                 "Assets",
                 [
@@ -48,7 +43,10 @@ export function plugin(Alpine: typeof _Alpine) {
                     },
                 ],
             ],
-            [
+        ]
+
+        if (isAdmin) {
+            commands.push([
                 "Users",
                 [
                     {
@@ -57,118 +55,137 @@ export function plugin(Alpine: typeof _Alpine) {
                         url: "/users",
                         tags: ["list"],
                     },
+                    {
+                        name: "Create User",
+                        icon: "user-plus",
+                        url: "/users/new",
+                        tags: ["add"],
+                    },
                 ],
-            ],
-        ] as CmdCategroy[],
-        shown: [] as CmdCategroy[],
-        curr: [0, 0] as [number, number],
-        search: "",
+            ])
+        }
 
-        onSearch() {
-            if (this.search.length === 0) {
-                this.curr = [0, 0]
+        return {
+            init() {
                 this.shown = this.commands
-                return
-            }
+                this.$watch("search", () => this.onSearch())
+            },
 
-            this.shown = this.commands
-                .map((cmds: CmdCategroy) => [
-                    cmds[0],
-                    cmds[1]
-                        .map((c) => {
-                            let score = Math.max(
-                                hasMatch(this.search, c.name),
-                                ...c.tags.map((t) => hasMatch(this.search, t)),
-                            )
-                            return {
-                                ...c,
-                                name: c.name,
-                                score,
-                            }
-                        })
-                        .filter(({ score }) => score > 0),
-                ])
-                .filter((cmds: CmdCategroy) => cmds[1].length)
+            show: false,
 
-            if (this.shown.length === 0) {
-                this.curr = undefined
-            } else {
-                this.curr = [0, 0]
-            }
-        },
+            commands,
+            shown: [] as CmdCategroy[],
+            curr: [0, 0] as [number, number],
+            search: "",
 
-        selectNext() {
-            if (!this.curr) {
-                return
-            }
-
-            let [cat, cmd] = this.curr
-            if (cmd + 1 < this.shown[cat][1].length) {
-                this.curr = [cat, cmd + 1]
-                this.scrollToActive()
-                return
-            }
-
-            if (cat + 1 < this.shown.length) {
-                this.curr = [cat + 1, 0]
-                this.scrollToActive()
-            }
-        },
-
-        selectPrev() {
-            if (!this.curr) {
-                return
-            }
-            let [cat, cmd] = this.curr
-            if (cmd - 1 >= 0) {
-                this.curr = [cat, cmd - 1]
-                this.scrollToActive()
-                return
-            }
-
-            if (cmd - 1 < 0 && cat !== 0) {
-                this.curr = [cat - 1, this.shown[cat - 1][1].length - 1]
-                this.scrollToActive()
-            }
-        },
-
-        exec() {
-            if (!this.curr) {
-                if (!this.search) {
+            onSearch() {
+                if (this.search.length === 0) {
+                    this.curr = [0, 0]
+                    this.shown = this.commands
                     return
                 }
-                window.location.href = `${location.origin}/assets?query=${this.search}`
-                return
-            }
 
-            let [cat, cmd] = this.curr
-            let execCmd = this.shown[cat][1][cmd]
-            if (execCmd) {
-                window.location.href = location.origin + execCmd.url
-            }
-        },
+                this.shown = this.commands
+                    .map((cmds: CmdCategroy) => [
+                        cmds[0],
+                        cmds[1]
+                            .map((c) => {
+                                let score = Math.max(
+                                    hasMatch(this.search, c.name),
+                                    ...c.tags.map((t) =>
+                                        hasMatch(this.search, t),
+                                    ),
+                                )
+                                return {
+                                    ...c,
+                                    name: c.name,
+                                    score,
+                                }
+                            })
+                            .filter(({ score }) => score > 0),
+                    ])
+                    .filter((cmds: CmdCategroy) => cmds[1].length)
 
-        scrollToActive() {
-            if (!this.curr) {
-                return
-            }
+                if (this.shown.length === 0) {
+                    this.curr = undefined
+                } else {
+                    this.curr = [0, 0]
+                }
+            },
 
-            let el: HTMLElement | null = this.$refs.cmdsList.querySelector(
-                ".command-palette-active",
-            )
-            if (!el) {
-                return
-            }
+            selectNext() {
+                if (!this.curr) {
+                    return
+                }
 
-            let offset =
-                el.offsetTop +
-                el.offsetHeight * 2 -
-                this.$refs.cmdsList.offsetHeight
-            if (offset > 0) {
-                this.$refs.cmdsList.scrollTo({ top: offset })
-            } else {
-                this.$refs.cmdsList.scrollTo({ top: 0 })
-            }
-        },
-    }))
+                let [cat, cmd] = this.curr
+                if (cmd + 1 < this.shown[cat][1].length) {
+                    this.curr = [cat, cmd + 1]
+                    this.scrollToActive()
+                    return
+                }
+
+                if (cat + 1 < this.shown.length) {
+                    this.curr = [cat + 1, 0]
+                    this.scrollToActive()
+                }
+            },
+
+            selectPrev() {
+                if (!this.curr) {
+                    return
+                }
+                let [cat, cmd] = this.curr
+                if (cmd - 1 >= 0) {
+                    this.curr = [cat, cmd - 1]
+                    this.scrollToActive()
+                    return
+                }
+
+                if (cmd - 1 < 0 && cat !== 0) {
+                    this.curr = [cat - 1, this.shown[cat - 1][1].length - 1]
+                    this.scrollToActive()
+                }
+            },
+
+            exec() {
+                if (!this.curr) {
+                    if (!this.search) {
+                        return
+                    }
+                    window.location.href = `${location.origin}/assets?query=${this.search}`
+                    return
+                }
+
+                let [cat, cmd] = this.curr
+                let execCmd = this.shown[cat][1][cmd]
+                if (execCmd) {
+                    window.location.href = location.origin + execCmd.url
+                }
+            },
+
+            scrollToActive() {
+                if (!this.curr) {
+                    return
+                }
+
+                let el: HTMLElement | null = this.$refs.cmdsList.querySelector(
+                    ".command-palette-active",
+                )
+                if (!el) {
+                    return
+                }
+
+                let offset =
+                    el.offsetTop +
+                    el.offsetHeight * 2 -
+                    this.$refs.cmdsList.offsetHeight
+                if (offset > 0) {
+                    this.$refs.cmdsList.scrollTo({ top: offset })
+                } else {
+                    this.$refs.cmdsList.scrollTo({ top: 0 })
+                }
+            },
+        }
+    })
 }

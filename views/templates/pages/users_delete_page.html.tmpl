@@ -1,0 +1,18 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "main" }}
+<h1 class="my-5 font-extrabold md:text-2xl lg:text-4xl text-center">
+	Are you sure you want to delete user "{{ .Data.User.Username }}"?
+</h1>
+
+<form method="post" action={{ printf "/users/%d/delete" .Data.User.ID }}>
+	<input type="hidden" name="stuff.csrf.token" value={{ .Global.CSRFToken }} />
+
+	<div class="flex w-full items-center justify-center">
+		<button type="submit" class="btn btn-danger">Delete</button>
+		<a x-on:click.prevent.stop="history.back()" href="/users" class="ms-5 btn-muted">Cancel</a>
+	</div>
+</form>
+{{ end }}
+
+

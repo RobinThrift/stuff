@@ -1,0 +1,100 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">Users</h1>
+{{ end }}
+
+{{ define "main" }}
+{{ with .Data }}
+<div
+	class="w-full h-full"
+	x-data="{ compact: {{ $.Data.Compact }} }"
+	x-init="$watch('compact', (v) => $setting({ usersList: { compact: v }}))"
+>
+	<div class="w-full main flex flex-row justify-end items-center">
+		{{ if $.Global.CurrentUserIsAdmin }}
+		<a href="/users/new" class="btn btn-primary btn-sm me-2">
+			<x-icon icon="plus" class="h-4 w-4" />
+			<span>Add User</span>
+		</a>
+		{{ end }}
+
+		<button class="btn btn-primary btn-sm me-2" x-on:click="compact = !compact">
+			<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
+			<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
+
+			<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
+			<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
+		</button>
+	</div>
+
+	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
+		<thead class="thead">
+			<tr>
+				<th>ID</th>
+				<th>Username</th>
+				<th>Display Name</th>
+				<th>Admin</th>
+				{{ if $.Global.CurrentUserIsAdmin }}
+				<th></th>
+				{{ end }}
+			</tr>
+		</thead>
+
+			<tbody class="tbody">
+			{{ range .Page.Users }}
+			<tr>
+				<td>{{ .ID }}</td>
+				<td><strong>{{ .Username }}</strong></td>
+				<td>{{ .DisplayName }}</td>
+				<td>
+					{{ if .IsAdmin }}
+						<x-icon icon="check" class="h-6 w-6 text-green-500" />
+					{{ else }}
+						<x-icon icon="x" class="h-6 w-6 text-red-500" />
+					{{ end }}
+				</td>
+				{{ if $.Global.CurrentUserIsAdmin }}
+				<td>
+					<div class="btn-grp hidden lg:flex">
+						<a class="btn btn-xs" href="{{ printf `/users/%v/reset_password` .ID }}">
+							<x-icon icon="password" class="w-4 h-4" />
+							Reset Password
+						</a>
+						<a class="btn btn-xs" href="{{ printf `/users/%v/toggle_admin` .ID }}">
+							<x-icon icon="crown" class="w-4 h-4" />
+							{{ if .IsAdmin }} Revoke Admin {{ else }} Make Admin {{ end }}
+						</a>
+						<a class="btn btn-xs text-red-500 hover:text-red-700" href="{{ printf `/users/%v/delete` .ID }}">
+							<x-icon icon="trash-simple" class="w-4 h-4" />
+							Delete
+						</a>
+					</div>
+
+					<x-dropdown-button
+						class="max-w-min lg:hidden"
+						button-class="btn-neutral"
+						button-text=""
+						icon="dots-three-vertical"
+						items='[
+							{ "text": "Reset Password", "url": "{{ printf `/users/%v/reset_password` .ID }}", "icon": "password" },
+							{ "text": "Toggle Admin", "url": "{{ printf `/users/%v/toggle_admin` .ID }}", "icon": "crown" },
+							{ "text": "Delete", "url": "(printf `/users/%d/delete` .ID)", "class": "text-red-500 hover:text-red-700", "icon": "trash-simple" }
+						]'
+					/>
+				</td>
+				{{ end }}
+			</tr>
+			{{ end }}
+		</tbody>
+	</table>
+
+</div>
+
+{{ if gt .Page.NumPages 1 }}
+{{ template "pagination" dict "Page" .Page }}
+{{ end }}
+
+{{ end }}
+{{ end }}
+

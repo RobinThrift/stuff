@@ -6,10 +6,10 @@ export function plugin(Alpine: typeof _Alpine) {
 		dark: window.matchMedia("(prefers-color-scheme: dark)").matches,
 
 		set(name: string) {
-			document.documentElement.classList.remove(`theme-${this.name}`);
+			document.body.classList.remove(`theme-${this.name}`);
 
 			this.name = name;
-			document.documentElement.classList.add(`theme-${this.name}`);
+			document.body.classList.add(`theme-${this.name}`);
 			localStorage.set(
 				"theme",
 				JSON.stringify({ name: this.name, dark: this.dark }),
@@ -20,9 +20,9 @@ export function plugin(Alpine: typeof _Alpine) {
 			this.dark = !this.dark;
 
 			if (this.dark) {
-				document.documentElement.classList.add("dark");
+				document.body.classList.add("dark");
 			} else {
-				document.documentElement.classList.remove("dark");
+				document.body.classList.remove("dark");
 			}
 
 			localStorage.set(
@@ -41,7 +41,7 @@ export function plugin(Alpine: typeof _Alpine) {
 	}
 
 	if (theme.dark) {
-		document.documentElement.classList.add("dark");
+		document.body.classList.add("dark");
 	}
 
 	Alpine.store("theme", theme);

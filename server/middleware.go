@@ -8,9 +8,9 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/csrf"
+	"github.com/kodeshack/stuff/auth"
 	"github.com/kodeshack/stuff/ctxx"
 	"github.com/kodeshack/stuff/server/session"
-	"github.com/kodeshack/stuff/users"
 	"github.com/segmentio/ksuid"
 )
 
@@ -33,7 +33,7 @@ func logReqMiddleware(next http.Handler) http.Handler {
 }
 
 func sessionMiddleware(sessionManager *scs.SessionManager) func(next http.Handler) http.Handler {
-	gob.Register(&users.User{})
+	gob.Register(&auth.User{})
 	gob.Register(map[string]bool{})
 
 	return func(next http.Handler) http.Handler {
