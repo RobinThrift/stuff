@@ -95,4 +95,3 @@ func (*LocalAuthRepoSQLite) DeleteByUsername(ctx context.Context, tx bob.Executo
 
 	return nil
 }
-
