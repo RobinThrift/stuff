@@ -11,12 +11,12 @@ _default:
 
 fmt: _npm-install
     go fmt ./...
-    cd static && biome format "src/*.ts"
+    cd static && biome format --write src/*.ts
 
 lint: _npm-install
     staticcheck ./...
     golangci-lint run ./...
-    cd static && biome check "src/*.ts"
+    cd static && biome check src/*.ts
 
 test *flags="-failfast -v -timeout 5m":
     @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
