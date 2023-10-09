@@ -167,20 +167,6 @@ func (c *Control) getLabelSheets(ctx context.Context, query getLabelSheetsQuery)
 		labels = append(labels, l...)
 	}
 
-	// for i := 0; i <= 60; i++ {
-	// 	for _, a := range assets.Assets {
-	// 		ls, err := a.Labels(query.baseURL, 200)
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		for j := range ls {
-	// 			ls[j].Name += " " + strconv.Itoa(i)
-	// 			ls[j].LocationCode += " " + strconv.Itoa(i)
-	// 			labels = append(labels, ls[j])
-	// 		}
-	// 	}
-	// }
-
 	query.sheet.Labels = labels
 
 	return query.sheet.Generate()
