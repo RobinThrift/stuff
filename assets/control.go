@@ -21,6 +21,7 @@ type Control struct {
 	TagCtrl   *tags.Control
 
 	FileDir string
+	TmpDir  string
 }
 
 type AssetRepo interface {
@@ -178,7 +179,7 @@ func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename s
 		return "", "", err
 	}
 
-	fh, err := os.CreateTemp("", origFileName)
+	fh, err := os.CreateTemp(c.TmpDir, origFileName)
 	if err != nil {
 		return "", "", err
 	}

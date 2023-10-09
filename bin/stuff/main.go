@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/alexedwards/scs/v2"
 	"github.com/RobinThrift/stuff/assets"
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/config"
@@ -19,6 +18,7 @@ import (
 	"github.com/RobinThrift/stuff/storage/database"
 	"github.com/RobinThrift/stuff/storage/database/sqlite"
 	"github.com/RobinThrift/stuff/tags"
+	"github.com/alexedwards/scs/v2"
 	"github.com/stephenafamo/bob"
 )
 
@@ -81,6 +81,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		AssetRepo: &assets.RepoSQLite{},
 		TagCtrl:   tagCtrl,
 		FileDir:   config.FileDir,
+		TmpDir:    config.TmpDir,
 	}
 
 	err = authCtrl.RunInitSetup(ctx, "admin", config.Auth.Local.InitialAdminPassword)

@@ -13,6 +13,7 @@ type Config struct {
 
 	Database Database `json:"database"`
 	FileDir  string   `json:"fileDir"`
+	TmpDir   string
 
 	TagAlgorithm string `json:"tagAlgorithm"`
 
@@ -68,6 +69,7 @@ func NewConfigFromEnv() (*Config, error) {
 		},
 
 		FileDir: getEnvDefault("STUFF_FILE_DIR", "files"),
+		TmpDir:  getEnvDefault("STUFF_TMP_DIR", getEnvDefault("TMPDIR", "")),
 
 		TagAlgorithm: getEnvDefault("STUFF_TAG_ALGORITHM", "nanoid"),
 
