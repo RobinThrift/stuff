@@ -1,6 +1,9 @@
 version        := env_var_or_default("VERSION", "dev")
 go_ldflgas     := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/RobinThrift/stuff.Version=" + version + "'"
 go_build_flags := env_var_or_default("GO_BUILD_FLAGS", "")
+oci_repo       := env_var_or_default("OCI_REPO", "ghcr.io/robinthrift/stuff")
+
+
 export PATH := "./static/node_modules/.bin:" + "./node_modules/.bin:" + env_var('PATH')
 export STUFF_LOG_LEVEL := "debug"
 export STUFF_LOG_FORMAT := "console"
@@ -29,21 +32,6 @@ run: build-js build-icons _fonts
     mkdir -p .run
     go run -tags dev ./bin/stuff
 
-build: build-js build-js build-styles build-icons _fonts
-    go build -ldflags="{{go_ldflgas}}" -o build/stuff ./bin/stuff
-
-build-styles: _npm-install
-    postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map
-
-build-js: _npm-install _copy-js-libs
-    cd static && esbuild src/index.ts --format=esm --target=es2020 --minify --bundle --outfile=build/bundle.min.js
-
-build-icons: _npm-install
-    rm -f staic/build/*.svg
-    svg-sprite \
-        --symbol --symbol-dest="" \
-        --symbol-prefix=".icon-%s" --symbol-sprite=icons.svg \
-        --dest=static/build static/src/icons/*.svg
 
 watch: _npm-install _copy-js-libs _fonts
     mkdir -p .run
@@ -65,6 +53,37 @@ _watch-icons:
     wgo \
         -file 'static/src/icons/.*\.svg' \
         just build-icons
+
+build: build-js build-js build-styles build-icons _fonts
+    just _build-go
+
+_build-go:
+    go build -ldflags="{{go_ldflgas}}" {{ go_build_flags }} -o build/stuff ./bin/stuff
+
+build-styles: _npm-install
+    postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map
+
+build-js: _npm-install _copy-js-libs
+    cd static && esbuild src/index.ts --format=esm --target=es2020 --minify --bundle --outfile=build/bundle.min.js
+
+build-icons: _npm-install
+    rm -f staic/build/*.svg
+    svg-sprite \
+        --symbol --symbol-dest="" \
+        --symbol-prefix=".icon-%s" --symbol-sprite=icons.svg \
+        --dest=static/build static/src/icons/*.svg
+
+docker_cmd := env_var_or_default("DOCKER_CMD", "build")
+build-oci-image:
+    docker {{ docker_cmd }} -f ./deployment/Dockerfile  -t {{ oci_repo }}:{{ version }} .
+
+run-oci-image: build-oci-image
+    docker run --rm \
+        -e STUFF_LOG_LEVEL={{ STUFF_LOG_LEVEL }} \
+        -e STUFF_LOG_FORMAT={{ STUFF_LOG_FORMAT }} \
+        -e STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD={{ STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD }} \
+        -p 8080:8080 \
+        {{ oci_repo }}:{{ version }}
 
 new-migration name: _go-tools
     @rm -f _stuff.db
