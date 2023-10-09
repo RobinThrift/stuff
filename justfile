@@ -86,6 +86,19 @@ run-oci-image: build-oci-image
         -p 8080:8080 \
         {{ oci_repo }}:{{ version }}
 
+# generate a release with the given tag
+release tag:
+    just changelog {{tag}}
+    git add CHANGELOG
+    git commit -m "Releasing version {{tag}}"
+    git tag {{tag}}
+    git push origin {{tag}}
+
+# generate a changelog using github.com/git-chglog/git-chglog
+changelog tag: _go-tools
+    git-chglog -o CHANGELOG/CHANGELOG-{{tag}}.md --next-tag {{tag}} --sort semver --config CHANGELOG/config.yml {{ tag }}
+    echo "- [CHANGELOG-{{tag}}.md](./CHANGELOG-{{tag}}.md)" >> CHANGELOG/README.md
+
 new-migration name: _go-tools
     @rm -f _stuff.db
     goose -table migrations -dir storage/database/sqlite/migrations sqlite3 ./_stuff.db create {{name}} sql
@@ -118,6 +131,7 @@ golangci_lint_version := "v1.54.2"
 goose_version := "v3.15.0"
 bobgen_version := "v0.22.0"
 wgo_version := "v0.5.3"
+git_chglog_version := "v0.15.4"
 _go-tools:
     @if ! type -p wgo > /dev/null ; then go install github.com/bokwoon95/wgo@{{wgo_version}} ; fi
     @if ! type -p staticcheck > /dev/null ; then go install honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ; fi
@@ -125,6 +139,8 @@ _go-tools:
     @if ! type -p goose > /dev/null ; then go install github.com/pressly/goose/v3/cmd/goose@{{goose_version}} ; fi
     @if ! type -p goose > /dev/null ; then go install github.com/pressly/goose/v3/cmd/goose@{{goose_version}} ; fi
     @if ! type -p bobgen-sqlite > /dev/null ; then go install github.com/stephenafamo/bob/gen/bobgen-sqlite@{{bobgen_version}} ; fi
+    @if ! type -p git-chglog > /dev/null ; then go install github.com/git-chglog/git-chglog/cmd/git-chglog@{{bobgen_version}} ; fi
+
 
 clean:
     rm -rf node_modules build .run

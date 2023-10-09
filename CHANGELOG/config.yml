@@ -1,0 +1,27 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/RobinThrift/stuff
+options:
+  commits:
+    filters:
+      Type:
+       - Add
+       - Fix
+       - Refactor
+       - Update
+  commit_groups:
+    title_maps:
+      Add: Features
+      Fix: Fixes
+      Refactor: Refactoring
+      Update: Updates
+  header:
+    pattern: "^((\\w+)\\s.*)$"
+    pattern_maps:
+      - Subject
+      - Type
+  notes:
+    keywords:
+      - BREAKING CHANGE
