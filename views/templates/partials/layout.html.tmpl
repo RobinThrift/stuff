@@ -109,7 +109,7 @@
 <footer class="px-3 md:px-6 lg:px-8 py-5 bg-background-200 w-full border-t border-gray-100 h-14 dark:border-primary-700">
 	<div class="flex flex-wrap justify-center text-sm">
 		{{ template "logo" dict "Class" "text-sm" "IconClass" "h-0" }}
-		<span class="px-5">Version X</span>
+		<span class="px-5">Version {{ $.Global.Version }}</span>
 		<a href="https://github.com/kodeshack/stuff" class="inline-block group flex flex-row justify-center items-center text-primary-400 hover:text-primary-500" rel="noopener noreferrer">
 			<x-icon icon="github-logo-duotone" class="h-[16px] w-[16px] !hidden group-hover:!inline-block" />
 			<x-icon icon="github-logo" class="h-[16px] w-[16px] group-hover:!hidden" />

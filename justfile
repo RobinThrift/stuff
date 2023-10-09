@@ -26,8 +26,10 @@ run: build-js build-icons _fonts
     mkdir -p .run
     go run -tags dev ./bin/stuff
 
+version    := env_var_or_default("VERSION", "dev")
+go_ldflgas := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/kodeshack/stuff.Version=" + version + "'"
 build: build-js build-js build-styles build-icons _fonts
-    go build ./bin/stuff
+    go build -ldflags="{{go_ldflgas}}" -o build/stuff ./bin/stuff
 
 build-styles: _npm-install
     postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map

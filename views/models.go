@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
+	"github.com/kodeshack/stuff"
 	"github.com/kodeshack/stuff/server/session"
 )
 
@@ -20,6 +21,7 @@ type Global struct {
 	CurrentPage        string
 	SidebarClosed      bool
 	CurrentUserIsAdmin bool
+	Version            string
 }
 
 func NewGlobal(title string, r *http.Request) Global {
@@ -36,6 +38,7 @@ func NewGlobal(title string, r *http.Request) Global {
 		CurrentPage:        r.URL.Path,
 		SidebarClosed:      sidebarClosed,
 		CurrentUserIsAdmin: currentUserIsAdmin,
+		Version:            stuff.Version,
 	}
 }
 
