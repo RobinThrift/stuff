@@ -31,6 +31,9 @@ RUN mkdir -p /run/stuff/files /tmp/stuff
 
 FROM scratch
 
+LABEL org.opencontainers.image.source=https://github.com/RobinThrift/stuff
+LABEL org.opencontainers.image.licenses=BSD-3-Clause
+
 COPY --from=builder /stuff/build/stuff /stuff
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd.nonroot /etc/passwd

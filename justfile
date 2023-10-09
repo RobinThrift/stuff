@@ -92,6 +92,7 @@ release tag:
     git add CHANGELOG
     git commit -m "Releasing version {{tag}}"
     git tag {{tag}}
+    git push
     git push origin {{tag}}
 
 # generate a changelog using github.com/git-chglog/git-chglog
