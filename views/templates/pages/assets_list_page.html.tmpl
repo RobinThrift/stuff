@@ -21,164 +21,175 @@
 
 {{ define "main" }}
 {{ with .Data }}
-<div
-	class="w-full h-full"
+<form
+	method="post"
+	action="/assets/actions"
+
+	class="max-w-screen max-h-screen"
 	x-data="{ columns: {{ $.Data.Columns | json }}, compact: {{ $.Data.Compact }} }"
 	x-init="
 		$watch('columns', (v) => $setting({ assetsList: { columns: v }}))
 		$watch('compact', (v) => $setting({ assetsList: { compact: v }}))
 	"
 >
-	<div class="w-full main flex flex-row justify-end items-center">
-		<div class="btn-grp me-2">
-			<button class="btn btn-primary btn-sm" x-on:click="compact = !compact">
-				<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
-				<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
+	<div class="w-full main flex flex-col sm:flex-row">
+		<div class="flex flex-grow flex-row sm:justify-end items-center mb-1 sm:mb-0">
+			<div class="btn-grp me-2">
+				<button class="btn btn-primary btn-sm" x-on:click.prevent="compact = !compact">
+					<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
+					<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
 
-				<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
-				<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
-			</button>
+					<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
+					<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
+				</button>
+			</div>
+
+			<x-dropdown
+				class="me-2"
+				button-text="Columns"
+				button-class="btn-primary btn-sm"
+			>
+				<ul class="dropdown-items">
+					<li>
+						<label for="show_column_tag" class="dropdown-item flex items-center">
+							<input id="show_column_tag" name="show_column_tag" type="checkbox" class="checkbox me-2" x-model="columns.Tag" />
+							Tag
+						</label>
+					</li>
+					<li>
+						<label for="show_image_tag" class="dropdown-item flex items-center">
+							<input id="show_image_tag" name="show_image_tag" type="checkbox" class="checkbox me-2" x-model="columns.Image" />
+							Image
+						</label>
+					</li>
+					<li>
+						<label for="show_name_tag" class="dropdown-item flex items-center">
+							<input id="show_name_tag" name="show_name_tag" type="checkbox" class="checkbox me-2" x-model="columns.Name" />
+							Name
+						</label>
+					</li>
+					<li>
+						<label for="show_category_tag" class="dropdown-item flex items-center">
+							<input id="show_category_tag" category="show_category_tag" type="checkbox" class="checkbox me-2" x-model="columns.Category" />
+							Category
+						</label>
+					</li>
+					<li>
+						<label for="show_location_tag" class="dropdown-item flex items-center">
+							<input id="show_location_tag" location="show_location_tag" type="checkbox" class="checkbox me-2" x-model="columns.Location" />
+							Location
+						</label>
+					</li>
+					<li>
+						<label for="show_status_tag" class="dropdown-item flex items-center">
+							<input id="show_status_tag" status="show_status_tag" type="checkbox" class="checkbox me-2" x-model="columns.Status" />
+							Status
+						</label>
+					</li>
+				</ul>
+			</x-dropdown>
+
+			<x-dropdown-button
+				button-text="Export"
+				button-class="btn-primary btn-sm"
+				items='[
+					{ "text": "Create Label Sheet", "url": "/assets/export/labels" },
+					{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
+					{ "text": "Export All (JSON)", "url": "/assets/export/json" }
+				]'
+			/>
 		</div>
-
-		<x-dropdown
-			class="me-2"
-			button-text="Columns"
-			button-class="btn-primary btn-sm"
-		>
-			<ul class="dropdown-items">
-				<li>
-					<label for="show_column_tag" class="dropdown-item flex items-center">
-						<input id="show_column_tag" name="show_column_tag" type="checkbox" class="checkbox me-2" x-model="columns.Tag" />
-						Tag
-					</label>
-				</li>
-				<li>
-					<label for="show_image_tag" class="dropdown-item flex items-center">
-						<input id="show_image_tag" name="show_image_tag" type="checkbox" class="checkbox me-2" x-model="columns.Image" />
-						Image
-					</label>
-				</li>
-				<li>
-					<label for="show_name_tag" class="dropdown-item flex items-center">
-						<input id="show_name_tag" name="show_name_tag" type="checkbox" class="checkbox me-2" x-model="columns.Name" />
-						Name
-					</label>
-				</li>
-				<li>
-					<label for="show_category_tag" class="dropdown-item flex items-center">
-						<input id="show_category_tag" category="show_category_tag" type="checkbox" class="checkbox me-2" x-model="columns.Category" />
-						Category
-					</label>
-				</li>
-				<li>
-					<label for="show_location_tag" class="dropdown-item flex items-center">
-						<input id="show_location_tag" location="show_location_tag" type="checkbox" class="checkbox me-2" x-model="columns.Location" />
-						Location
-					</label>
-				</li>
-				<li>
-					<label for="show_status_tag" class="dropdown-item flex items-center">
-						<input id="show_status_tag" status="show_status_tag" type="checkbox" class="checkbox me-2" x-model="columns.Status" />
-						Status
-					</label>
-				</li>
-			</ul>
-		</x-dropdown>
-
-		<x-dropdown-button
-			button-text="Export"
-			button-class="btn-primary btn-sm"
-			items='[
-				{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
-				{ "text": "Export All (JSON)", "url": "/assets/export/json" }
-			]'
-		/>
 	</div>
 
-	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
-		<thead class="thead">
-			<tr>
-				<th>
-					<div class="flex items-center">
-						<input id="selected_all" type="checkbox" class="checkbox" />
-						<label for="selected_all" class="sr-only">checkbox</label>
-					</div>
-				</th>
-				<th x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>Tag</th>
-				<th x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
-				<th x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>Name</th>
-				<th x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>Category</th>
-				<th x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>Location</th>
-				<th x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>Status</th>
-				<th></th>
-			</tr>
-		</thead>
+	<div class="max-w-screen max-h-screen overflow-x-auto">
+		<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
+			<thead class="thead">
+				<tr>
+					<th>
+						<div class="flex items-center">
+							<input id="selected_all" type="checkbox" class="checkbox" />
+							<label for="selected_all" class="sr-only">checkbox</label>
+						</div>
+					</th>
+					<th x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>Tag</th>
+					<th x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
+					<th x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>Name</th>
+					<th x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>Category</th>
+					<th x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>Location</th>
+					<th x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>Status</th>
+					<th></th>
+				</tr>
+			</thead>
 
 
-		<tbody class="tbody">
-			{{ range .Page.Assets }}
-			<tr>
-				<td class="w-4">
-					<div class="flex items-center">
-						<input id="selected_{{ .ID }}" name="selected_{{ .ID }}" type="checkbox" class="checkbox" />
-						<label id="selected_{{ .ID }}" class="sr-only">Select Tag {{ .Tag }}</label>
-					</div>
-				</td>
-				<td x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>
-					<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
-						<strong>{{ .Tag }}</strong>
-					</a>
-				</td>
-				<td x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>
-					{{ if ne .ThumbnailURL "" }}
-						<img src={{ .ThumbnailURL }} />
-					{{ end }}
-				</td>
-				<td x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>
-					<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
-						{{ .Name }}
-					</a>
-				</td>
-				<td x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>
-					{{ .Category }}
-				</td>
-				<td x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>
-					{{  .Location  }}
-					{{ if ne .PositionCode "" }}
-						({{ .PositionCode }})
-					{{ end }}
-				</td>
-				<td x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>
-					{{ template "status_badge" dict "Status" .Status }}
-				</td>
-				<td class="text-end">
-					<div class="btn-grp hidden lg:flex">
-						<a class="btn btn-xs" href="{{ printf `/assets/%v/edit` .ID }}">
-							<x-icon icon="pencil-simple" class="w-4 h-4" />
-							Edit
+			<tbody class="tbody">
+				{{ range .Page.Assets }}
+				<tr>
+					<td class="w-4">
+						<div class="flex items-center">
+							<input id="selected_{{ .ID }}" name="selected_{{ .ID }}" type="checkbox" class="checkbox" />
+							<label id="selected_{{ .ID }}" class="sr-only">Select Tag {{ .Tag }}</label>
+						</div>
+					</td>
+					<td x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>
+						<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
+							<strong>{{ .Tag }}</strong>
 						</a>
-						<a class="btn btn-xs text-red-500 hover:text-red-700" href="{{ printf `/assets/%v/delete` .ID }}">
-							<x-icon icon="trash-simple" class="w-4 h-4" />
-							Delete
+					</td>
+					<td x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>
+						{{ if ne .ThumbnailURL "" }}
+							<img src={{ .ThumbnailURL }} />
+						{{ end }}
+					</td>
+					<td x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>
+						<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
+							{{ .Name }}
 						</a>
-					</div>
+					</td>
+					<td x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>
+						{{ .Category }}
+					</td>
+					<td x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>
+						{{  .Location  }}
+						{{ if ne .PositionCode "" }}
+							({{ .PositionCode }})
+						{{ end }}
+					</td>
+					<td x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>
+						{{ template "status_badge" dict "Status" .Status }}
+					</td>
+					<td class="text-end">
+						<div class="btn-grp hidden lg:flex">
+							<a class="btn btn-xs" href="{{ printf `/assets/%v/edit` .ID }}">
+								<x-icon icon="pencil-simple" class="w-4 h-4" />
+								Edit
+							</a>
+							<a class="btn btn-xs text-red-500 hover:text-red-700" href="{{ printf `/assets/%v/delete` .ID }}">
+								<x-icon icon="trash-simple" class="w-4 h-4" />
+								Delete
+							</a>
+						</div>
 
-					<x-dropdown-button
-						class="max-w-min lg:hidden"
-						button-class="btn-neutral"
-						button-text=""
-						icon="dots-three-vertical"
-						items='[
-							{ "text": "Edit", "url": "{{ printf `/assets/%v/edit` .ID }}", "icon": "pencil-simple" },
-							{ "text": "Delete", "url": "(printf `/assets/%d/delete` .ID)", "class": "text-red-500 hover:text-red-700", "icon": "trash-simple" }
-						]'
-					/>
-				</td>
-			</tr>
-			{{ end }}
-		</tbody>
-	</table>
-</div>
+						<x-dropdown-button
+							class="max-w-min lg:hidden"
+							button-class="btn-neutral"
+							button-text=""
+							icon="dots-three-vertical"
+							items='[
+								{ "text": "Edit", "url": "{{ printf `/assets/%v/edit` .ID }}", "icon": "pencil-simple" },
+								{ "text": "Delete", "url": "(printf `/assets/%d/delete` .ID)", "class": "text-red-500 hover:text-red-700", "icon": "trash-simple" }
+							]'
+						/>
+					</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+
+	</div>
+
+	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+</form>
 
 {{ if gt .Page.NumPages 1 }}
 {{ template "pagination" dict "Page" .Page }}

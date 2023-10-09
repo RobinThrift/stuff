@@ -22,11 +22,11 @@ test *flags="-failfast -v -timeout 5m":
     @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
     go test {{ flags }} ./...
 
-run: build-js build-icons
+run: build-js build-icons _fonts
     mkdir -p .run
     go run -tags dev ./bin/stuff
 
-build: build-js build-js build-styles build-icons
+build: build-js build-js build-styles build-icons _fonts
     go build ./bin/stuff
 
 build-styles: _npm-install
@@ -42,7 +42,7 @@ build-icons: _npm-install
         --symbol-prefix=".icon-%s" --symbol-sprite=icons.svg \
         --dest=static/build static/src/icons/*.svg
 
-watch: _npm-install _copy-js-libs
+watch: _npm-install _copy-js-libs _fonts
     mkdir -p .run
     concurrently "just _watch-go" "just _watch-styles" "just _watch-icons" "just _watch-js"
 
@@ -87,6 +87,8 @@ install:
 _npm-install:
     [ -d static/node_modules ] || (cd static && npm i --no-audit --no-fund)
 
+_fonts:
+    [ -f static/build/fonts/OpenSans-Regular.ttf ] || (mkdir -p static/build/fonts && curl -L https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf -o static/build/fonts/OpenSans-Regular.ttf)
 
 staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.54.2"

@@ -20,7 +20,7 @@
 			{{ block "header" . }}{{ end }}
 		</header>
 
-		<main id="main" class="overflow-x-auto max-w-screen md:max-w-none md:overflow-x-auto flex-1">
+		<main id="main" class="max-w-screen md:max-w-none md:overflow-x-auto flex-1">
 		{{ if ne $.Global.FlashMessage "" }}
 		<div class="border rounded p-5 m-5 bg-secondary-500 text-background-200">{{ $.Global.FlashMessage }}</div>
 		{{ end }}

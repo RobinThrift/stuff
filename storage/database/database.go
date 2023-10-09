@@ -7,6 +7,9 @@ import (
 	"github.com/stephenafamo/bob"
 )
 
+const OrderASC = "ASC"
+const OrderDESC = "DESC"
+
 type Database struct {
 	bob.DB
 }

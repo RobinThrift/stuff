@@ -1,0 +1,319 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">Create Label Sheet</h1>
+{{ end }}
+
+{{ define "main" }}
+{{ with .Data }}
+<form
+	x-data="labelSheetCreator({ selected: {{ json .Assets }} })"
+	x-ref="form"
+	class="main lg:flex lg:flex-col lg:h-full"
+	method="post"
+	action="/assets/export/labels"
+>
+	{{ if has .ValidationErrs "general" }}
+	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
+	{{ end }}
+
+	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+
+	<div class="flex items-center mb-5">
+		<div class="flex-1 flex flex-col items-start">
+			<button type="submit" class="btn btn-primary">
+				Create
+			</button>
+		</div>
+
+		<div class="flex items-center">
+			<label for="template" class="label font-bold mb-0 me-2">Template</label>
+			<select name="template" id="template" class="input w-full" x-on:input="setTemplate" x-ref="select">
+					{{ $items := (list "- Select -" "Avery L78710-20") }}
+					{{ range $items }}
+						<option value="{{ . }}" {{ if eq $.Data.Template . }} selected {{ end }} >
+							{{- . -}}
+						</option>
+					{{ end }}
+			</select>
+		</div>
+	</div>
+
+	<div class="lg:grid grid-cols-3 lg:flex-1 lg:overflow-hidden">
+		<div class="col-span-1 lg:h-full lg:overflow-auto pe-5">
+			<h2 class="font-bold text-jl mb-3">Page Layout</h2>
+
+			<div class="flex flex-col md:flex-row mb-5">
+				{{-
+					template "select" dict
+					"Class" "w-1/2 me-5"
+					"Label" "Page Size"
+					"Name" "page_size"
+					"ValidationErr" .ValidationErrs.page_size
+					"Value" .PageSize
+					"Options" (list
+						(list "A4" "A4")
+					)
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "w-1/2"
+					"Type" "number"
+					"Label" "Skip Number of Labels"
+					"Name" "skip_labels"
+					"ValidationErr" .ValidationErrs.skip_labels
+					"Value" .SkipLabels
+				-}}
+			</div>
+
+			<div class="flex mb-5">
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Required" true
+					"Label" "Number of Columns"
+					"Name" "page_cols"
+					"ValidationErr" .ValidationErrs.page_cols
+					"Value" .NumColumns
+				-}}
+
+				{{-
+					template "field" dict
+					"Type" "number"
+					"Required" true
+					"Label" "Number of Rows"
+					"Name" "page_rows"
+					"ValidationErr" .ValidationErrs.page_rows
+					"Value" .NumRows
+				-}}
+			</div>
+
+			<div class="flex mb-5">
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Margin Top (mm)"
+					"Name" "page_margin_top"
+					"ValidationErr" .ValidationErrs.page_margin_top
+					"Value" .MarginTop
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Margin Bottom (mm)"
+					"Name" "page_margin_bottom"
+					"ValidationErr" .ValidationErrs.page_margin_bottom
+					"Value" .MarginBottom
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Margin Left (mm)"
+					"Name" "page_margin_left"
+					"ValidationErr" .ValidationErrs.page_margin_left
+					"Value" .MarginLeft
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Margin Right (mm)"
+					"Name" "page_margin_right"
+					"ValidationErr" .ValidationErrs.page_margin_right
+					"Value" .MarginRight
+				-}}
+			</div>
+
+			<h2 class="font-bold text-jl mt-5 mb-5">Label Size</h2>
+
+			{{-
+				template "field" dict
+				"Class" "mb-5 w-1/2"
+				"Type" "number"
+				"Step" "0.01"
+				"Required" true
+				"Label" "Font Size"
+				"Name" "label_font_size"
+				"ValidationErr" .ValidationErrs.label_font_size
+				"Value" .FontSize
+			-}}
+
+			<x-checkbox label="Show Label Borders" class="mb-5" name="label_show_borders" validation-error="{{ .ValidationErrs.label_show_borders }}" is-checked="{{ .ShowBorders}}" />
+
+			<div class="flex mb-5">
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Width (mm)"
+					"Name" "label_width"
+					"ValidationErr" .ValidationErrs.label_width
+					"Value" .Width
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Height (mm)"
+					"Name" "label_height"
+					"ValidationErr" .ValidationErrs.label_height
+					"Value" .Height
+				-}}
+			</div>
+
+			<div class="flex mb-5">
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Vertical Padding (mm)"
+					"Name" "label_vertical_padding"
+					"ValidationErr" .ValidationErrs.label_vertical_padding
+					"Value" .VerticalPadding
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Horizontal Padding (mm)"
+					"Name" "label_horizontal_padding"
+					"ValidationErr" .ValidationErrs.label_horizontal_padding
+					"Value" .HorizontalPadding
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Vertical Spacing (mm)"
+					"Name" "label_vertical_spacing"
+					"ValidationErr" .ValidationErrs.label_vertical_spacing
+					"Value" .VerticalSpacing
+				-}}
+
+				{{-
+					template "field" dict
+					"Class" "me-2"
+					"Type" "number"
+					"Step" "0.01"
+					"Required" true
+					"Label" "Horizontal Spacing (mm)"
+					"Name" "label_horizontal_spacing"
+					"ValidationErr" .ValidationErrs.label_horizontal_spacing
+					"Value" .HorizontalSpacing
+				-}}
+			</div>
+		</div>
+
+		<div class="col-span-2 lg:grid grid-cols-4 lg:h-full lg:overflow-hidden">
+			<div class="col-span-1 lg:h-full lg:flex lg:flex-col">
+				<h2 class="font-bold mb-3">Selected Assets</h2>
+
+				<select class="input lg:flex-1 lg:overflow-auto" name="selected_asset_ids" id="selected_asset_ids" multiple x-model="selectedIDs">
+					<option value="-">- None -</option>
+					<template x-for="asset in selected">
+						<option x-bind:value="asset.id" x-text="asset.tag" selected></option>
+					</template>
+				</select>
+			</div>
+
+			<div class="col-span-3 px-5 lg:flex lg:flex-col lg:h-full lg:overflow-hidden">
+				{{ template "sheet_search_assets" . }}
+			</div>
+		</div>
+	</div>
+</form>
+{{ end }}
+{{ end }}
+
+
+{{ define "sheet_search_assets" }}
+
+<h2 class="font-bold mb-3">Select Assets</h2>
+
+<div class="flex items-center mb-3">
+	<div class="relative flex-1 me-5">
+		<span class="pointer-events-none absolute ml-2.5 translate-y-1/2 -mt-0.5 text-gray-500">
+			<x-icon icon="magnifying-glass" class="w-5 h-5 text-neutral-400" />
+		</span>
+		<input
+			@keyup.debounce.300ms="setAssetSearchQuery($event.target.value)"
+			@keydown.enter.stop.prevent="setAssetSearchQuery($event.target.value)"
+			x-bind:value="assetSearchQuery"
+			type="search"
+			id="assetSearchQuery" name="assetSearchQuery"
+			class="input px-1 py-1 pl-10"
+			placeholder="Search"
+			autocomplete="off" autocorrect="off" spellcheck="false"
+		>
+	</div>
+
+	<button type="button" class="btn btn-primary btn-sm" x-bind:disabled="assets.length === 0" x-on:click.prevent="addAllAssetsToSelection">
+		Select All
+	</button>
+</div>
+
+<div class="flex-1 lg:overflow-hidden">
+	<div class="lg:overflow-auto lg:h-full">
+		<table class="table w-full">
+			<thead class="thead sticky top-0">
+				<tr>
+					<th align="left">Tag</th>
+					<th align="left">Name</th>
+					<th align="left">Status</th>
+				</tr>
+			</thead>
+
+			<tbody class="tbody">
+				<template x-for="asset in assets">
+					<tr class="hover:cursor-pointer" x-on:click="addAssetToSelection(asset)" x-show="!isSelected(asset)">
+						<td x-text="asset.tag" align="left"></td>
+						<td x-text="asset.name" align="left"></td>
+						<td align="left">
+							<span
+								x-text="asset.status"
+								class="rounded px-2.5 py-0.5 font-semibold"
+								x-bind:class="{
+									'bg-blue-500 text-blue-100': asset.status === 'IN_STORAGE',
+									'bg-green-100 text-green-700': asset.status === 'IN_USE',
+									'bg-neutral-300 text-neutral-700': asset.status === 'ARCHIVED',
+								}"
+							>
+							</span>
+						</td>
+					</tr>
+				</template>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+{{ end }}

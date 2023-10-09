@@ -12,6 +12,7 @@ import (
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
+	"github.com/kodeshack/stuff/storage/database"
 	"github.com/kodeshack/stuff/storage/database/sqlite/models"
 	"github.com/kodeshack/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
@@ -70,7 +71,7 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 
 	if query.OrderBy != "" {
 		if query.OrderDir == "" {
-			query.OrderDir = "ASC"
+			query.OrderDir = database.OrderASC
 		}
 
 		mods = append(mods, bmods.OrderBy[*dialect.SelectQuery]{
@@ -98,6 +99,67 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 		if err != nil {
 			return nil, fmt.Errorf("error getting assets: %w", err)
 		}
+	}
+
+	numPages := 0
+	if limit > 0 {
+		numPages = int(count) / limit
+	}
+
+	page := &AssetListPage{
+		Assets:   make([]*Asset, 0, len(assets)),
+		Total:    int(count),
+		Page:     query.Page,
+		PageSize: query.PageSize,
+		NumPages: numPages,
+	}
+
+	for i := range assets {
+		page.Assets = append(page.Assets, mapDBModelToAsset(assets[i], nil))
+	}
+
+	return page, nil
+}
+
+func (ar *RepoSQLite) ListForExport(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
+	limit := query.PageSize
+	offset := limit * query.Page
+
+	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 4)
+
+	if limit > 0 {
+		mods = append(mods, sm.Limit(limit))
+	}
+
+	if offset > 0 {
+		mods = append(mods, sm.Offset(offset))
+	}
+
+	if query.OrderBy != "" {
+		if query.OrderDir == "" {
+			query.OrderDir = database.OrderASC
+		}
+
+		mods = append(mods, bmods.OrderBy[*dialect.SelectQuery]{
+			Expression: query.OrderBy,
+			Direction:  query.OrderDir,
+		})
+	}
+
+	if len(query.IDs) != 0 {
+		mods = append(mods, models.SelectWhere.Assets.ID.In(query.IDs...))
+	}
+
+	count, err := models.Assets.Query(ctx, exec, mods...).Count()
+	if err != nil {
+		return nil, fmt.Errorf("error counting assets: %w", err)
+	}
+
+	mods = append(mods, models.ThenLoadAssetAssetParts())
+
+	assets, err := models.Assets.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, fmt.Errorf("error getting assets: %w", err)
 	}
 
 	numPages := 0

@@ -58,41 +58,41 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 
 type apiPart struct {
 	ID           int64  `json:"id"`
-	AssetID      int64  `json:"asset_id"`
+	AssetID      int64  `json:"assetID"`
 	Tag          string `json:"tag"`
 	Name         string `json:"name"`
 	Location     string `json:"location,omitempty"`
-	PositionCode string `json:"position_code,omitempty"`
+	PositionCode string `json:"positionCode,omitempty"`
 	Notes        string `json:"notes,omitempty"`
 }
 
 type apiAsset struct {
 	ID            int64          `json:"id,omitempty"`
-	ParentAssetID int64          `json:"parent_asset_id,omitempty"`
+	ParentAssetID int64          `json:"parentAssetID,omitempty"`
 	Tag           string         `json:"tag"`
 	Status        Status         `json:"status"`
 	Name          string         `json:"name"`
 	Category      string         `json:"category"`
 	Model         string         `json:"model,omitempty"`
-	ModelNo       string         `json:"model_no,omitempty"`
-	SerialNo      string         `json:"serial_no,omitempty"`
+	ModelNo       string         `json:"modelNo,omitempty"`
+	SerialNo      string         `json:"serialNo,omitempty"`
 	Manufacturer  string         `json:"manufacturer,omitempty"`
 	Notes         string         `json:"notes,omitempty"`
-	ImageURL      string         `json:"image_url,omitempty"`
-	ThumbnailURL  string         `json:"thumbnail_url,omitempty"`
-	WarrantyUntil time.Time      `json:"warranty_until,omitempty"`
-	CustomAttrs   map[string]any `json:"custom_attrs,omitempty"`
+	ImageURL      string         `json:"imageURL,omitempty"`
+	ThumbnailURL  string         `json:"thumbnailURL,omitempty"`
+	WarrantyUntil time.Time      `json:"warrantyUntil,omitempty"`
+	CustomAttrs   map[string]any `json:"customAttrs,omitempty"`
 
 	Location     string `json:"location,omitempty"`
-	PositionCode string `json:"position_code,omitempty"`
+	PositionCode string `json:"positionCode,omitempty"`
 
-	PurchaseSupplier string         `json:"purchase_supplier,omitempty"`
-	PurchaseOrderNo  string         `json:"purchase_order_no,omitempty"`
-	PurchaseDate     time.Time      `json:"purchase_date,omitempty"`
-	PurchaseAmount   MonetaryAmount `json:"purchase_amount,omitempty"`
-	PurchaseCurrency string         `json:"purchase_currency,omitempty"`
+	PurchaseSupplier string         `json:"purchaseSupplier,omitempty"`
+	PurchaseOrderNo  string         `json:"purchaseOrderNo,omitempty"`
+	PurchaseDate     time.Time      `json:"purchaseDate,omitempty"`
+	PurchaseAmount   MonetaryAmount `json:"purchaseAmount,omitempty"`
+	PurchaseCurrency string         `json:"purchaseCurrency,omitempty"`
 
-	PartsTotalCounter int        `json:"parts_total_counter,omitempty"`
+	PartsTotalCounter int        `json:"partsTotalCounter,omitempty"`
 	Parts             []*apiPart `json:"parts,omitempty"`
 }
 

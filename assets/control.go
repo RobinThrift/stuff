@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path"
 
@@ -25,6 +26,7 @@ type Control struct {
 type AssetRepo interface {
 	Get(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error)
 	List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
+	ListForExport(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
 	Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
 	Delete(ctx context.Context, exec bob.Executor, id int64) error
@@ -142,6 +144,46 @@ func (c *Control) listCategories(ctx context.Context, query ListCategoriesQuery)
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]Category, error) {
 		return c.AssetRepo.ListCategories(ctx, tx, query)
 	})
+}
+
+type getLabelSheetsQuery struct {
+	baseURL *url.URL
+	ids     []int64
+	sheet   *Sheet
+}
+
+func (c *Control) getLabelSheets(ctx context.Context, query getLabelSheetsQuery) ([]byte, error) {
+	assets, err := c.AssetRepo.ListForExport(ctx, c.DB, ListAssetsQuery{IDs: query.ids})
+	if err != nil {
+		return nil, err
+	}
+
+	labels := make([]Label, 0, len(assets.Assets))
+	for _, a := range assets.Assets {
+		l, err := a.Labels(query.baseURL, 200)
+		if err != nil {
+			return nil, err
+		}
+		labels = append(labels, l...)
+	}
+
+	// for i := 0; i <= 60; i++ {
+	// 	for _, a := range assets.Assets {
+	// 		ls, err := a.Labels(query.baseURL, 200)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		for j := range ls {
+	// 			ls[j].Name += " " + strconv.Itoa(i)
+	// 			ls[j].LocationCode += " " + strconv.Itoa(i)
+	// 			labels = append(labels, ls[j])
+	// 		}
+	// 	}
+	// }
+
+	query.sheet.Labels = labels
+
+	return query.sheet.Generate()
 }
 
 func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename string, hash string, err error) { //nolint: unparam // will fix soon

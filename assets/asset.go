@@ -115,6 +115,8 @@ type Category struct {
 type ListAssetsQuery struct {
 	Search *ListAssetsQuerySearch
 
+	IDs []int64
+
 	Page     int
 	PageSize int
 

@@ -41,7 +41,7 @@ class AutoCompleter {
         url.searchParams.set("query", query)
 
         let res = await fetch(url)
-        let values: any = await res.json()
+        let values = await res.json()
 
         if (this._itemsAt) {
             values = get(this._itemsAt, values) as Record<string, unknown>[]
@@ -75,6 +75,7 @@ class AutoCompleter {
 export function plugin(Alpine: typeof _Alpine) {
     Alpine.data(
         "autocompleter",
+        // biome-ignore lint/suspicious/noExplicitAny: The alpine types are bad
         ({ source, itemsAt, valueAt, labelAt, value }: any) => ({
             open: false,
             qs: null,
@@ -102,11 +103,11 @@ export function plugin(Alpine: typeof _Alpine) {
                     let pos = el.getBoundingClientRect()
                     let top = pos.top + window.scrollY
                     let left = pos.left + window.scrollX
-                    this.$refs.suggestions.style.left = left + "px"
-                    this.$refs.suggestions.style.top =
-                        top + el.offsetHeight + "px"
-                    this.$refs.suggestions.style.minWidth =
-                        el.offsetWidth + "px"
+                    this.$refs.suggestions.style.left = `${left}px`
+                    this.$refs.suggestions.style.top = `${
+                        top + el.offsetHeight
+                    }px`
+                    this.$refs.suggestions.style.minWidth = `${el.offsetWidth}px`
                 }
             },
 

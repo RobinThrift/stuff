@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -42,6 +43,11 @@ func run() error {
 
 func setup(ctx context.Context) (func(context.Context) error, error) {
 	config, err := config.NewConfigFromEnv()
+	if err != nil {
+		return nil, err
+	}
+
+	baseURL, err := url.Parse(config.BaseURL)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +90,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 
 	authRouter := &auth.UIRouter{Control: authCtrl, Decoder: auth.NewDecoder()}
 	assetsUIRouter := &assets.UIRouter{
+		BaseURL:          baseURL,
 		Control:          assetsCtrl,
 		Decoder:          assets.NewDecoder(config.DecimalSeparator),
 		DefaultCurrency:  config.DefaultCurrency,

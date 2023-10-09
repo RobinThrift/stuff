@@ -13,7 +13,7 @@ x-dropdown
 	{{ if ne (get . "button-text") "" }}
 	{{ $iconClass = "w-[16px] h-[16px] !me-0 ms-2" }}
 	{{- end }}
-	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click="open = !open">
+	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click.prevent="open = !open">
 		{{- get . "button-text" }}
 		<x-icon icon="{{ default .icon `caret-down` }}" class="{{ $iconClass }}" />
 	</button>
@@ -48,7 +48,7 @@ x-dropdown-button
 	{{ if has . "button-text" }}
 	{{ $iconClass = "w-[16px] h-[16px] !m-0 !ms-2 {{ get . `button-text` }}" }}
 	{{- end }}
-	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click="open = !open">
+	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click.prevent="open = !open">
 		{{- get . "button-text" }}
 		<x-icon icon="{{ default .icon `caret-down` }}" class="{{ $iconClass }}" />
 	</button>

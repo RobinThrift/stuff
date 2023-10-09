@@ -1,6 +1,7 @@
 @layer components {
 	.btn {
 		@apply flex items-center justify-center px-3 py-2 focus:outline-none rounded-lg;
+        @apply disabled:cursor-not-allowed disabled:opacity-50;
 
 		.icon {
 			@apply w-4 h-4 me-1;

@@ -23,6 +23,7 @@ import (
 var policy = bluemonday.StrictPolicy()
 
 type UIRouter struct {
+	BaseURL          *url.URL
 	Control          *Control
 	Decoder          *form.Decoder
 	DefaultCurrency  string
@@ -43,6 +44,9 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
 	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
+
+	mux.Get("/assets/export/labels", views.HTTPHandlerFuncErr(rt.handleAssetsExportLabelsGet))
+	mux.Post("/assets/export/labels", views.HTTPHandlerFuncErr(rt.handleAssetsExportLabelsPost))
 
 	mux.Get("/assets/export/json", views.HTTPHandlerFuncErr(rt.handleAssetsExportJSON))
 	mux.Get("/assets/export/csv", views.HTTPHandlerFuncErr(rt.handleAssetsExportCSV))
@@ -265,6 +269,77 @@ func (rt *UIRouter) handleAssetsDeleteDelete(w http.ResponseWriter, r *http.Requ
 	session.Put(r.Context(), "info_message", fmt.Sprintf("Asset '%s' deleted", asset.Name))
 
 	http.Redirect(w, r, "/assets", http.StatusFound)
+	return nil
+}
+
+// [GET] /assets/export/labels
+func (rt *UIRouter) handleAssetsExportLabelsGet(w http.ResponseWriter, r *http.Request) error {
+	return renderLabelSheetCreatorPage(w, r, LabelSheetCreatorPageViewModel{
+		Assets:         []*Asset{},
+		ValidationErrs: map[string]string{},
+	})
+}
+
+// [POST] /assets/export/labels
+func (rt *UIRouter) handleAssetsExportLabelsPost(w http.ResponseWriter, r *http.Request) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	var model LabelSheetCreatorPageViewModel
+
+	err = rt.Decoder.Decode(&model, r.PostForm)
+	if err != nil {
+		return err
+	}
+
+	model.ValidationErrs = map[string]string{}
+
+	query := getLabelSheetsQuery{
+		baseURL: rt.BaseURL,
+		ids:     model.SelectedAssetIDs,
+		sheet: &Sheet{
+			SkipNumLabels: model.SkipLabels,
+			PageSize:      PageSize(model.PageSize),
+			PageLayout: PageLayout{
+				Cols:         model.NumColumns,
+				Rows:         model.NumRows,
+				MarginLeft:   model.MarginLeft,
+				MarginTop:    model.MarginTop,
+				MarginRight:  model.MarginRight,
+				MarginBottom: model.MarginBottom,
+			},
+
+			LabelSize: LabelSize{
+				FontSize:          model.FontSize,
+				Height:            model.Height,
+				Width:             model.Width,
+				VerticalPadding:   model.VerticalPadding,
+				HorizontalPadding: model.HorizontalPadding,
+				VerticalSpacing:   model.VerticalSpacing,
+				HorizontalSpacing: model.HorizontalSpacing,
+			},
+			PrintBorders: model.ShowBorders,
+		},
+	}
+
+	pdf, err := rt.Control.getLabelSheets(r.Context(), query)
+	if err != nil {
+		return err
+	}
+
+	w.Header().Add("content-disposition", `attachment; filename="labels.pdf"`)
+	w.Header().Add("content-type", "application/pdf; charset=utf-8")
+
+	w.WriteHeader(http.StatusOK)
+
+	_, err = w.Write(pdf)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to http response", "error", err)
+		return err
+	}
+
 	return nil
 }
 

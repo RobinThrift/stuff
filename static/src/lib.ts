@@ -1,4 +1,5 @@
 export function get(path: string, obj: Record<string, unknown>) {
+    // biome-ignore lint/suspicious/noExplicitAny: Can't really be known beforehand
     let res: any = obj
     let parts = path.split(".")
     for (let i = 0; i <= parts.length; i++) {

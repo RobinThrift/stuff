@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
@@ -46,8 +47,21 @@ type Argon2Params struct {
 }
 
 func NewConfigFromEnv() (*Config, error) {
+	addr := getEnvDefault("STUFF_ADDRESS", ":8080")
+	defaultBaseURL := addr
+	if defaultBaseURL[0] == ':' {
+		defaultBaseURL = "localhost" + defaultBaseURL
+	}
+	baseURL := getEnvDefault("STUFF_BASE_URL", defaultBaseURL)
+
+	if !strings.HasPrefix(baseURL, "http") {
+		baseURL = "http://" + baseURL
+	}
+
 	return &Config{
-		Addr: getEnvDefault("STUFF_ADDRESS", ":8080"),
+		Addr: addr,
+
+		BaseURL: baseURL,
 
 		Database: Database{
 			Path: getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),

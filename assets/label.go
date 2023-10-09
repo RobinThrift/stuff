@@ -3,6 +3,7 @@ package assets
 import (
 	"bytes"
 	"fmt"
+	"image"
 	"image/png"
 	"net/url"
 
@@ -65,11 +66,20 @@ type Label struct {
 type Barcode struct {
 	Size  int
 	Value string
-	Image []byte
+	Image image.Image
 }
 
-func generateBarcode(value string, size int) ([]byte, error) {
+func (l *Label) Image() ([]byte, error) {
 	var b bytes.Buffer
+	err := png.Encode(&b, l.Barcode.Image)
+	if err != nil {
+		return nil, fmt.Errorf("error encoding url as QR code as PNG: %w", err)
+	}
+
+	return b.Bytes(), nil
+}
+
+func generateBarcode(value string, size int) (image.Image, error) {
 	code, err := qr.Encode(value, qr.M, qr.Auto)
 	if err != nil {
 		return nil, fmt.Errorf("error encoding url as QR code: %w", err)
@@ -80,18 +90,12 @@ func generateBarcode(value string, size int) ([]byte, error) {
 		return nil, fmt.Errorf("error scaling url QR code image to %dx%[1]dpx: %w", size, err)
 	}
 
-	err = png.Encode(&b, qrCode)
-	if err != nil {
-		return nil, fmt.Errorf("error encoding url as QR code as PNG: %w", err)
-	}
-
-	return b.Bytes(), nil
-
+	return qrCode, nil
 }
 
 func fmtLocationCode(loc string, posCode string) string {
 	if posCode != "" {
-		return loc + "(" + posCode + ")"
+		return loc + " (" + posCode + ")"
 	}
 	return loc
 }
