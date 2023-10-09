@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aarondl/opt/null"
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	"github.com/RobinThrift/stuff/storage/database"
 	"github.com/RobinThrift/stuff/storage/database/sqlite/models"
 	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
+	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
+	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
@@ -369,6 +369,9 @@ func (ar *RepoSQLite) DeleteParts(ctx context.Context, exec bob.Executor, assetI
 
 func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error) {
 	limit := query.PageSize
+	if limit == 0 {
+		limit = 25
+	}
 	offset := limit * query.Page
 
 	mods := []bob.Mod[*dialect.SelectQuery]{

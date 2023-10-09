@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/RobinThrift/stuff/api"
+	"github.com/go-chi/chi/v5"
 )
 
 type APIRouter struct {
