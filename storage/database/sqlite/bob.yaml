@@ -6,7 +6,7 @@ replacements:
 
   replace:
     type: "types.SQLiteDatetime"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - match:
     name: "updated_at"
@@ -15,7 +15,7 @@ replacements:
 
   replace:
     type: "types.SQLiteDatetime"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - match:
     name: "expires_at"
@@ -23,7 +23,7 @@ replacements:
 
   replace:
     type: "types.SQLiteDatetime"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - match:
     name: "warranty_until"
@@ -33,7 +33,7 @@ replacements:
 
   replace:
     type: "types.SQLiteDatetime"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - match:
     name: "purchase_date"
@@ -43,7 +43,7 @@ replacements:
 
   replace:
     type: "types.SQLiteDatetime"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - tables: ["assets"]
   match:
@@ -54,7 +54,7 @@ replacements:
 
   replace:
     type: "types.SQLiteJSON[map[string]any]"
-    imports: ['"github.com/kodeshack/stuff/storage/database/sqlite/types"']
+    imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 no_factory: true
 no_tests: true

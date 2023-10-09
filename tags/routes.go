@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/kodeshack/stuff/views"
+	"github.com/RobinThrift/stuff/views"
 )
 
 type UIRouter struct {

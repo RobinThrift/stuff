@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/kodeshack/stuff/storage/database"
+	"github.com/RobinThrift/stuff/storage/database"
 	nanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/segmentio/ksuid"
 	"github.com/stephenafamo/bob"

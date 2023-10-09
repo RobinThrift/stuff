@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
-	"github.com/kodeshack/stuff"
-	"github.com/kodeshack/stuff/server/session"
+	"github.com/RobinThrift/stuff"
+	"github.com/RobinThrift/stuff/server/session"
 )
 
 type Model[D any] struct {

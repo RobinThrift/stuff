@@ -10,8 +10,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/kodeshack/stuff/storage/database"
-	"github.com/kodeshack/stuff/tags"
+	"github.com/RobinThrift/stuff/storage/database"
+	"github.com/RobinThrift/stuff/tags"
 	"github.com/stephenafamo/bob"
 )
 

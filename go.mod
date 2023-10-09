@@ -1,4 +1,4 @@
-module github.com/kodeshack/stuff
+module github.com/RobinThrift/stuff
 
 go 1.21.1
 

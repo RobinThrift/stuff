@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
-	"github.com/kodeshack/stuff/server/session"
-	"github.com/kodeshack/stuff/views"
+	"github.com/RobinThrift/stuff/server/session"
+	"github.com/RobinThrift/stuff/views"
 )
 
 type ListUsersPageViewModel struct {

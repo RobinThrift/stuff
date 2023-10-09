@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/kodeshack/stuff/storage/database/sqlite/types"
+	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"

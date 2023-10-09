@@ -9,8 +9,8 @@ import (
 
 	"github.com/aarondl/opt/omit"
 	"github.com/alexedwards/scs/v2"
-	"github.com/kodeshack/stuff/storage/database/sqlite/models"
-	"github.com/kodeshack/stuff/storage/database/sqlite/types"
+	"github.com/RobinThrift/stuff/storage/database/sqlite/models"
+	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
 )
 

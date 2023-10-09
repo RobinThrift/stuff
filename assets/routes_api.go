@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/kodeshack/stuff/api"
+	"github.com/RobinThrift/stuff/api"
 )
 
 type APIRouter struct {

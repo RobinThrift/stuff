@@ -8,7 +8,7 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/kodeshack/stuff/static"
+	"github.com/RobinThrift/stuff/static"
 )
 
 type Server struct {

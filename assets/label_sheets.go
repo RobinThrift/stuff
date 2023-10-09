@@ -7,7 +7,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/kodeshack/stuff/static"
+	"github.com/RobinThrift/stuff/static"
 	"github.com/signintech/gopdf"
 )
 

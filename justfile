@@ -1,3 +1,6 @@
+version        := env_var_or_default("VERSION", "dev")
+go_ldflgas     := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/RobinThrift/stuff.Version=" + version + "'"
+go_build_flags := env_var_or_default("GO_BUILD_FLAGS", "")
 export PATH := "./static/node_modules/.bin:" + "./node_modules/.bin:" + env_var('PATH')
 export STUFF_LOG_LEVEL := "debug"
 export STUFF_LOG_FORMAT := "console"
@@ -26,8 +29,6 @@ run: build-js build-icons _fonts
     mkdir -p .run
     go run -tags dev ./bin/stuff
 
-version    := env_var_or_default("VERSION", "dev")
-go_ldflgas := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/kodeshack/stuff.Version=" + version + "'"
 build: build-js build-js build-styles build-icons _fonts
     go build -ldflags="{{go_ldflgas}}" -o build/stuff ./bin/stuff
 
