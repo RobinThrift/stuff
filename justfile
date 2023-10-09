@@ -20,6 +20,7 @@ fmt: _npm-install
     cd static && biome format --write src/*.ts
 
 lint: _npm-install
+    @[ -d static/build ] || (mkdir static/build && touch static/build/styles.css)
     staticcheck ./...
     golangci-lint run ./...
     cd static && biome check src/*.ts
