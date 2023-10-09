@@ -68,7 +68,7 @@ func (s PageSize) rect() gopdf.Rect {
 	return gopdf.Rect{}
 }
 
-func (s *Sheet) Generate() ([]byte, error) {
+func (s *Sheet) Generate() ([]byte, error) { //nolint gocognit Will refactor later
 	sheet, err := s.newPDF()
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (s *Sheet) Generate() ([]byte, error) {
 	labels := s.Labels
 	if s.SkipNumLabels != 0 {
 		skipLabels := make([]Label, s.SkipNumLabels)
-		labels = append(skipLabels, s.Labels...)
+		labels = append(skipLabels, s.Labels...) //nolint gocritic this is fine
 	}
 
 	labelWidth := s.LabelSize.Width
