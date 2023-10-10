@@ -181,3 +181,30 @@ func renderLabelSheetCreatorPage(w http.ResponseWriter, r *http.Request, model L
 
 	return nil
 }
+
+type ImportPageViewModel struct {
+	Format           string `form:"format"`
+	IgnoreDuplicates bool   `form:"ignore_duplicates"`
+
+	SnipeITURL    string `form:"snipeit_url"`
+	SnipeITAPIKey string `form:"snipeit_api_key"`
+
+	ValidationErrs map[string]string `form:"-"`
+}
+
+func renderImportPage(w http.ResponseWriter, r *http.Request, model ImportPageViewModel) error {
+	csrfErr, ok := session.Pop[string](r.Context(), "csrf_error")
+	if ok {
+		model.ValidationErrs["general"] = csrfErr
+	}
+
+	err := views.Render(w, "assets_import", views.Model[ImportPageViewModel]{
+		Global: views.NewGlobal("Import Assets", r),
+		Data:   model,
+	})
+	if err != nil {
+		return fmt.Errorf("error rendering import page: %w", err)
+	}
+
+	return nil
+}

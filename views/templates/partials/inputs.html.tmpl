@@ -218,6 +218,8 @@ Select:
 	Label string
 	Value string
 	Options [][]string
+
+	XOnInput string
 */ -}}
 {{ define "select" }}
 <div {{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}>
@@ -231,6 +233,10 @@ Select:
 		class="input w-full py-2.5 {{ if ne .InputClass "" -}} {{ .InputClass }} {{- end -}}"
 		{{ if ne .Value "" }}
 			value="{{ .Value }}"
+		{{ end }}
+
+		{{ if ne .XOnInput "" }}
+			x-on:input="{{ .XOnInput }}"
 		{{ end }}
 	>
 		{{ range .Options }}

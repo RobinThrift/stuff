@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/RobinThrift/stuff/storage/database"
+	"github.com/google/uuid"
 	nanoid "github.com/matoous/go-nanoid/v2"
 	"github.com/segmentio/ksuid"
 	"github.com/stephenafamo/bob"
@@ -52,6 +52,19 @@ func (c *Control) GetNext(ctx context.Context) (string, error) {
 		}
 
 		return "", fmt.Errorf("unknown tag algorithm: %s", c.Algorithm)
+	})
+}
+
+func (c *Control) Get(ctx context.Context, tag string) (*Tag, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Tag, error) {
+		tag, err := c.TagRepo.Get(ctx, tx, tag)
+		if err != nil {
+			if !errors.Is(err, ErrTagNotFound) {
+				return nil, err
+			}
+		}
+
+		return tag, nil
 	})
 }
 

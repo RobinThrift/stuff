@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -83,6 +84,42 @@ func (c *Control) createAsset(ctx context.Context, asset *Asset, file *File) (*A
 	}
 
 	return created, nil
+}
+
+func (c *Control) createAssets(ctx context.Context, assets []*Asset, ignoreDuplicates bool) error {
+	return c.DB.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+		for i := range assets {
+			tag, err := c.TagCtrl.Get(ctx, assets[i].Tag)
+			if err != nil {
+				if !errors.Is(err, tags.ErrTagNotFound) {
+					return err
+				}
+			}
+
+			if tag != nil && !ignoreDuplicates {
+				return fmt.Errorf("asset with tag '%s' already exists", assets[i].Tag)
+			}
+
+			if imgURL, err := url.Parse(assets[i].ImageURL); assets[i].ImageURL != "" && err == nil {
+				filename, _, err := c.downloadImage(ctx, imgURL)
+				if err != nil {
+					return err
+				}
+
+				assets[i].ImageURL = "/assets/files/" + filename
+				assets[i].ThumbnailURL = assets[i].ImageURL
+			} else {
+				assets[i].ImageURL = ""
+			}
+
+			_, err = c.AssetRepo.Create(ctx, tx, assets[i])
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*Asset, error) {
@@ -214,6 +251,31 @@ func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename s
 	}
 
 	return filename, hash, nil
+}
+
+func (c *Control) downloadImage(ctx context.Context, url *url.URL) (filename string, hash string, err error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", "", err
+	}
+
+	defer func() {
+		err = errors.Join(err, res.Body.Close())
+	}()
+
+	err = checkContentTypeAllowed(res.Header.Get("content-type"), imgAllowList)
+	if err != nil {
+		return "", "", err
+	}
+
+	origFileName := path.Base(url.Path)
+
+	return c.handleFileUpload(origFileName, res.Body)
 }
 
 func ensureDirExists(dir string) error {

@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/form/v4"
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/server/session"
 	"github.com/RobinThrift/stuff/views"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/form/v4"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -50,6 +50,9 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/export/json", views.HTTPHandlerFuncErr(rt.handleAssetsExportJSON))
 	mux.Get("/assets/export/csv", views.HTTPHandlerFuncErr(rt.handleAssetsExportCSV))
+
+	mux.Get("/assets/import", views.HTTPHandlerFuncErr(rt.handleAssetsImportGet))
+	mux.Post("/assets/import", views.HTTPHandlerFuncErr(rt.handleAssetsImportPost))
 }
 
 // [GET] /
@@ -368,6 +371,61 @@ func (rt *UIRouter) handleAssetsExportCSV(w http.ResponseWriter, r *http.Request
 	return exportAssetsAsCSV(w, assets.Assets)
 }
 
+// [GET] /assets/import
+func (rt *UIRouter) handleAssetsImportGet(w http.ResponseWriter, r *http.Request) error {
+	return renderImportPage(w, r, ImportPageViewModel{})
+}
+
+const (
+	defaultMaxMemory = 32 << 20 // 32 MB same as stdlib
+)
+
+// [POST] /assets/import
+func (rt *UIRouter) handleAssetsImportPost(w http.ResponseWriter, r *http.Request) error {
+	err := r.ParseMultipartForm(defaultMaxMemory)
+	if err != nil {
+		return err
+	}
+
+	var model ImportPageViewModel
+
+	err = rt.Decoder.Decode(&model, r.PostForm)
+	if err != nil {
+		return err
+	}
+
+	model.ValidationErrs = map[string]string{}
+
+	var assets []*Asset
+
+	switch model.Format {
+	case "snipeit_json_export":
+		assets, err = importFromSnipeITJSONExport(r, &model)
+	case "snipeit_api":
+		assets, err = importFromSnipeITAPI(r.Context(), model.SnipeITURL, model.SnipeITAPIKey)
+	default:
+		errMsg := fmt.Sprintf("unknown format '%s'", model.Format)
+		slog.ErrorContext(r.Context(), "error importing assets", "error", errMsg)
+		model.ValidationErrs["format"] = errMsg
+		return renderImportPage(w, r, model)
+	}
+
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error importing assets", "error", err)
+		return renderImportPage(w, r, model)
+	}
+
+	err = rt.Control.createAssets(r.Context(), assets, model.IgnoreDuplicates)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error importing assets", "error", err)
+		model.ValidationErrs["general"] = err.Error()
+		return renderImportPage(w, r, model)
+	}
+
+	http.Redirect(w, r, "/assets", http.StatusFound)
+	return nil
+}
+
 func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 	q := ListAssetsQuery{ //nolint: varnamelen
 		OrderBy: params.Get("order_by"),
@@ -407,30 +465,6 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 }
 
 var imgAllowList = []string{"image/png", "image/jpeg", "image/webp"}
-var errImgTypeNotAllowed = errors.New("image type not allowed")
-
-// @TODO: implement file size check
-func checkImageUpload(header *multipart.FileHeader) error {
-	ct := header.Header.Get("content-type")
-	mt, _, err := mime.ParseMediaType(ct)
-	if err != nil {
-		return err
-	}
-
-	allowed := false
-	for _, m := range imgAllowList {
-		if mt == m {
-			allowed = true
-			break
-		}
-	}
-
-	if !allowed {
-		return errImgTypeNotAllowed
-	}
-
-	return nil
-}
 
 func handleFileUpload(r *http.Request, key string) (*File, error) {
 	_, hasFileUpload := r.MultipartForm.File[key]
@@ -444,7 +478,7 @@ func handleFileUpload(r *http.Request, key string) (*File, error) {
 	}
 
 	if uploaded != nil {
-		err = checkImageUpload(header)
+		err = checkFileType(header, imgAllowList)
 		if err != nil {
 			return nil, err
 		}
@@ -453,6 +487,34 @@ func handleFileUpload(r *http.Request, key string) (*File, error) {
 	}
 
 	return nil, nil
+}
+
+var errFileTypeNotAllowed = errors.New("file type not allowed")
+
+func checkFileType(header *multipart.FileHeader, allowlist []string) error {
+	return checkContentTypeAllowed(header.Header.Get("content-type"), allowlist)
+}
+
+func checkContentTypeAllowed(ct string, allowlist []string) error {
+	mt, _, err := mime.ParseMediaType(ct)
+	if err != nil {
+		return err
+	}
+
+	allowed := false
+	for _, m := range allowlist {
+		if mt == m {
+			allowed = true
+			break
+		}
+	}
+
+	if !allowed {
+		return fmt.Errorf("%w: %s", errFileTypeNotAllowed, mt)
+	}
+
+	return nil
+
 }
 
 func NewDecoder(decimalSeparator string) *form.Decoder {

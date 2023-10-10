@@ -1,0 +1,81 @@
+{{ template "layout.html.tmpl" . }}
+
+{{ define "header" }}
+<h1 class="font-extrabold md:text-2xl lg:text-4xl">{{ $.Global.Title }}</h1>
+{{ end }}
+
+{{ define "main" }}
+{{ with .Data }}
+<form
+	class="main max-w-screen-xl"
+	method="post"
+	action="/assets/import"
+	enctype="multipart/form-data"
+	x-data="{ show: '{{ .Format }}' }"
+>
+	{{ if has .ValidationErrs "general" }}
+	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
+	{{ end }}
+
+	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
+
+	{{-
+		template "select" dict
+		"Class" "mb-5"
+		"Label" "Format"
+		"Name" "format"
+		"ValidationErr" .ValidationErrs.format
+		"Value" .Format
+		"Options" (list
+			(list "- None -" "none")
+			(list "Snipe-IT JSON Export" "snipeit_json_export")
+			(list "Snipe-IT API" "snipeit_api")
+		)
+		"XOnInput" "show = $event.target.value"
+	-}}
+
+	<div x-cloak x-show="show === 'snipeit_json_export'">
+		{{-
+			template "field" dict
+			"Class" "mb-5"
+			"Label" "File"
+			"Name" "import_file"
+			"Type" "file"
+			"ValidationErr" .ValidationErrs.import_file
+		-}}
+	</div>
+
+	<div x-cloak x-show="show === 'snipeit_api'">
+		{{-
+			template "field" dict
+			"Class" "mb-5"
+			"Label" "SnipeIT URL"
+			"Name" "snipeit_url"
+			"ValidationErr" .ValidationErrs.snipeit_url
+			"Value" .SnipeITURL
+		-}}
+
+		{{-
+			template "field" dict
+			"Label" "API Key"
+			"Type" "password"
+			"Name" "snipeit_api_key"
+			"ValidationErr" .ValidationErrs.snipeit_api_key
+			"Value" .SnipeITAPIKey
+		-}}
+	</div>
+
+
+	<x-checkbox label="Ignore Duplicates" name="ignore_duplicates" checked="{{ .IgnoreDuplicates }}" validation-error="{{ .ValidationErrs.ignore_duplicates }}" />
+
+
+	<button type="submit" class="btn btn-primary mt-5">
+		Import
+	</button>
+
+</form>
+{{ end }}
+{{ end }}
+
+
+
