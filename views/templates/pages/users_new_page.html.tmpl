@@ -10,7 +10,6 @@
 	class="main max-w-screen-xl"
 	method="post"
 	action="/users/new"
-	enctype="multipart/form-data"
 >
 	{{ if has .ValidationErrs "general" }}
 	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
