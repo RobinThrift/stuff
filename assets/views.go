@@ -176,7 +176,7 @@ func renderLabelSheetCreatorPage(w http.ResponseWriter, r *http.Request, model L
 		Data:   model,
 	})
 	if err != nil {
-		return fmt.Errorf("error rendering edit asset page: %w", err)
+		return fmt.Errorf("error rendering create label sheet page: %w", err)
 	}
 
 	return nil
