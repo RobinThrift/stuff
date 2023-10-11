@@ -3,6 +3,7 @@ package views
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"reflect"
@@ -81,6 +82,18 @@ var templateFuncs = template.FuncMap{
 		return a + b
 	},
 
+	"min": func(a int, b int) int { //nolint: gocritic // false positive because new builtins
+		return min(a, b)
+	},
+
+	"max": func(a int, b int) int { //nolint: gocritic // false positive because new builtins
+		return max(a, b)
+	},
+
+	"between": func(a, lower, upper int) bool {
+		return a > lower && a < upper
+	},
+
 	"json": func(v any) template.JS {
 		j, err := json.Marshal(v)
 		if err != nil {
@@ -99,6 +112,22 @@ var templateFuncs = template.FuncMap{
 
 	"bytesToPNG": func(b []byte) template.URL {
 		return template.URL("data:image/png;base64," + base64.StdEncoding.EncodeToString(b))
+	},
+
+	"sequence": func(from int, to int) ([]int, error) {
+		if from > to {
+			return nil, errors.New("from is greater than to")
+		}
+
+		r := make([]int, to-from+1)
+
+		i := 0
+		for c := from; c <= to; c++ {
+			r[i] = c
+			i++
+		}
+
+		return r, nil
 	},
 }
 

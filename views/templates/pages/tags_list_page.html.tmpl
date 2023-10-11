@@ -43,7 +43,14 @@
 </table>
 
 {{ if gt .Page.NumPages 1 }}
-{{ template "pagination" dict "Page" .Page }}
+{{ template "pagination" dict
+	"URL" "/tags"
+	"Name" "Tags"
+	"Total" .Page.Total
+	"PageSize" .Page.PageSize
+	"CurrPage" .Page.Page
+	"NumPages" .Page.NumPages
+}}
 {{ end }}
 
 {{ end }}

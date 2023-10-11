@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"time"
@@ -56,54 +57,22 @@ func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, idOrTag string
 }
 
 func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
-	limit := query.PageSize
-	offset := limit * query.Page
-
-	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
-
-	if limit > 0 {
-		mods = append(mods, sm.Limit(limit))
-	}
-
-	if offset > 0 {
-		mods = append(mods, sm.Offset(offset))
-	}
-
-	if query.OrderBy != "" {
-		if query.OrderDir == "" {
-			query.OrderDir = database.OrderASC
-		}
-
-		mods = append(mods, bmods.OrderBy[*dialect.SelectQuery]{
-			Expression: query.OrderBy,
-			Direction:  query.OrderDir,
-		})
-	}
-
 	var err error
 	var assets models.AssetSlice
 	var count int64
-
 	if query.Search != nil && query.Search.Raw != "" {
-		assets, count, err = ar.listAssetsFromFTSTable(ctx, exec, query.Search, mods)
-		if err != nil {
-			return nil, err
-		}
+		assets, count, err = ar.listUsingFTS(ctx, exec, query)
 	} else {
-		count, err = models.Assets.Query(ctx, exec, mods...).Count()
-		if err != nil {
-			return nil, fmt.Errorf("error counting assets: %w", err)
-		}
-
-		assets, err = models.Assets.Query(ctx, exec, mods...).All()
-		if err != nil {
-			return nil, fmt.Errorf("error getting assets: %w", err)
-		}
+		assets, count, err = ar.list(ctx, exec, query)
 	}
 
-	numPages := 0
-	if limit > 0 {
-		numPages = int(count) / limit
+	if err != nil {
+		return nil, err
+	}
+
+	numPages := 1
+	if query.PageSize > 0 {
+		numPages = int(math.Ceil(float64(count) / float64(query.PageSize)))
 	}
 
 	page := &AssetListPage{
@@ -119,6 +88,66 @@ func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAss
 	}
 
 	return page, nil
+}
+
+func (ar *RepoSQLite) list(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (models.AssetSlice, int64, error) {
+	limit := query.PageSize
+	offset := limit * query.Page
+
+	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
+
+	if query.OrderBy != "" {
+		if query.OrderDir == "" {
+			query.OrderDir = database.OrderASC
+		}
+
+		mods = append(mods, bmods.OrderBy[*dialect.SelectQuery]{
+			Expression: query.OrderBy,
+			Direction:  query.OrderDir,
+		})
+	}
+
+	count, err := models.Assets.Query(ctx, exec, mods...).Count()
+	if err != nil {
+		return nil, 0, fmt.Errorf("error counting assets: %w", err)
+	}
+
+	if limit > 0 {
+		mods = append(mods, sm.Limit(limit))
+	}
+
+	if offset > 0 {
+		mods = append(mods, sm.Offset(offset))
+	}
+
+	assets, err := models.Assets.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, 0, fmt.Errorf("error getting assets: %w", err)
+	}
+
+	return assets, count, nil
+}
+
+func (ar *RepoSQLite) listUsingFTS(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (models.AssetSlice, int64, error) {
+	limit := query.PageSize
+	offset := limit * query.Page
+
+	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 2)
+
+	if limit > 0 {
+		mods = append(mods, sm.Limit(limit))
+	}
+
+	if offset > 0 {
+		mods = append(mods, sm.Offset(offset))
+	}
+
+	assets, count, err := ar.listAssetsFromFTSTable(ctx, exec, query.Search, mods)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return assets, count, nil
 }
 
 func (ar *RepoSQLite) ListForExport(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {

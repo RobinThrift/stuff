@@ -426,6 +426,8 @@ func (rt *UIRouter) handleAssetsImportPost(w http.ResponseWriter, r *http.Reques
 	return nil
 }
 
+const defaultPageSize = 25
+
 func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 	q := ListAssetsQuery{ //nolint: varnamelen
 		OrderBy: params.Get("order_by"),
@@ -442,7 +444,7 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 	if pageStr := params.Get("page"); pageStr != "" {
 		page, err := strconv.Atoi(pageStr)
 		if err == nil {
-			q.Page = q.PageSize * page
+			q.Page = page
 		}
 	}
 
@@ -454,7 +456,7 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 	}
 
 	if q.PageSize == 0 {
-		q.PageSize = 50
+		q.PageSize = defaultPageSize
 	}
 
 	if q.PageSize > 100 {

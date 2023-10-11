@@ -1,5 +1,8 @@
 {{ template "document_head" . }}
-<div class="min-h-screen md:h-screen flex" x-data="{ sidebarOpen: false, sidebarDesktopClosed: {{ $.Global.SidebarClosed }}  }">
+<div
+	class="min-h-screen md:h-screen flex" x-data="{ sidebarOpen: false, sidebarDesktopClosed: {{ $.Global.SidebarClosed }}  }"
+	x-bind:class="{ 'overflow-hidden h-screen block': sidebarOpen }"
+>
 	<nav
 		class="sidebar {{- if $.Global.SidebarClosed }} sidebar-desktop-closed {{- end }}"
 		x-bind:class="{ 'translate-x-0': sidebarOpen, 'sidebar-desktop-closed': sidebarDesktopClosed }"
@@ -10,7 +13,7 @@
 
 	<div class="bg-slate-950/80 absolute md:hidden top-0 left-0 bottom-0 right-0 z-10 duration-300" x-cloak x-on:click="sidebarOpen = false" x-show="sidebarOpen" x-transition.opacity></div>
 
-	<div class="md:overflow-auto flex-1 flex flex-col">
+	<div class="md:overflow-auto w-full flex flex-col">
 		<header class="h-20 max-w-screen px-2 md:px-6 lg:px-8 py-2 md:py-5 flex flex-row items-center md:justify-start">
 			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-primary-500 focus:outline-none focus:text-black md:hidden mr-2">
 				<span class="sr-only">Show Menu</span>
@@ -20,15 +23,17 @@
 			{{ block "header" . }}{{ end }}
 		</header>
 
-		<main id="main" class="max-w-screen md:max-w-none md:overflow-x-auto flex-1">
-		{{ if ne $.Global.FlashMessage "" }}
-		<div class="border rounded p-5 m-5 bg-secondary-500 text-background-200">{{ $.Global.FlashMessage }}</div>
-		{{ end }}
+		<main id="main" class="max-w-screen md:max-w-none flex-1 flex flex-col">
+			{{ if ne $.Global.FlashMessage "" }}
+			<div class="border rounded p-5 m-5 bg-secondary-500 text-background-200">{{ $.Global.FlashMessage }}</div>
+			{{ end }}
 
-		{{ block "main" . }}{{ end }}
+			<div class="flex-1">
+				{{ block "main" . }}{{ end }}
+			</div>
+
+			{{ template "footer" . }}
 		</main>
-
-		{{ template "footer" . }}
 	</div>
 </div>
 {{ template "command_palette" . }}

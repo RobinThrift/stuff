@@ -31,6 +31,45 @@
 	.main {
 		@apply px-2 md:px-6 lg:px-8 pb-3;
 	}
+
+	.pagination {
+		@apply flex items-center justify-between w-full h-16 px-3 border-t border-gray-100;
+		@apply dark:border-primary-700;
+	}
+
+	.pagination-items {
+		@apply flex items-center text-sm leading-tight bg-white border divide-x rounded h-9 divide-gray-100 border-gray-200;
+		@apply dark:divide-primary-700 dark:border-primary-700;
+	}
+
+	.pagination-item {
+		@apply relative inline-flex items-center h-full px-3;
+
+		&:hover {
+			.accent {
+				@apply border-l border-r border-primary-500 left-0 w-full;
+			}
+		}
+
+		.accent {
+			@apply box-content absolute bottom-0 w-0 h-px -mx-px translate-y-px border-transparent bg-primary-500 left-1/2 duration-200 ease-out ;
+		}
+
+		&.active {
+			@apply relative inline-flex items-center h-full px-3 text-neutral-900 bg-gray-50;
+
+			.accent {
+				@apply left-0 w-full border-l border-r bg-primary-500 border-primary-500;
+			}
+		}
+	}
+
+	span.disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+		text-decoration: none;
+		pointer-events: none;
+	}
 }
 
 .rainbow {
