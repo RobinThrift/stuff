@@ -3,6 +3,13 @@
 module.exports = {
     content: ["./views/templates/**/*.html.tmpl"],
     darkMode: "class",
+
+    plugins: [
+        require("@tailwindcss/forms")({
+            strategy: "base", // only generate global styles
+        }),
+    ],
+
     theme: {
         extend: {
             colors: {
@@ -130,5 +137,4 @@ module.exports = {
             },
         },
     },
-    plugins: [],
 }

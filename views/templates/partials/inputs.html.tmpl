@@ -230,7 +230,7 @@ Select:
 	<select
 		name="{{ .Name }}"
 		id="{{ .Name }}"
-		class="input w-full py-2.5 {{ if ne .InputClass "" -}} {{ .InputClass }} {{- end -}}"
+		class="input {{ if ne .InputClass "" -}} {{ .InputClass }} {{- end -}}"
 		{{ if ne .Value "" }}
 			value="{{ .Value }}"
 		{{ end }}
