@@ -11,6 +11,8 @@ type Config struct {
 
 	BaseURL string `json:"baseURL"`
 
+	UseSecureCookies bool
+
 	Database Database `json:"database"`
 	FileDir  string   `json:"fileDir"`
 	TmpDir   string
@@ -62,7 +64,8 @@ func NewConfigFromEnv() (*Config, error) {
 	return &Config{
 		Addr: addr,
 
-		BaseURL: baseURL,
+		BaseURL:          baseURL,
+		UseSecureCookies: getEnvBoolDefault("STUFF_USE_SECURE_COOKIES", true),
 
 		Database: Database{
 			Path: getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),
@@ -116,4 +119,18 @@ func getEnvIntDefault(key string, d int) int {
 	}
 
 	return i
+}
+
+func getEnvBoolDefault(key string, d bool) bool {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		return d
+	}
+
+	b, err := strconv.ParseBool(v)
+	if err != nil {
+		return d
+	}
+
+	return b
 }

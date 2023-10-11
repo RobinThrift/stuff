@@ -11,6 +11,7 @@ export STUFF_ADDRESS := "localhost:8080"
 export STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD := "admin"
 export STUFF_FILE_DIR := ".run/files_dev_run"
 export STUFF_DATABASE_PATH := ".run/stuff.db"
+export STUFF_USE_SECURE_COOKIES := "false"
 
 _default:
     @just --list
@@ -83,6 +84,7 @@ run-oci-image: build-oci-image
         -e STUFF_LOG_LEVEL={{ STUFF_LOG_LEVEL }} \
         -e STUFF_LOG_FORMAT={{ STUFF_LOG_FORMAT }} \
         -e STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD={{ STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD }} \
+        -e STUFF_USE_SECURE_COOKIES={{ STUFF_USE_SECURE_COOKIES }} \
         -p 8080:8080 \
         {{ oci_repo }}:{{ version }}
 

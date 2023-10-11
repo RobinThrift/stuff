@@ -113,7 +113,10 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 	sm.Cookie.Persist = true
 	sm.Cookie.SameSite = http.SameSiteStrictMode
 
-	srv, err := server.NewServer(config.Addr, sm,
+	srv, err := server.NewServer(
+		config.Addr,
+		config.UseSecureCookies,
+		sm,
 		authRouter.RegisterRoutes,
 		assetsUIRouter.RegisterRoutes,
 		assetsAPIRouter.RegisterRoutes,

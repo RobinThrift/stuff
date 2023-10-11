@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/alexedwards/scs/v2"
-	"github.com/gorilla/csrf"
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/ctxx"
 	"github.com/RobinThrift/stuff/server/session"
+	"github.com/alexedwards/scs/v2"
+	"github.com/gorilla/csrf"
 	"github.com/segmentio/ksuid"
 )
 
@@ -65,7 +65,7 @@ func loginRedirectMiddleware(skipFor []string) func(next http.Handler) http.Hand
 	}
 }
 
-func csrfMiddleware(skipFor []string) (func(next http.Handler) http.Handler, error) {
+func csrfMiddleware(secure bool, skipFor []string) (func(next http.Handler) http.Handler, error) {
 	csrfSecret, err := genCSRFSecret()
 	if err != nil {
 		return nil, err
@@ -74,6 +74,7 @@ func csrfMiddleware(skipFor []string) (func(next http.Handler) http.Handler, err
 	csrfProtect := csrf.Protect(
 		csrfSecret,
 		csrf.Path("/"),
+		csrf.Secure(secure),
 		csrf.SameSite(csrf.SameSiteStrictMode),
 		csrf.CookieName("stuff.csrf.token"),
 		csrf.FieldName("stuff.csrf.token"),

@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/RobinThrift/stuff/static"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	"github.com/RobinThrift/stuff/static"
 )
 
 type Server struct {
@@ -17,12 +17,12 @@ type Server struct {
 
 type RegisterRoutes func(mux *chi.Mux)
 
-func NewServer(addr string, sm *scs.SessionManager, routes ...RegisterRoutes) (*Server, error) {
+func NewServer(addr string, useSecureCookies bool, sm *scs.SessionManager, routes ...RegisterRoutes) (*Server, error) {
 	srv := &Server{}
 
 	mux := chi.NewMux()
 
-	csrfMiddleware, err := csrfMiddleware([]string{"/static"})
+	csrfMiddleware, err := csrfMiddleware(useSecureCookies, []string{"/static"})
 	if err != nil {
 		return nil, err
 	}
