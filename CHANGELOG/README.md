@@ -3,3 +3,4 @@
 - [CHANGELOG-v0.1.0.md](./CHANGELOG-v0.1.0.md)
 - [CHANGELOG-v0.1.1.md](./CHANGELOG-v0.1.1.md)
 - [CHANGELOG-v0.1.2.md](./CHANGELOG-v0.1.2.md)
+- [CHANGELOG-v0.2.0.md](./CHANGELOG-v0.2.0.md)
