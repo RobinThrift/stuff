@@ -96,8 +96,13 @@ func (c *Control) createAssets(ctx context.Context, assets []*Asset, ignoreDupli
 				}
 			}
 
-			if tag != nil && !ignoreDuplicates {
+			if tag != nil && tag.InUse && !ignoreDuplicates {
 				return fmt.Errorf("asset with tag '%s' already exists", assets[i].Tag)
+			}
+
+			_, err = c.TagCtrl.CreateIfNotExists(ctx, assets[i].Tag)
+			if err != nil {
+				return err
 			}
 
 			if imgURL, err := url.Parse(assets[i].ImageURL); assets[i].ImageURL != "" && err == nil {
