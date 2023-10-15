@@ -30,6 +30,12 @@ export function plugin(Alpine: typeof _Alpine) {
                         url: "/assets",
                         tags: ["list"],
                     },
+                    {
+                        name: "Import Assets",
+                        icon: "arrow-square-in",
+                        url: "/assets/import",
+                        tags: [],
+                    },
                 ],
             ],
             [

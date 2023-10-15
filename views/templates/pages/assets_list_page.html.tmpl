@@ -7,12 +7,17 @@
 	<x-dropdown-button
 		icon="dots-three-vertical"
 		items='[
-			{ "text": "New Asset", "url": "/assets/new", "icon": "plus" }
+			{ "text": "New Asset", "url": "/assets/new", "icon": "plus" },
+			{ "text": "Import", "url": "/assets/import", "icon": "arrow-square-in" }
 		]'
 	/>
 </div>
 
 <div class="hidden sm:flex flex-1 flex flex-col sm:flex-row justify-center items-end sm:justify-end sm:items-center">
+	<a href="/assets/import" class="btn btn-primary me-2">
+		<x-icon icon="arrow-square-in" class="" /> Import
+	</a>
+
 	<a href="/assets/new" class="btn btn-primary">
 		<x-icon icon="plus" class="" /> New Asset
 	</a>
