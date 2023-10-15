@@ -14,7 +14,7 @@
 
 	.checkbox {
 		@apply w-4 h-4 rounded  text-primary-500 bg-background-200 border-neutral-200 focus:ring-primary-500;
-		@apply dark:text-primary-500 dark:bg-background-200 dark:border-neutral-800 dark:focus:ring-primary-500;
+		@apply dark:text-primary-500 dark:bg-background-200 dark:border-primary-800 dark:focus:ring-primary-500;
 	}
 
 	.checkbox-input {
