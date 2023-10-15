@@ -406,6 +406,7 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 	mods := []bob.Mod[*dialect.SelectQuery]{
 		sm.Limit(limit),
 		sm.Offset(offset),
+		sm.Distinct(),
 	}
 
 	if query.Search != "" {
