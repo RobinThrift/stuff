@@ -103,7 +103,7 @@
         --colour-green-950: 0 51 49;
     }
 
-    .dark {
+    :root[class~="dark"] {
         --colour-background-100: 9 9 11;
         --colour-background-200: 24 24 27;
         --colour-background-300: 39 39 42;
