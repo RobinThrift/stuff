@@ -52,38 +52,44 @@
 			>
 				<ul class="dropdown-items">
 					<li>
-						<label for="show_column_tag" class="dropdown-item flex items-center">
-							<input id="show_column_tag" name="show_column_tag" type="checkbox" class="checkbox me-2" x-model="columns.Tag" />
+						<label for="show_column_column" class="dropdown-item flex items-center">
+							<input id="show_column_column" name="show_column_column" type="checkbox" class="checkbox me-2" x-model="columns.Tag" />
 							Tag
 						</label>
 					</li>
 					<li>
-						<label for="show_image_tag" class="dropdown-item flex items-center">
-							<input id="show_image_tag" name="show_image_tag" type="checkbox" class="checkbox me-2" x-model="columns.Image" />
+						<label for="show_image_column" class="dropdown-item flex items-center">
+							<input id="show_image_column" name="show_image_column" type="checkbox" class="checkbox me-2" x-model="columns.Image" />
 							Image
 						</label>
 					</li>
 					<li>
-						<label for="show_name_tag" class="dropdown-item flex items-center">
-							<input id="show_name_tag" name="show_name_tag" type="checkbox" class="checkbox me-2" x-model="columns.Name" />
+						<label for="show_name_column" class="dropdown-item flex items-center">
+							<input id="show_name_column" name="show_name_column" type="checkbox" class="checkbox me-2" x-model="columns.Name" />
 							Name
 						</label>
 					</li>
 					<li>
-						<label for="show_category_tag" class="dropdown-item flex items-center">
-							<input id="show_category_tag" category="show_category_tag" type="checkbox" class="checkbox me-2" x-model="columns.Category" />
+						<label for="show_type_column" class="dropdown-item flex items-center">
+							<input id="show_type_column" name="show_type_column" type="checkbox" class="checkbox me-2" x-model="columns.Type" />
+							Type
+						</label>
+					</li>
+					<li>
+						<label for="show_category_column" class="dropdown-item flex items-center">
+							<input id="show_category_column" name="show_category_column" type="checkbox" class="checkbox me-2" x-model="columns.Category" />
 							Category
 						</label>
 					</li>
 					<li>
-						<label for="show_location_tag" class="dropdown-item flex items-center">
-							<input id="show_location_tag" location="show_location_tag" type="checkbox" class="checkbox me-2" x-model="columns.Location" />
+						<label for="show_location_column" class="dropdown-item flex items-center">
+							<input id="show_location_column" name="show_location_column" type="checkbox" class="checkbox me-2" x-model="columns.Location" />
 							Location
 						</label>
 					</li>
 					<li>
-						<label for="show_status_tag" class="dropdown-item flex items-center">
-							<input id="show_status_tag" status="show_status_tag" type="checkbox" class="checkbox me-2" x-model="columns.Status" />
+						<label for="show_status_column" class="dropdown-item flex items-center">
+							<input id="show_status_column" name="show_status_column" type="checkbox" class="checkbox me-2" x-model="columns.Status" />
 							Status
 						</label>
 					</li>
@@ -133,6 +139,7 @@
 				<th x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>Tag</th>
 				<th x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
 				<th x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>Name</th>
+				<th x-show="columns.Type" {{ if not $.Data.Columns.Type -}} x-cloak {{- end}}>Type</th>
 				<th x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>Category</th>
 				<th x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>Location</th>
 				<th x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>Status</th>
@@ -164,6 +171,12 @@
 					<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
 						{{ .Name }}
 					</a>
+				</td>
+				<td x-show="columns.Type" {{ if not $.Data.Columns.Type -}} x-cloak {{- end}}>
+					{{ .Type }}
+                    {{- if eq .Type "CONSUMABLE" }}
+                    ({{ .Quantity}} {{ .QuantityUnit }})
+                    {{- end }}
 				</td>
 				<td x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>
 					{{ .Category }}

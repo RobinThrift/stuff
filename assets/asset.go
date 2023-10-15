@@ -22,8 +22,17 @@ const (
 	StatusArchived  Status = "ARCHIVED"
 )
 
+type AssetType string
+
+const (
+	AssetTypeAsset      AssetType = "ASSET"
+	AssetTypeComponent  AssetType = "COMPONENT"
+	AssetTypeConsumable AssetType = "CONSUMABLE"
+)
+
 type Asset struct {
-	ID int64 `form:"-"`
+	ID   int64     `form:"-"`
+	Type AssetType `form:"type"`
 
 	ParentAssetID int64    `form:"parent_asset_id"`
 	Parent        *Asset   `form:"-"`
@@ -42,6 +51,8 @@ type Asset struct {
 	ImageURL      string         `form:"-"`
 	ThumbnailURL  string         `form:"-"`
 	WarrantyUntil time.Time      `form:"warranty_until,omitempty"`
+	Quantity      uint64         `form:"quantity"`
+	QuantityUnit  string         `form:"quantity_unit"`
 	CustomAttrs   map[string]any `form:"custom_attrs"`
 
 	CheckedOutTo int64  `form:"checked_out_to"`
@@ -122,6 +133,8 @@ type ListAssetsQuery struct {
 
 	OrderBy  string
 	OrderDir string
+
+	AssetType AssetType
 }
 
 type ListAssetsQuerySearch struct {

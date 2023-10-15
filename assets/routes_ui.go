@@ -435,10 +435,22 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 
 	if query := params.Get("query"); query != "" {
 		q.Search = decodeSearchQuery(query)
+
+		if typ, ok := q.Search.Fields["type"]; ok && typ != "" {
+			q.AssetType = AssetType(strings.ToUpper(typ))
+			delete(q.Search.Fields, "type")
+			if len(q.Search.Fields) == 0 {
+				q.Search.Raw = ""
+			}
+		}
 	}
 
 	if size := params.Get("page_size"); size != "" {
 		q.PageSize, _ = strconv.Atoi(size)
+	}
+
+	if typ := params.Get("type"); typ != "" {
+		q.AssetType = AssetType(strings.ToUpper(typ))
 	}
 
 	if pageStr := params.Get("page"); pageStr != "" {
@@ -607,6 +619,7 @@ func sanitizeAssetFields(asset *Asset) {
 	asset.Location = policy.Sanitize(asset.Location)
 	asset.PositionCode = policy.Sanitize(asset.PositionCode)
 	asset.Notes = policy.Sanitize(asset.Notes)
+	asset.QuantityUnit = policy.Sanitize(asset.QuantityUnit)
 	asset.PurchaseInfo.Supplier = policy.Sanitize(asset.PurchaseInfo.Supplier)
 	asset.PurchaseInfo.OrderNo = policy.Sanitize(asset.PurchaseInfo.OrderNo)
 	asset.PurchaseInfo.Currency = policy.Sanitize(asset.PurchaseInfo.Currency)

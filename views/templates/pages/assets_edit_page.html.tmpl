@@ -19,6 +19,8 @@
 	method="post"
 	action="{{- if .IsNew -}} /assets/new {{- else -}} {{ printf "/assets/%v/edit" .Asset.ID }} {{- end -}}"
 	enctype="multipart/form-data"
+
+	x-data="{ 'type': '{{ .Asset.Type }}' }"
 >
 	{{ if has .ValidationErrs "general" }}
 	<span class="block text-red-500">{{ .ValidationErrs.general }}</span>
@@ -32,7 +34,7 @@
 			<div class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
 				{{-
 					template "field" dict
-					"Class" "col-span-3 mb-3"
+					"Class" "col-span-4 mb-3"
 					"InputWrapperClass" "flex-grow"
 					"LabelClass" "font-bold"
 					"Required" true
@@ -44,7 +46,23 @@
 
 				{{-
 					template "select" dict
-					"Class" "col-span-1 mb-3"
+					"Class" "col-span-2 mb-3"
+					"Label" "Type"
+					"LabelClass" "font-bold"
+					"Name" "type"
+					"ValidationErr" .ValidationErrs.type
+					"Value" .Asset.Type
+					"Options" (list
+						(list "Asset" "ASSET")
+						(list "Component" "COMPONENT")
+						(list "Consumable" "CONSUMABLE")
+					)
+					"XOnInput" "type = $event.target.value"
+				-}}
+
+				{{-
+					template "select" dict
+					"Class" "col-span-2 mb-3"
 					"Label" "Status"
 					"LabelClass" "font-bold"
 					"Name" "status"
@@ -56,6 +74,29 @@
 						(list "Archived" "ARCHIVED")
 					)
 				-}}
+
+				<div x-cloak x-show="type === 'CONSUMABLE'" class="col-span-4 md:col-span-3 md:gap-5 md:grid md:grid-cols-4 mt-3">
+					{{-
+						template "field" dict
+						"Class" "col-span-1"
+						"LabelClass" "font-bold"
+						"Label" "Quantity"
+						"Name" "quantity"
+						"Type" "number"
+						"ValidationErr" .ValidationErrs.quantity
+						"Value" .Asset.Quantity
+					-}}
+
+					{{-
+						template "field" dict
+						"Class" "col-span-1"
+						"LabelClass" "font-bold"
+						"Label" "Unit"
+						"Name" "quantity_unit"
+						"ValidationErr" .ValidationErrs.quantity_unit
+						"Value" .Asset.QuantityUnit
+					-}}
+				</div>
 
 				{{-
 					template "field" dict

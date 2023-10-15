@@ -9,10 +9,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
-	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"
@@ -53,6 +53,9 @@ type Asset struct {
 	CreatedBy         int64                                      `db:"created_by" `
 	CreatedAt         types.SQLiteDatetime                       `db:"created_at" `
 	UpdatedAt         types.SQLiteDatetime                       `db:"updated_at" `
+	Type              string                                     `db:"type" `
+	Quantity          uint64                                     `db:"quantity" `
+	QuantityUnit      null.Val[string]                           `db:"quantity_unit" `
 
 	R assetR `db:"-" `
 }
@@ -111,10 +114,13 @@ type AssetSetter struct {
 	CreatedBy         omit.Val[int64]                                `db:"created_by"`
 	CreatedAt         omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
 	UpdatedAt         omit.Val[types.SQLiteDatetime]                 `db:"updated_at"`
+	Type              omit.Val[string]                               `db:"type"`
+	Quantity          omit.Val[uint64]                               `db:"quantity"`
+	QuantityUnit      omitnull.Val[string]                           `db:"quantity_unit"`
 }
 
 func (s AssetSetter) SetColumns() []string {
-	vals := make([]string, 0, 27)
+	vals := make([]string, 0, 30)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -223,6 +229,18 @@ func (s AssetSetter) SetColumns() []string {
 		vals = append(vals, "updated_at")
 	}
 
+	if !s.Type.IsUnset() {
+		vals = append(vals, "type")
+	}
+
+	if !s.Quantity.IsUnset() {
+		vals = append(vals, "quantity")
+	}
+
+	if !s.QuantityUnit.IsUnset() {
+		vals = append(vals, "quantity_unit")
+	}
+
 	return vals
 }
 
@@ -308,6 +326,15 @@ func (s AssetSetter) Overwrite(t *Asset) {
 	if !s.UpdatedAt.IsUnset() {
 		t.UpdatedAt, _ = s.UpdatedAt.Get()
 	}
+	if !s.Type.IsUnset() {
+		t.Type, _ = s.Type.Get()
+	}
+	if !s.Quantity.IsUnset() {
+		t.Quantity, _ = s.Quantity.Get()
+	}
+	if !s.QuantityUnit.IsUnset() {
+		t.QuantityUnit, _ = s.QuantityUnit.GetNull()
+	}
 }
 
 func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
@@ -392,10 +419,19 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.UpdatedAt.IsUnset() {
 		um.Set("updated_at").ToArg(s.UpdatedAt).Apply(q)
 	}
+	if !s.Type.IsUnset() {
+		um.Set("type").ToArg(s.Type).Apply(q)
+	}
+	if !s.Quantity.IsUnset() {
+		um.Set("quantity").ToArg(s.Quantity).Apply(q)
+	}
+	if !s.QuantityUnit.IsUnset() {
+		um.Set("quantity_unit").ToArg(s.QuantityUnit).Apply(q)
+	}
 }
 
 func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 27)
+	vals := make([]bob.Expression, 0, 30)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -504,6 +540,18 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.UpdatedAt))
 	}
 
+	if !s.Type.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Type))
+	}
+
+	if !s.Quantity.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.Quantity))
+	}
+
+	if !s.QuantityUnit.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.QuantityUnit))
+	}
+
 	return im.Values(vals...)
 }
 
@@ -535,6 +583,9 @@ type assetColumnNames struct {
 	CreatedBy         string
 	CreatedAt         string
 	UpdatedAt         string
+	Type              string
+	Quantity          string
+	QuantityUnit      string
 }
 
 type assetRelationshipJoins[Q dialect.Joinable] struct {
@@ -593,6 +644,9 @@ var AssetColumns = struct {
 	CreatedBy         sqlite.Expression
 	CreatedAt         sqlite.Expression
 	UpdatedAt         sqlite.Expression
+	Type              sqlite.Expression
+	Quantity          sqlite.Expression
+	QuantityUnit      sqlite.Expression
 }{
 	ID:                sqlite.Quote("assets", "id"),
 	ParentAssetID:     sqlite.Quote("assets", "parent_asset_id"),
@@ -621,6 +675,9 @@ var AssetColumns = struct {
 	CreatedBy:         sqlite.Quote("assets", "created_by"),
 	CreatedAt:         sqlite.Quote("assets", "created_at"),
 	UpdatedAt:         sqlite.Quote("assets", "updated_at"),
+	Type:              sqlite.Quote("assets", "type"),
+	Quantity:          sqlite.Quote("assets", "quantity"),
+	QuantityUnit:      sqlite.Quote("assets", "quantity_unit"),
 }
 
 type assetWhere[Q sqlite.Filterable] struct {
@@ -651,6 +708,9 @@ type assetWhere[Q sqlite.Filterable] struct {
 	CreatedBy         sqlite.WhereMod[Q, int64]
 	CreatedAt         sqlite.WhereMod[Q, types.SQLiteDatetime]
 	UpdatedAt         sqlite.WhereMod[Q, types.SQLiteDatetime]
+	Type              sqlite.WhereMod[Q, string]
+	Quantity          sqlite.WhereMod[Q, uint64]
+	QuantityUnit      sqlite.WhereNullMod[Q, string]
 }
 
 func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
@@ -682,6 +742,9 @@ func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
 		CreatedBy:         sqlite.Where[Q, int64](AssetColumns.CreatedBy),
 		CreatedAt:         sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.CreatedAt),
 		UpdatedAt:         sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.UpdatedAt),
+		Type:              sqlite.Where[Q, string](AssetColumns.Type),
+		Quantity:          sqlite.Where[Q, uint64](AssetColumns.Quantity),
+		QuantityUnit:      sqlite.WhereNull[Q, string](AssetColumns.QuantityUnit),
 	}
 }
 

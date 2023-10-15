@@ -96,6 +96,10 @@ func (ar *RepoSQLite) list(ctx context.Context, exec bob.Executor, query ListAss
 
 	mods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
 
+	if query.AssetType != "" {
+		mods = append(mods, models.SelectWhere.Assets.Type.EQ(string(query.AssetType)))
+	}
+
 	if query.OrderBy != "" {
 		if query.OrderDir == "" {
 			query.OrderDir = database.OrderASC
@@ -142,7 +146,7 @@ func (ar *RepoSQLite) listUsingFTS(ctx context.Context, exec bob.Executor, query
 		mods = append(mods, sm.Offset(offset))
 	}
 
-	assets, count, err := ar.listAssetsFromFTSTable(ctx, exec, query.Search, mods)
+	assets, count, err := ar.listAssetsFromFTSTable(ctx, exec, query, mods)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -213,15 +217,15 @@ func (ar *RepoSQLite) ListForExport(ctx context.Context, exec bob.Executor, quer
 
 var removeSpecialChars = regexp.MustCompile(`[^\w* ]`)
 
-func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Executor, search *ListAssetsQuerySearch, mods []bob.Mod[*dialect.SelectQuery]) (models.AssetSlice, int64, error) {
-	if len(search.Fields) == 0 {
-		value := removeSpecialChars.ReplaceAllString(search.Raw, "")
+func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Executor, query ListAssetsQuery, mods []bob.Mod[*dialect.SelectQuery]) (models.AssetSlice, int64, error) {
+	if len(query.Search.Fields) == 0 {
+		value := removeSpecialChars.ReplaceAllString(query.Search.Raw, "")
 		mods = append(mods,
 			sm.Where(sqlite.Quote(models.TableNames.AssetsFTS).EQ(sqlite.Quote(value))),
 		)
 	}
 
-	for field, value := range search.Fields {
+	for field, value := range query.Search.Fields {
 		column, ok := isAssetsFTSColumn(field)
 		if !ok {
 			continue
@@ -253,7 +257,18 @@ func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Execu
 		ids = append(ids, id)
 	}
 
-	assets, err := models.Assets.Query(ctx, exec, models.SelectWhere.Assets.ID.In(ids...), models.SelectWhere.Assets.ParentAssetID.IsNull()).All()
+	assetQueryMods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
+
+	if query.AssetType != "" {
+		assetQueryMods = append(assetQueryMods, models.SelectWhere.Assets.Tag.EQ(string(query.AssetType)))
+	}
+
+	assetQueryMods = append(assetQueryMods,
+		models.SelectWhere.Assets.ID.In(ids...),
+		models.SelectWhere.Assets.ParentAssetID.IsNull(),
+	)
+
+	assets, err := models.Assets.Query(ctx, exec, assetQueryMods...).All()
 	if err != nil {
 		return nil, 0, fmt.Errorf("error getting assets: %w", err)
 	}
@@ -263,6 +278,7 @@ func (ar *RepoSQLite) listAssetsFromFTSTable(ctx context.Context, exec bob.Execu
 
 func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
 	model := &models.AssetSetter{
+		Type:             omit.From(string(asset.Type)),
 		ParentAssetID:    omitnullInt64(asset.ParentAssetID),
 		Status:           omit.From(string(asset.Status)),
 		Tag:              omitnullStr(asset.Tag),
@@ -277,6 +293,8 @@ func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asse
 		ThumbnailURL:     omitnullStr(asset.ThumbnailURL),
 		WarrantyUntil:    omitnullTime(asset.WarrantyUntil),
 		CustomAttrs:      omitnullCustomAttrs(asset.CustomAttrs),
+		Quantity:         omit.From(asset.Quantity),
+		QuantityUnit:     omitnullStr(asset.QuantityUnit),
 		CheckedOutTo:     omitnullInt64(asset.CheckedOutTo),
 		Location:         omitnullStr(asset.Location),
 		PositionCode:     omitnullStr(asset.PositionCode),
@@ -299,6 +317,7 @@ func (ar *RepoSQLite) Create(ctx context.Context, exec bob.Executor, asset *Asse
 func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error) {
 	model := &models.Asset{
 		ID:                asset.ID,
+		Type:              string(asset.Type),
 		ParentAssetID:     nullInt64(asset.ParentAssetID),
 		Status:            string(asset.Status),
 		Tag:               nullStr(asset.Tag),
@@ -313,6 +332,8 @@ func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asse
 		ThumbnailURL:      nullStr(asset.ThumbnailURL),
 		WarrantyUntil:     nullTime(asset.WarrantyUntil),
 		CustomAttrs:       nullCustomAttrs(asset.CustomAttrs),
+		Quantity:          asset.Quantity,
+		QuantityUnit:      nullStr(asset.QuantityUnit),
 		CheckedOutTo:      nullInt64(asset.CheckedOutTo),
 		Location:          nullStr(asset.Location),
 		PositionCode:      nullStr(asset.PositionCode),
@@ -326,6 +347,7 @@ func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asse
 	}
 
 	setter := &models.AssetSetter{
+		Type:              omit.From(string(asset.Type)),
 		ParentAssetID:     omitnullInt64(asset.ParentAssetID),
 		Status:            omit.From(string(asset.Status)),
 		Tag:               omitnullStr(asset.Tag),
@@ -340,6 +362,8 @@ func (ar *RepoSQLite) Update(ctx context.Context, exec bob.Executor, asset *Asse
 		ThumbnailURL:      omitnullStr(asset.ThumbnailURL),
 		WarrantyUntil:     omitnullTime(asset.WarrantyUntil),
 		CustomAttrs:       omitnullCustomAttrs(asset.CustomAttrs),
+		Quantity:          omit.From(asset.Quantity),
+		QuantityUnit:      omitnullStr(asset.QuantityUnit),
 		CheckedOutTo:      omitnullInt64(asset.CheckedOutTo),
 		Location:          omitnullStr(asset.Location),
 		PositionCode:      omitnullStr(asset.PositionCode),
@@ -432,6 +456,7 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 	asset := &Asset{
 		ID:            model.ID,
+		Type:          AssetType(model.Type),
 		ParentAssetID: model.ParentAssetID.GetOrZero(),
 		Status:        Status(model.Status),
 		Tag:           model.Tag.GetOrZero(),
@@ -446,6 +471,8 @@ func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 		ThumbnailURL:  model.ThumbnailURL.GetOrZero(),
 		WarrantyUntil: model.WarrantyUntil.GetOrZero().Time,
 		CustomAttrs:   model.CustomAttrs.GetOrZero().JSON,
+		Quantity:      model.Quantity,
+		QuantityUnit:  model.QuantityUnit.GetOrZero(),
 		CheckedOutTo:  model.CheckedOutTo.GetOrZero(),
 		Location:      model.Location.GetOrZero(),
 		PositionCode:  model.PositionCode.GetOrZero(),

@@ -109,6 +109,9 @@ var ColumnNames = struct {
 		CreatedBy:         "created_by",
 		CreatedAt:         "created_at",
 		UpdatedAt:         "updated_at",
+		Type:              "type",
+		Quantity:          "quantity",
+		QuantityUnit:      "quantity_unit",
 	},
 	AssetsFTS: assetsFTColumnNames{
 		ID:           "id",

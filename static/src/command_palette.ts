@@ -31,6 +31,18 @@ export function plugin(Alpine: typeof _Alpine) {
                         tags: ["list"],
                     },
                     {
+                        name: "List Components",
+                        icon: "stack-simple",
+                        url: "/assets?type=component",
+                        tags: ["list", "components"],
+                    },
+                    {
+                        name: "List Consumables",
+                        icon: "receipt",
+                        url: "/assets?type=consumable",
+                        tags: ["list", "consumables"],
+                    },
+                    {
                         name: "Import Assets",
                         icon: "arrow-square-in",
                         url: "/assets/import",

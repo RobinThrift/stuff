@@ -45,7 +45,7 @@ func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAsse
 	columns, _ := session.Get[map[string]bool](r.Context(), "assets_list_columns")
 	if len(columns) == 0 {
 		columns = map[string]bool{
-			"Tag": true, "Image": true, "Name": true, "Category": true, "Location": true, "Status": true,
+			"Tag": true, "Image": true, "Name": true, "Type": true, "Category": true, "Location": true, "Status": true,
 		}
 	}
 
