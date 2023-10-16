@@ -37,11 +37,13 @@ func (e Error) Error() string {
 }
 
 func RespondWithError(ctx context.Context, w http.ResponseWriter, err error) {
+	slog.ErrorContext(ctx, "api error", "error", err)
+
 	var apiErr Error
 	if !errors.As(err, &apiErr) {
 		apiErr.Code = http.StatusInternalServerError
 		apiErr.Title = err.Error()
-		apiErr.Title = "stuff/internal-server-error"
+		apiErr.Type = "stuff/internal-server-error"
 	}
 
 	b, err := json.Marshal(apiErr)
