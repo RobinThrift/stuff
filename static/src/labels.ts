@@ -41,7 +41,7 @@ const templates: Record<string, SheetTemplate> = {
         page: {
             size: "A4",
             marginTop: 13.3,
-            marginBottom: 13.3,
+            marginBottom: 13.0,
             marginLeft: 8.5,
             marginRight: 8.5,
             cols: 7,
@@ -49,8 +49,8 @@ const templates: Record<string, SheetTemplate> = {
         },
         label: {
             fontSize: 4,
-            height: 9.8,
-            width: 25.3,
+            height: 10,
+            width: 25.4,
             horizontalPadding: 1,
             verticalPadding: 1,
             horizontalSpacing: 2.5,
