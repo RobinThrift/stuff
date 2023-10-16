@@ -373,7 +373,7 @@ func (rt *UIRouter) handleAssetsExportCSV(w http.ResponseWriter, r *http.Request
 
 // [GET] /assets/import
 func (rt *UIRouter) handleAssetsImportGet(w http.ResponseWriter, r *http.Request) error {
-	return renderImportPage(w, r, ImportPageViewModel{})
+	return renderImportPage(w, r, ImportPageViewModel{ValidationErrs: map[string]string{}})
 }
 
 const (
