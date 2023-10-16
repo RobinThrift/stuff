@@ -136,6 +136,20 @@ func importFromSnipeITAPI(ctx context.Context, serverURL string, apiKey string) 
 		return nil, err
 	}
 
+	components, err := getComponentsFromSnipeITAPI(ctx, serverURL, apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	assets = append(assets, components...)
+
+	consumables, err := getConsumablesFromSnipeITAPI(ctx, serverURL, apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	assets = append(assets, consumables...)
+
 	return assets, nil
 }
 
@@ -181,6 +195,13 @@ type snipeITHardwareItem struct {
 		Date string `json:"date"`
 	} `json:"purchase_date"`
 	PurchaseCost string `json:"purchase_cost"`
+	Quantity     int    `json:"qty"`
+	ItemNo       string `json:"item_no"`
+
+	CustomFields map[string]struct {
+		Value string `json:"value"`
+		Type  string `json:"element"`
+	} `json:"custom_fields"`
 }
 
 func getAssetsFromSnipeITAPI(ctx context.Context, serverURL string, apiKey string) ([]*Asset, error) {
@@ -212,6 +233,97 @@ func getAssetsFromSnipeITAPI(ctx context.Context, serverURL string, apiKey strin
 			if err != nil {
 				return nil, err
 			}
+
+			assets = append(assets, a)
+		}
+
+		fetched += len(page.Rows)
+		if fetched >= page.Total {
+			break
+		}
+	}
+
+	return assets, nil
+}
+
+func getComponentsFromSnipeITAPI(ctx context.Context, serverURL string, apiKey string) ([]*Asset, error) {
+	var assets []*Asset
+
+	u, err := url.Parse(serverURL)
+	if err != nil {
+		return nil, err
+	}
+	u.Path += snipeITAPIPath + "/components"
+
+	fetched := 0
+
+	for {
+		q := u.Query()
+		q.Add("limit", "100")
+		q.Add("offset", fmt.Sprint(fetched))
+		q.Add("sort", "created")
+		q.Add("order", "desc")
+		u.RawQuery = q.Encode()
+
+		page, err := execSnipeITAPIRequest[snipeITHardwarePage](ctx, u.String(), apiKey)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range page.Rows {
+			a, err := mapSnipeITAPIToAsset(&page.Rows[i])
+			if err != nil {
+				return nil, err
+			}
+
+			a.Type = AssetTypeComponent
+			a.Quantity = uint64(page.Rows[i].Quantity)
+
+			assets = append(assets, a)
+		}
+
+		fetched += len(page.Rows)
+		if fetched >= page.Total {
+			break
+		}
+	}
+
+	return assets, nil
+}
+
+func getConsumablesFromSnipeITAPI(ctx context.Context, serverURL string, apiKey string) ([]*Asset, error) {
+	var assets []*Asset
+
+	u, err := url.Parse(serverURL)
+	if err != nil {
+		return nil, err
+	}
+	u.Path += snipeITAPIPath + "/consumables"
+
+	fetched := 0
+
+	for {
+		q := u.Query()
+		q.Add("limit", "100")
+		q.Add("offset", fmt.Sprint(fetched))
+		q.Add("sort", "created")
+		q.Add("order", "desc")
+		u.RawQuery = q.Encode()
+
+		page, err := execSnipeITAPIRequest[snipeITHardwarePage](ctx, u.String(), apiKey)
+		if err != nil {
+			return nil, err
+		}
+
+		for i := range page.Rows {
+			a, err := mapSnipeITAPIToAsset(&page.Rows[i])
+			if err != nil {
+				return nil, err
+			}
+
+			a.Type = AssetTypeConsumable
+			a.Model = page.Rows[i].ItemNo
+			a.Quantity = uint64(page.Rows[i].Quantity)
 
 			assets = append(assets, a)
 		}
@@ -278,6 +390,7 @@ func mapSnipeITAPIToAsset(item *snipeITHardwareItem) (*Asset, error) {
 
 	return &Asset{
 		Status:       mapSnipeITStatus(item.StatusLabel.Name),
+		Type:         AssetTypeAsset,
 		Tag:          fmt.Sprint(item.AssetTag),
 		Name:         item.Name,
 		Category:     item.Category.Name,
