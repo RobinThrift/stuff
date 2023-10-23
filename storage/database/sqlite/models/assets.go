@@ -44,11 +44,6 @@ type Asset struct {
 	CheckedOutTo      null.Val[int64]                            `db:"checked_out_to" `
 	Location          null.Val[string]                           `db:"location" `
 	PositionCode      null.Val[string]                           `db:"position_code" `
-	PurchaseSupplier  null.Val[string]                           `db:"purchase_supplier" `
-	PurchaseOrderNo   null.Val[string]                           `db:"purchase_order_no" `
-	PurchaseDate      null.Val[types.SQLiteDatetime]             `db:"purchase_date" `
-	PurchaseAmount    null.Val[int64]                            `db:"purchase_amount" `
-	PurchaseCurrency  null.Val[string]                           `db:"purchase_currency" `
 	PartsTotalCounter int64                                      `db:"parts_total_counter" `
 	CreatedBy         int64                                      `db:"created_by" `
 	CreatedAt         types.SQLiteDatetime                       `db:"created_at" `
@@ -75,12 +70,13 @@ type AssetsStmt = bob.QueryStmt[*Asset, AssetSlice]
 
 // assetR is where relationships are stored.
 type assetR struct {
-	AssetParts          AssetPartSlice // fk_asset_parts_2
-	CreatedByUser       *User          // fk_assets_0
-	CheckedOutToUser    *User          // fk_assets_1
-	Tag                 *Tag           // fk_assets_2
-	ParentAsset         *Asset         // fk_assets_3
-	ReverseParentAssets AssetSlice     // fk_assets_3__self_join_reverse
+	AssetParts          AssetPartSlice     // fk_asset_parts_2
+	AssetPurchases      AssetPurchaseSlice // fk_asset_purchases_1
+	CreatedByUser       *User              // fk_assets_0
+	CheckedOutToUser    *User              // fk_assets_1
+	Tag                 *Tag               // fk_assets_2
+	ParentAsset         *Asset             // fk_assets_3
+	ReverseParentAssets AssetSlice         // fk_assets_3__self_join_reverse
 }
 
 // AssetSetter is used for insert/upsert/update operations
@@ -105,11 +101,6 @@ type AssetSetter struct {
 	CheckedOutTo      omitnull.Val[int64]                            `db:"checked_out_to"`
 	Location          omitnull.Val[string]                           `db:"location"`
 	PositionCode      omitnull.Val[string]                           `db:"position_code"`
-	PurchaseSupplier  omitnull.Val[string]                           `db:"purchase_supplier"`
-	PurchaseOrderNo   omitnull.Val[string]                           `db:"purchase_order_no"`
-	PurchaseDate      omitnull.Val[types.SQLiteDatetime]             `db:"purchase_date"`
-	PurchaseAmount    omitnull.Val[int64]                            `db:"purchase_amount"`
-	PurchaseCurrency  omitnull.Val[string]                           `db:"purchase_currency"`
 	PartsTotalCounter omit.Val[int64]                                `db:"parts_total_counter"`
 	CreatedBy         omit.Val[int64]                                `db:"created_by"`
 	CreatedAt         omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
@@ -120,7 +111,7 @@ type AssetSetter struct {
 }
 
 func (s AssetSetter) SetColumns() []string {
-	vals := make([]string, 0, 30)
+	vals := make([]string, 0, 25)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -191,26 +182,6 @@ func (s AssetSetter) SetColumns() []string {
 
 	if !s.PositionCode.IsUnset() {
 		vals = append(vals, "position_code")
-	}
-
-	if !s.PurchaseSupplier.IsUnset() {
-		vals = append(vals, "purchase_supplier")
-	}
-
-	if !s.PurchaseOrderNo.IsUnset() {
-		vals = append(vals, "purchase_order_no")
-	}
-
-	if !s.PurchaseDate.IsUnset() {
-		vals = append(vals, "purchase_date")
-	}
-
-	if !s.PurchaseAmount.IsUnset() {
-		vals = append(vals, "purchase_amount")
-	}
-
-	if !s.PurchaseCurrency.IsUnset() {
-		vals = append(vals, "purchase_currency")
 	}
 
 	if !s.PartsTotalCounter.IsUnset() {
@@ -299,21 +270,6 @@ func (s AssetSetter) Overwrite(t *Asset) {
 	if !s.PositionCode.IsUnset() {
 		t.PositionCode, _ = s.PositionCode.GetNull()
 	}
-	if !s.PurchaseSupplier.IsUnset() {
-		t.PurchaseSupplier, _ = s.PurchaseSupplier.GetNull()
-	}
-	if !s.PurchaseOrderNo.IsUnset() {
-		t.PurchaseOrderNo, _ = s.PurchaseOrderNo.GetNull()
-	}
-	if !s.PurchaseDate.IsUnset() {
-		t.PurchaseDate, _ = s.PurchaseDate.GetNull()
-	}
-	if !s.PurchaseAmount.IsUnset() {
-		t.PurchaseAmount, _ = s.PurchaseAmount.GetNull()
-	}
-	if !s.PurchaseCurrency.IsUnset() {
-		t.PurchaseCurrency, _ = s.PurchaseCurrency.GetNull()
-	}
 	if !s.PartsTotalCounter.IsUnset() {
 		t.PartsTotalCounter, _ = s.PartsTotalCounter.Get()
 	}
@@ -392,21 +348,6 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.PositionCode.IsUnset() {
 		um.Set("position_code").ToArg(s.PositionCode).Apply(q)
 	}
-	if !s.PurchaseSupplier.IsUnset() {
-		um.Set("purchase_supplier").ToArg(s.PurchaseSupplier).Apply(q)
-	}
-	if !s.PurchaseOrderNo.IsUnset() {
-		um.Set("purchase_order_no").ToArg(s.PurchaseOrderNo).Apply(q)
-	}
-	if !s.PurchaseDate.IsUnset() {
-		um.Set("purchase_date").ToArg(s.PurchaseDate).Apply(q)
-	}
-	if !s.PurchaseAmount.IsUnset() {
-		um.Set("purchase_amount").ToArg(s.PurchaseAmount).Apply(q)
-	}
-	if !s.PurchaseCurrency.IsUnset() {
-		um.Set("purchase_currency").ToArg(s.PurchaseCurrency).Apply(q)
-	}
 	if !s.PartsTotalCounter.IsUnset() {
 		um.Set("parts_total_counter").ToArg(s.PartsTotalCounter).Apply(q)
 	}
@@ -431,7 +372,7 @@ func (s AssetSetter) Apply(q *dialect.UpdateQuery) {
 }
 
 func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 30)
+	vals := make([]bob.Expression, 0, 25)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -504,26 +445,6 @@ func (s AssetSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.PositionCode))
 	}
 
-	if !s.PurchaseSupplier.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.PurchaseSupplier))
-	}
-
-	if !s.PurchaseOrderNo.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.PurchaseOrderNo))
-	}
-
-	if !s.PurchaseDate.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.PurchaseDate))
-	}
-
-	if !s.PurchaseAmount.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.PurchaseAmount))
-	}
-
-	if !s.PurchaseCurrency.IsUnset() {
-		vals = append(vals, sqlite.Arg(s.PurchaseCurrency))
-	}
-
 	if !s.PartsTotalCounter.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.PartsTotalCounter))
 	}
@@ -574,11 +495,6 @@ type assetColumnNames struct {
 	CheckedOutTo      string
 	Location          string
 	PositionCode      string
-	PurchaseSupplier  string
-	PurchaseOrderNo   string
-	PurchaseDate      string
-	PurchaseAmount    string
-	PurchaseCurrency  string
 	PartsTotalCounter string
 	CreatedBy         string
 	CreatedAt         string
@@ -590,6 +506,7 @@ type assetColumnNames struct {
 
 type assetRelationshipJoins[Q dialect.Joinable] struct {
 	AssetParts          bob.Mod[Q]
+	AssetPurchases      bob.Mod[Q]
 	CreatedByUser       bob.Mod[Q]
 	CheckedOutToUser    bob.Mod[Q]
 	Tag                 bob.Mod[Q]
@@ -600,6 +517,7 @@ type assetRelationshipJoins[Q dialect.Joinable] struct {
 func buildassetRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) assetRelationshipJoins[Q] {
 	return assetRelationshipJoins[Q]{
 		AssetParts:          assetsJoinAssetParts[Q](ctx, typ),
+		AssetPurchases:      assetsJoinAssetPurchases[Q](ctx, typ),
 		CreatedByUser:       assetsJoinCreatedByUser[Q](ctx, typ),
 		CheckedOutToUser:    assetsJoinCheckedOutToUser[Q](ctx, typ),
 		Tag:                 assetsJoinTag[Q](ctx, typ),
@@ -635,11 +553,6 @@ var AssetColumns = struct {
 	CheckedOutTo      sqlite.Expression
 	Location          sqlite.Expression
 	PositionCode      sqlite.Expression
-	PurchaseSupplier  sqlite.Expression
-	PurchaseOrderNo   sqlite.Expression
-	PurchaseDate      sqlite.Expression
-	PurchaseAmount    sqlite.Expression
-	PurchaseCurrency  sqlite.Expression
 	PartsTotalCounter sqlite.Expression
 	CreatedBy         sqlite.Expression
 	CreatedAt         sqlite.Expression
@@ -666,11 +579,6 @@ var AssetColumns = struct {
 	CheckedOutTo:      sqlite.Quote("assets", "checked_out_to"),
 	Location:          sqlite.Quote("assets", "location"),
 	PositionCode:      sqlite.Quote("assets", "position_code"),
-	PurchaseSupplier:  sqlite.Quote("assets", "purchase_supplier"),
-	PurchaseOrderNo:   sqlite.Quote("assets", "purchase_order_no"),
-	PurchaseDate:      sqlite.Quote("assets", "purchase_date"),
-	PurchaseAmount:    sqlite.Quote("assets", "purchase_amount"),
-	PurchaseCurrency:  sqlite.Quote("assets", "purchase_currency"),
 	PartsTotalCounter: sqlite.Quote("assets", "parts_total_counter"),
 	CreatedBy:         sqlite.Quote("assets", "created_by"),
 	CreatedAt:         sqlite.Quote("assets", "created_at"),
@@ -699,11 +607,6 @@ type assetWhere[Q sqlite.Filterable] struct {
 	CheckedOutTo      sqlite.WhereNullMod[Q, int64]
 	Location          sqlite.WhereNullMod[Q, string]
 	PositionCode      sqlite.WhereNullMod[Q, string]
-	PurchaseSupplier  sqlite.WhereNullMod[Q, string]
-	PurchaseOrderNo   sqlite.WhereNullMod[Q, string]
-	PurchaseDate      sqlite.WhereNullMod[Q, types.SQLiteDatetime]
-	PurchaseAmount    sqlite.WhereNullMod[Q, int64]
-	PurchaseCurrency  sqlite.WhereNullMod[Q, string]
 	PartsTotalCounter sqlite.WhereMod[Q, int64]
 	CreatedBy         sqlite.WhereMod[Q, int64]
 	CreatedAt         sqlite.WhereMod[Q, types.SQLiteDatetime]
@@ -733,11 +636,6 @@ func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
 		CheckedOutTo:      sqlite.WhereNull[Q, int64](AssetColumns.CheckedOutTo),
 		Location:          sqlite.WhereNull[Q, string](AssetColumns.Location),
 		PositionCode:      sqlite.WhereNull[Q, string](AssetColumns.PositionCode),
-		PurchaseSupplier:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseSupplier),
-		PurchaseOrderNo:   sqlite.WhereNull[Q, string](AssetColumns.PurchaseOrderNo),
-		PurchaseDate:      sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.PurchaseDate),
-		PurchaseAmount:    sqlite.WhereNull[Q, int64](AssetColumns.PurchaseAmount),
-		PurchaseCurrency:  sqlite.WhereNull[Q, string](AssetColumns.PurchaseCurrency),
 		PartsTotalCounter: sqlite.Where[Q, int64](AssetColumns.PartsTotalCounter),
 		CreatedBy:         sqlite.Where[Q, int64](AssetColumns.CreatedBy),
 		CreatedAt:         sqlite.Where[Q, types.SQLiteDatetime](AssetColumns.CreatedAt),
@@ -850,6 +748,13 @@ func assetsJoinAssetParts[Q dialect.Joinable](ctx context.Context, typ string) b
 		),
 	}
 }
+func assetsJoinAssetPurchases[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, AssetPurchases.Name(ctx)).On(
+			AssetPurchaseColumns.AssetID.EQ(AssetColumns.ID),
+		),
+	}
+}
 func assetsJoinCreatedByUser[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Users.Name(ctx)).On(
@@ -901,6 +806,24 @@ func (os AssetSlice) AssetParts(ctx context.Context, exec bob.Executor, mods ...
 
 	return AssetParts.Query(ctx, exec, append(mods,
 		sm.Where(sqlite.Group(AssetPartColumns.AssetID).In(PKArgs...)),
+	)...)
+}
+
+// AssetPurchases starts a query for related objects on asset_purchases
+func (o *Asset) AssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPurchasesQuery {
+	return AssetPurchases.Query(ctx, exec, append(mods,
+		sm.Where(AssetPurchaseColumns.AssetID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os AssetSlice) AssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPurchasesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return AssetPurchases.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetPurchaseColumns.AssetID).In(PKArgs...)),
 	)...)
 }
 
@@ -1007,6 +930,15 @@ func (o *Asset) Preload(name string, retrieved any) error {
 		}
 
 		o.R.AssetParts = rels
+
+		return nil
+	case "AssetPurchases":
+		rels, ok := retrieved.(AssetPurchaseSlice)
+		if !ok {
+			return fmt.Errorf("asset cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.AssetPurchases = rels
 
 		return nil
 	case "CreatedByUser":
@@ -1119,6 +1051,72 @@ func (os AssetSlice) LoadAssetAssetParts(ctx context.Context, exec bob.Executor,
 			}
 
 			o.R.AssetParts = append(o.R.AssetParts, rel)
+		}
+	}
+
+	return nil
+}
+
+func ThenLoadAssetAssetPurchases(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadAssetAssetPurchases(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load AssetAssetPurchases", retrieved)
+		}
+
+		err := loader.LoadAssetAssetPurchases(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadAssetAssetPurchases loads the asset's AssetPurchases into the .R struct
+func (o *Asset) LoadAssetAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.AssetPurchases = nil
+
+	related, err := o.AssetPurchases(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.AssetPurchases = related
+	return nil
+}
+
+// LoadAssetAssetPurchases loads the asset's AssetPurchases into the .R struct
+func (os AssetSlice) LoadAssetAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assetPurchases, err := os.AssetPurchases(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.AssetPurchases = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range assetPurchases {
+			if o.ID != rel.AssetID {
+				continue
+			}
+
+			o.R.AssetPurchases = append(o.R.AssetPurchases, rel)
 		}
 	}
 
@@ -1582,6 +1580,65 @@ func (asset0 *Asset) AttachAssetParts(ctx context.Context, exec bob.Executor, re
 	}
 
 	asset0.R.AssetParts = append(asset0.R.AssetParts, assetPart1...)
+
+	return nil
+}
+
+func insertAssetAssetPurchases0(ctx context.Context, exec bob.Executor, assetPurchases1 []*AssetPurchaseSetter, asset0 *Asset) (AssetPurchaseSlice, error) {
+	for _, assetPurchase1 := range assetPurchases1 {
+		assetPurchase1.AssetID = omit.From(asset0.ID)
+	}
+
+	ret, err := AssetPurchases.InsertMany(ctx, exec, assetPurchases1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertAssetAssetPurchases0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachAssetAssetPurchases0(ctx context.Context, exec bob.Executor, assetPurchases1 AssetPurchaseSlice, asset0 *Asset) error {
+	setter := &AssetPurchaseSetter{
+		AssetID: omit.From(asset0.ID),
+	}
+
+	err := AssetPurchases.Update(ctx, exec, setter, assetPurchases1...)
+	if err != nil {
+		return fmt.Errorf("attachAssetAssetPurchases0: %w", err)
+	}
+
+	return nil
+}
+
+func (asset0 *Asset) InsertAssetPurchases(ctx context.Context, exec bob.Executor, related ...*AssetPurchaseSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	assetPurchase1, err := insertAssetAssetPurchases0(ctx, exec, related, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetPurchases = append(asset0.R.AssetPurchases, assetPurchase1...)
+
+	return nil
+}
+
+func (asset0 *Asset) AttachAssetPurchases(ctx context.Context, exec bob.Executor, related ...*AssetPurchase) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	assetPurchase1 := AssetPurchaseSlice(related)
+
+	err = attachAssetAssetPurchases0(ctx, exec, assetPurchase1, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetPurchases = append(asset0.R.AssetPurchases, assetPurchase1...)
 
 	return nil
 }

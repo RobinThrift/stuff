@@ -86,14 +86,18 @@ type apiAsset struct {
 	Location     string `json:"location,omitempty"`
 	PositionCode string `json:"positionCode,omitempty"`
 
-	PurchaseSupplier string         `json:"purchaseSupplier,omitempty"`
-	PurchaseOrderNo  string         `json:"purchaseOrderNo,omitempty"`
-	PurchaseDate     time.Time      `json:"purchaseDate,omitempty"`
-	PurchaseAmount   MonetaryAmount `json:"purchaseAmount,omitempty"`
-	PurchaseCurrency string         `json:"purchaseCurrency,omitempty"`
+	Purchases []*apiPurchase `json:"purchases"`
 
 	PartsTotalCounter int        `json:"partsTotalCounter,omitempty"`
 	Parts             []*apiPart `json:"parts,omitempty"`
+}
+
+type apiPurchase struct {
+	Supplier string         `json:"supplier,omitempty"`
+	OrderNo  string         `json:"order_no,omitempty"`
+	Date     time.Time      `json:"order_date,omitempty"`
+	Amount   MonetaryAmount `json:"amount,omitempty"`
+	Currency string         `json:"currency,omitempty"`
 }
 
 // [GET] /api/v1/assets
@@ -126,6 +130,17 @@ func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		purchases := make([]*apiPurchase, 0, len(asset.Purchases))
+		for _, p := range asset.Purchases {
+			purchases = append(purchases, &apiPurchase{
+				Supplier: p.Supplier,
+				OrderNo:  p.OrderNo,
+				Date:     p.Date,
+				Amount:   p.Amount,
+				Currency: p.Currency,
+			})
+		}
+
 		res.Assets = append(res.Assets, &apiAsset{
 			ID:                asset.ID,
 			ParentAssetID:     asset.ParentAssetID,
@@ -144,11 +159,7 @@ func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
 			CustomAttrs:       asset.CustomAttrs,
 			Location:          asset.Location,
 			PositionCode:      asset.PositionCode,
-			PurchaseSupplier:  asset.PurchaseInfo.Supplier,
-			PurchaseOrderNo:   asset.PurchaseInfo.OrderNo,
-			PurchaseDate:      asset.PurchaseInfo.Date,
-			PurchaseAmount:    asset.PurchaseInfo.Amount,
-			PurchaseCurrency:  asset.PurchaseInfo.Currency,
+			Purchases:         purchases,
 			PartsTotalCounter: asset.PartsTotalCounter,
 			Parts:             parts,
 		})

@@ -36,9 +36,16 @@ Input:
 	XData string
 	XBindValue string
 	XBindName string
+	XBindDisabled string
+	XShow string
 */ -}}
 {{ define "field" }}
 <div
+	{{ if has . "XShow" }}
+	x-cloak
+	x-show="{{ .XShow }}"
+	{{ end }}
+
 	{{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}
 	{{ if has . "XData" -}} x-data="{{ .XData }}" {{- end -}}
 
@@ -70,6 +77,10 @@ Input:
 			x-ref="{{ .XRef }}"
 			{{ end }}
 
+			{{ if has . "XDatePicker" }}
+			x-datepicker="{{ .XDatePicker }}"
+			{{ end }}
+
 			{{ if has . "Required" }}
 			required="{{ .Required }}"
 			{{ end }}
@@ -80,6 +91,10 @@ Input:
 
 			{{ if has . "Disabled" }}
 			disabled="{{ .Disabled }}"
+			{{ end }}
+
+			{{ if has . "XBindDisabled" }}
+			x-bind:disabled="{{ .XBindDisabled }}"
 			{{ end }}
 
 			type="{{ default .Type "text" }}"
@@ -269,6 +284,10 @@ Select:
 	AutoComplete string
 	Icon templ.Component
 	ValidationErr string
+
+	XBindValue string
+	XBindName string
+	XShow string
 */ -}}
 {{ define "datepicker" }}
 {{ $value := "" }}
@@ -282,16 +301,7 @@ Select:
 		"Value" $value
 		"AutoComplete" "off"
 		"XRef" "picker"
-		"XData" `{
-		init() {
-			return import("/static/flatpickr.min.js").catch(console.error).then(() => {
-				globalThis.flatpickr($refs.picker, {
-					allowInput: true,
-					dateFormat: 'Y-m-d',
-				})
-			})
-		}
-	}`
+		"XDatePicker" (printf `{ value: "%v", format: "Y-m-d" }` $value)
 	)
 -}}
 {{ end }}
@@ -345,3 +355,4 @@ x-checkbox:
 	{{ end }}
 </div>
 {{ end }}
+

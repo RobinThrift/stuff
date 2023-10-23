@@ -170,6 +170,7 @@
 					"Name" "serial_no"
 					"ValidationErr" .ValidationErrs.serial_no
 					"Value" .Asset.SerialNo
+					"XShow" "type !== 'CONSUMABLE'"
 				-}}
 
 				{{-
@@ -182,6 +183,7 @@
 					"ValidationErr" .ValidationErrs.warranty_until
 					"Value" .Asset.WarrantyUntil
 					"Format" "2006-01-02"
+					"XShow" "type !== 'CONSUMABLE'"
 				-}}
 
 				{{-
@@ -237,17 +239,20 @@
 				-}}
 			</div>
 
-			<h3 class="mt-2 px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">PurchaseInfo</h3>
+			<h3 class="mt-2 px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">Purchase Info</h3>
 			<div class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:grid md:grid-cols-4 lg:ms-2 flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
+				{{ $purchase := index .Asset.Purchases 0 }}
+
 				{{-
 					template "field" dict
 					"Class" "col-span-3 mb-3"
 					"LabelClass" "font-bold"
 					"InputWrapperClass" "flex-grow"
 					"Label" "Order No."
-					"Name" "purchase.order_no"
-					"ValidationErr" (index .ValidationErrs "purchase.order_no")
-					"Value" .Asset.PurchaseInfo.OrderNo
+					"Name" "purchases[0].order_no"
+					"ValidationErr" (index .ValidationErrs "purchases[0].order_no")
+					"Value" $purchase.OrderNo
+					"XBindDisabled" "type === 'CONSUMABLE'"
 				-}}
 
 				{{-
@@ -256,10 +261,11 @@
 					"LabelClass" "font-bold"
 					"InputWrapperClass" "flex-grow"
 					"Label" "Purchase Date"
-					"Name" "purchase.date"
+					"Name" "purchases[0].order_date"
 					"Format" "2006-01-02"
-					"ValidationErr" (index .ValidationErrs "purchase.date")
-					"Value" .Asset.PurchaseInfo.Date
+					"ValidationErr" (index .ValidationErrs "purchases[0].order_date")
+					"Value" $purchase.Date
+					"XBindDisabled" "type === 'CONSUMABLE'"
 				-}}
 
 				{{-
@@ -268,25 +274,33 @@
 					"LabelClass" "font-bold"
 					"InputWrapperClass" "flex-grow"
 					"Label" "Supplier"
-					"Name" "purchase.supplier"
-					"ValidationErr" (index .ValidationErrs "purchase.supplier")
-					"Value" .Asset.PurchaseInfo.Supplier
+					"Name" "purchases[0].supplier"
+					"ValidationErr" (index .ValidationErrs "purchases[0].supplier")
+					"Value" $purchase.Supplier
+					"XBindDisabled" "type === 'CONSUMABLE'"
 				-}}
 
 				<div class="md:col-span-1 md:col-start-4 flex items-center mb-5 mt-3 lg:mt-0">
-					<label for="purchase.amount" class="label font-bold mt-2 mr-5 flex items-center">Cost</label>
+					<label for="purchases[0].amount" class="label font-bold mt-2 mr-5 flex items-center">Cost</label>
 					<div class="flex-grow flex w-full items-center">
-						<input name="purchase.amount" id="purchase.amount" class="input rounded-r-none min-w-[90px] flex-1 text-right" value="{{ .Asset.PurchaseInfo.Amount.Format .DecimalSeparator }}" />
+						<input
+							name="purchases[0].amount"
+							id="purchases[0].amount"
+							class="input rounded-r-none min-w-[90px] flex-1 text-right"
+							value="{{ $purchase.Amount.Format .DecimalSeparator }}"
+							x-bind:disabled="type === 'CONSUMABLE'"
+						/>
 						<input
 							type="text"
-							name="purchase.currency"
-							id="purchase.currency"
-							value="{{ .Asset.PurchaseInfo.Currency }}"
+							name="purchases[0].currency"
+							id="purchases[0].currency"
+							value="{{ $purchase.Currency }}"
 							class="input rounded-l-none w-[64px] border-l-0"
+							x-bind:disabled="type === 'CONSUMABLE'"
 						/>
 
-						{{ if has .ValidationErrs "purchase.amount" }}
-						<span class="block text-red-500">{{ (index .ValidationErrs "purchase.amount") }}</span>
+						{{ if has .ValidationErrs "purchases[0].amount" }}
+						<span class="block text-red-500">{{ (index .ValidationErrs "purchases[0].amount") }}</span>
 						{{ end }}
 					</div>
 				</div>
@@ -345,6 +359,8 @@
 
 	{{ template "edit_parts" .Asset }}
 
+	{{ template "edit_purchases" . }}
+
 	<div class="flex flex-col items-end">
 		<button type="submit" class="btn btn-primary mt-5">
 			Save Asset
@@ -358,6 +374,8 @@
 {{ define "edit_parts" }}
 <div
 	class="w-full"
+	x-cloak
+	x-show="type !== 'CONSUMABLE'"
 	x-data="{{
 		printf `{
 			parts: %v ?? [],
@@ -377,7 +395,7 @@
 			},
 
 			removeItem(i) {
-				console.log(this.parts.splice(i, 1))
+				this.parts.splice(i, 1)
 			}
 		}` (json .Parts) .Tag .PartsTotalCounter
 	}}"
@@ -461,5 +479,105 @@
 	</table>
 
 	<button class="btn btn-secondary mt-5" x-on:click.prevent="addItem()">Add Part</button>
+</div>
+{{ end }}
+
+{{ define "edit_purchases" }}
+<div
+	class="w-full"
+	x-cloak
+	x-show="type === 'CONSUMABLE'"
+	x-data="{{
+		printf `{
+			purchases: %v ?? [],
+			defaultCurrency: '%v',
+			decimalSeparator: '%v',
+
+			addItem() {
+				this.totalCounter++
+				this.purchases.push({
+					Supplier: '',
+					OrderNo: '',
+					Date: '',
+					Amount: '',
+					Currency: this.defaultCurrency,
+				})
+			},
+
+			removeItem(i) {
+				this.purchases.splice(i, 1)
+			}
+		}` (json .Asset.Purchases) .DefaultCurrency .DecimalSeparator
+	}}"
+>
+	<h2 class="mt-8 mb-5 md:text-xl lg:text-3xl font-bold">Purchases</h2>
+	<table class="w-full">
+		<thead>
+			<tr class="text-left">
+				<th>Date</th>
+				<th>Supplier</th>
+				<th>OrderNo</th>
+				<th>Amount</th>
+				<th></th>
+			</tr>
+		</thead>
+
+		<tbody>
+			<template x-for="(purchase, i) in purchases">
+				<tr>
+					<td class="pe-3 last:pe-0 max-w-[100px]">
+						{{-
+							template "datepicker" dict
+							"Placeholder" "Order Date"
+							"XBindName" "`purchases[${i}].order_date`"
+							"XBindValue" "purchase.Date"
+							"Format" "2006-01-02"
+						-}}
+					</td>
+
+					<td class="pe-3 last:pe-0">
+						{{-
+							template "field" dict
+							"Placeholder" "Supplier"
+							"XBindName" "`purchases[${i}].supplier`"
+							"XBindValue" "purchase.Supplier"
+						-}}
+					</td>
+
+					<td class="pe-3 last:pe-0">
+						{{-
+							template "field" dict
+							"Placeholder" "Order No."
+							"XBindName" "`purchases[${i}].order_no`"
+							"XBindValue" "purchase.OrderNo"
+						-}}
+					</td>
+
+					<td class="pe-3 last:pe-0 max-w-[100px]">
+						<div class="flex w-full items-center mt-2">
+							<input
+								class="input rounded-r-none min-w-[90px] flex-1 text-right"
+								x-bind:name="`purchases[${i}].amount`"
+								x-bind:id="`purchases[${i}].amount`"
+								x-bind:value="(purchase.Amount/100).toFixed(2).replace('.', decimalSeparator)"
+							/>
+							<input
+								class="input rounded-l-none w-[64px] border-l-0"
+								x-bind:name="`purchases[${i}].currency`"
+								x-bind:id="`purchases[${i}].currency`"
+								x-bind:value="purchase.Currency"
+							/>
+						</div>
+					</td>
+
+					<td>
+						<button class="btn btn-danger h-8 mt-2" x-on:click.prevent="removeItem(i)"><x-icon icon="x-square" class="w-6 h-6 !me-0" /></button>
+					</td>
+				</tr>
+			</template>
+		</tbody>
+	</table>
+
+	<button class="btn btn-secondary mt-5" x-on:click.prevent="addItem()">Add Purchase</button>
 </div>
 {{ end }}

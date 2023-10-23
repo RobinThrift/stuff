@@ -141,7 +141,7 @@ func (rt *UIRouter) handleAssetsNewPost(w http.ResponseWriter, r *http.Request) 
 
 	session.Put(r.Context(), "info_message", fmt.Sprintf("New asset '%s' created", created.Name))
 
-	http.Redirect(w, r, "/assets", http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/assets/%v", created.ID), http.StatusFound)
 	return nil
 }
 
@@ -180,6 +180,7 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 	}
 
 	asset.Parts = nil
+	asset.Purchases = nil
 
 	err = rt.Decoder.Decode(asset, r.PostForm)
 	if err != nil {
@@ -230,7 +231,7 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 
 	session.Put(r.Context(), "info_message", fmt.Sprintf("Asset '%s' updated", updated.Name))
 
-	http.Redirect(w, r, "/assets", http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("/assets/%v", updated.ID), http.StatusFound)
 	return nil
 }
 
@@ -481,6 +482,11 @@ func listAssetsQueryFromURL(params url.Values) ListAssetsQuery {
 var imgAllowList = []string{"image/png", "image/jpeg", "image/webp"}
 
 func handleFileUpload(r *http.Request, key string) (*File, error) {
+	err := r.ParseMultipartForm(defaultMaxMemory)
+	if err != nil {
+		return nil, err
+	}
+
 	_, hasFileUpload := r.MultipartForm.File[key]
 	if !hasFileUpload {
 		return nil, nil
@@ -620,7 +626,9 @@ func sanitizeAssetFields(asset *Asset) {
 	asset.PositionCode = policy.Sanitize(asset.PositionCode)
 	asset.Notes = policy.Sanitize(asset.Notes)
 	asset.QuantityUnit = policy.Sanitize(asset.QuantityUnit)
-	asset.PurchaseInfo.Supplier = policy.Sanitize(asset.PurchaseInfo.Supplier)
-	asset.PurchaseInfo.OrderNo = policy.Sanitize(asset.PurchaseInfo.OrderNo)
-	asset.PurchaseInfo.Currency = policy.Sanitize(asset.PurchaseInfo.Currency)
+	for i := range asset.Purchases {
+		asset.Purchases[i].Supplier = policy.Sanitize(asset.Purchases[i].Supplier)
+		asset.Purchases[i].OrderNo = policy.Sanitize(asset.Purchases[i].OrderNo)
+		asset.Purchases[i].Currency = policy.Sanitize(asset.Purchases[i].Currency)
+	}
 }

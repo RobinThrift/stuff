@@ -19,6 +19,7 @@ type EditAssetsPageViewModel struct {
 	IsNew            bool
 	Asset            *Asset
 	ValidationErrs   map[string]string
+	DefaultCurrency  string
 	DecimalSeparator string
 }
 
@@ -68,10 +69,11 @@ func renderListAssetsPage(w http.ResponseWriter, r *http.Request, query ListAsse
 }
 
 func (rt *UIRouter) renderEditAssetPage(w http.ResponseWriter, r *http.Request, model EditAssetsPageViewModel) error {
+	model.DefaultCurrency = rt.DefaultCurrency
 	model.DecimalSeparator = rt.DecimalSeparator
 
-	if model.Asset.PurchaseInfo.Currency == "" {
-		model.Asset.PurchaseInfo.Currency = rt.DefaultCurrency
+	if len(model.Asset.Purchases) == 0 {
+		model.Asset.Purchases = []*Purchase{{Currency: rt.DefaultCurrency}}
 	}
 
 	title := "New Asset"

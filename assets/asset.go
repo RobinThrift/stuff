@@ -59,7 +59,7 @@ type Asset struct {
 	Location     string `form:"location"`
 	PositionCode string `form:"position_code"`
 
-	PurchaseInfo PurchaseInfo `form:"purchase"`
+	Purchases []*Purchase `form:"purchases"`
 
 	PartsTotalCounter int     `form:"parts_total_counter"`
 	Parts             []*Part `form:"parts"`
@@ -67,12 +67,12 @@ type Asset struct {
 	MetaInfo MetaInfo `form:"-"`
 }
 
-type PurchaseInfo struct {
-	Supplier string         `form:"supplier"`
-	OrderNo  string         `form:"order_no"`
-	Date     time.Time      `form:"date,omitempty"`
-	Amount   MonetaryAmount `form:"amount"`
-	Currency string         `form:"currency"`
+type Purchase struct {
+	Supplier string         `form:"supplier,omitempty"`
+	OrderNo  string         `form:"order_no,omitempty"`
+	Date     time.Time      `form:"order_date,omitempty"`
+	Amount   MonetaryAmount `form:"amount,omitempty"`
+	Currency string         `form:"currency,omitempty"`
 }
 
 type MetaInfo struct {

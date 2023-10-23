@@ -15,25 +15,32 @@ func exportAssetsAsJSON(w io.Writer, assets []*Asset) error {
 	forExport := make([]*apiAsset, 0, len(assets))
 
 	for _, asset := range assets {
+		purchases := make([]*apiPurchase, 0, len(asset.Purchases))
+		for _, p := range asset.Purchases {
+			purchases = append(purchases, &apiPurchase{
+				Supplier: p.Supplier,
+				OrderNo:  p.OrderNo,
+				Date:     p.Date,
+				Amount:   p.Amount,
+				Currency: p.Currency,
+			})
+		}
+
 		forExport = append(forExport, &apiAsset{
-			Tag:              asset.Tag,
-			Status:           asset.Status,
-			Name:             asset.Name,
-			Category:         asset.Category,
-			Model:            asset.Model,
-			ModelNo:          asset.ModelNo,
-			SerialNo:         asset.SerialNo,
-			Manufacturer:     asset.Manufacturer,
-			Notes:            asset.Notes,
-			WarrantyUntil:    asset.WarrantyUntil,
-			CustomAttrs:      asset.CustomAttrs,
-			Location:         asset.Location,
-			PositionCode:     asset.PositionCode,
-			PurchaseSupplier: asset.PurchaseInfo.Supplier,
-			PurchaseOrderNo:  asset.PurchaseInfo.OrderNo,
-			PurchaseDate:     asset.PurchaseInfo.Date,
-			PurchaseAmount:   asset.PurchaseInfo.Amount,
-			PurchaseCurrency: asset.PurchaseInfo.Currency,
+			Tag:           asset.Tag,
+			Status:        asset.Status,
+			Name:          asset.Name,
+			Category:      asset.Category,
+			Model:         asset.Model,
+			ModelNo:       asset.ModelNo,
+			SerialNo:      asset.SerialNo,
+			Manufacturer:  asset.Manufacturer,
+			Notes:         asset.Notes,
+			WarrantyUntil: asset.WarrantyUntil,
+			CustomAttrs:   asset.CustomAttrs,
+			Location:      asset.Location,
+			PositionCode:  asset.PositionCode,
+			Purchases:     purchases,
 		})
 	}
 
@@ -92,17 +99,21 @@ func exportAssetsAsCSV(w io.Writer, assets []*Asset) error {
 
 		values[10] = asset.Location
 		values[11] = asset.PositionCode
-		values[12] = asset.PurchaseInfo.Supplier
-		values[13] = asset.PurchaseInfo.OrderNo
 
-		if asset.PurchaseInfo.Date.IsZero() {
-			values[14] = ""
-		} else {
-			values[14] = asset.PurchaseInfo.Date.Format(time.RFC3339)
+		if len(asset.Purchases) != 0 {
+			lastPurchase := len(asset.Purchases) - 1
+			values[12] = asset.Purchases[lastPurchase].Supplier
+			values[13] = asset.Purchases[lastPurchase].OrderNo
+
+			if asset.Purchases[lastPurchase].Date.IsZero() {
+				values[14] = ""
+			} else {
+				values[14] = asset.Purchases[lastPurchase].Date.Format(time.RFC3339)
+			}
+
+			values[15] = fmt.Sprint(asset.Purchases[lastPurchase].Amount)
+			values[16] = asset.Purchases[lastPurchase].Currency
 		}
-
-		values[15] = fmt.Sprint(asset.PurchaseInfo.Amount)
-		values[16] = asset.PurchaseInfo.Currency
 
 		_, err = line.WriteRune('\n')
 		if err != nil {

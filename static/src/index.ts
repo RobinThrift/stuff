@@ -1,6 +1,7 @@
 import _Alpine from "alpinejs"
 import { plugin as autocomplete } from "./autocompleter"
 import { plugin as commandpalette } from "./command_palette"
+import { plugin as datepicker } from "./datepicker"
 import { plugin as labels } from "./labels"
 import { plugin as settings } from "./settings"
 import { plugin as theme } from "./theme"
@@ -13,6 +14,7 @@ declare global {
 }
 
 _Alpine.plugin(autocomplete)
+_Alpine.plugin(datepicker)
 _Alpine.plugin(commandpalette)
 _Alpine.plugin(settings)
 _Alpine.plugin(labels)

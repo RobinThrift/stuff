@@ -62,6 +62,13 @@
 					</dd>
 				</div>
 
+
+				{{ if eq .Type "CONSUMABLE" }}
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+					<dt class="font-medium">Quantity Left</dt>
+					<dd class="sm:col-span-2">{{ .Quantity }} {{ .QuantityUnit }}</dd>
+				</div>
+				{{ else }}
 				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
 					<dt class="font-medium">SerialNo</dt>
 					<dd class="sm:col-span-2">{{ .SerialNo }}</dd>
@@ -75,6 +82,8 @@
 						{{ end }}
 					</dd>
 				</div>
+
+				{{ end }}
 
 				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
 					<dt class="font-medium">Location</dt>
@@ -98,35 +107,74 @@
 				</div>
 
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+				{{ if and (eq (len .Purchases) 1) (ne .Type "CONSUMABLE") }}
+				{{ $purchase := index .Purchases 0 }}
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
 					<h3 class="font-bold text-lg">Purchase Info</h3>
 				</div>
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
 					<dt class="font-medium">Supplier</dt>
-					<dd class="sm:col-span-2">{{ .PurchaseInfo.Supplier }}</dd>
+					<dd class="sm:col-span-2">{{ $purchase.Supplier }}</dd>
 				</div>
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
 					<dt class="font-medium">Order No.</dt>
-					<dd class="sm:col-span-2">{{ .PurchaseInfo.OrderNo }}</dd>
+					<dd class="sm:col-span-2">{{ $purchase.OrderNo }}</dd>
 				</div>
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
 					<dt class="font-medium">Purchase Date</dt>
 					<dd class="sm:col-span-2">
-						{{ if not .PurchaseInfo.Date.IsZero }}
-						{{ .PurchaseInfo.Date.Format "2006-02-01" }}
+						{{ if not $purchase.Date.IsZero }}
+						{{ $purchase.Date.Format "2006-02-01" }}
 						{{ end }}
 					</dd>
 				</div>
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
+				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
 					<dt class="font-medium">Amount</dt>
 					<dd class="sm:col-span-2">
-						{{ .PurchaseInfo.Amount.Format $.Data.DecimalSeparator }} {{ .PurchaseInfo.Currency }}
+						{{ $purchase.Amount.Format $.Data.DecimalSeparator }} {{ $purchase.Currency }}
 					</dd>
 				</div>
+
+				{{- else -}}
+
+				{{- with .Purchases }}
+				<div class="lg:col-span-2">
+					<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
+						<h3 class="font-bold text-lg">Purchases</h3>
+					</div>
+
+					<table class="min-w-full">
+						<thead class="thead">
+							<tr>
+								<th>Date</th>
+								<th>Supplier</th>
+								<th>OrderNo</th>
+								<th>Amount</th>
+							</tr>
+						</thead>
+
+					<tbody class="tbody">
+						{{ range . }}
+							<tr>
+								<td class="max-w-[100px]">
+									{{- if not .Date.IsZero -}}
+									{{ .Date.Format "2006-02-01" }}
+									{{- end -}}
+								</td>
+								<td>{{ .Supplier }}</td>
+								<td>{{ .OrderNo }}</td>
+								<td class="max-w-[100px]">{{ .Amount.Format $.Data.DecimalSeparator }} {{ .Currency }}</td>
+							</tr>
+						{{ end }}
+						</tbody>
+					</table>
+				</div>
+				{{- end }}
+				{{- end }}
 			</dl>
 		</div>
 	</div>

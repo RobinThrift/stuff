@@ -36,7 +36,7 @@ replacements:
     imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 - match:
-    name: "purchase_date"
+    name: "order_date"
     db_type: "TEXT"
     default: "NULL"
     nullable: true

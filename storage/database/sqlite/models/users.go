@@ -50,10 +50,11 @@ type UsersStmt = bob.QueryStmt[*User, UserSlice]
 
 // userR is where relationships are stored.
 type userR struct {
-	CreatedByAssetFiles AssetFileSlice // fk_asset_files_0
-	CreatedByAssetParts AssetPartSlice // fk_asset_parts_0
-	CreatedByAssets     AssetSlice     // fk_assets_0
-	CheckedOutToAssets  AssetSlice     // fk_assets_1
+	CreatedByAssetFiles     AssetFileSlice     // fk_asset_files_0
+	CreatedByAssetParts     AssetPartSlice     // fk_asset_parts_0
+	CreatedByAssetPurchases AssetPurchaseSlice // fk_asset_purchases_0
+	CreatedByAssets         AssetSlice         // fk_assets_0
+	CheckedOutToAssets      AssetSlice         // fk_assets_1
 }
 
 // UserSetter is used for insert/upsert/update operations
@@ -194,18 +195,20 @@ type userColumnNames struct {
 }
 
 type userRelationshipJoins[Q dialect.Joinable] struct {
-	CreatedByAssetFiles bob.Mod[Q]
-	CreatedByAssetParts bob.Mod[Q]
-	CreatedByAssets     bob.Mod[Q]
-	CheckedOutToAssets  bob.Mod[Q]
+	CreatedByAssetFiles     bob.Mod[Q]
+	CreatedByAssetParts     bob.Mod[Q]
+	CreatedByAssetPurchases bob.Mod[Q]
+	CreatedByAssets         bob.Mod[Q]
+	CheckedOutToAssets      bob.Mod[Q]
 }
 
 func builduserRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) userRelationshipJoins[Q] {
 	return userRelationshipJoins[Q]{
-		CreatedByAssetFiles: usersJoinCreatedByAssetFiles[Q](ctx, typ),
-		CreatedByAssetParts: usersJoinCreatedByAssetParts[Q](ctx, typ),
-		CreatedByAssets:     usersJoinCreatedByAssets[Q](ctx, typ),
-		CheckedOutToAssets:  usersJoinCheckedOutToAssets[Q](ctx, typ),
+		CreatedByAssetFiles:     usersJoinCreatedByAssetFiles[Q](ctx, typ),
+		CreatedByAssetParts:     usersJoinCreatedByAssetParts[Q](ctx, typ),
+		CreatedByAssetPurchases: usersJoinCreatedByAssetPurchases[Q](ctx, typ),
+		CreatedByAssets:         usersJoinCreatedByAssets[Q](ctx, typ),
+		CheckedOutToAssets:      usersJoinCheckedOutToAssets[Q](ctx, typ),
 	}
 }
 
@@ -366,6 +369,13 @@ func usersJoinCreatedByAssetParts[Q dialect.Joinable](ctx context.Context, typ s
 		),
 	}
 }
+func usersJoinCreatedByAssetPurchases[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, AssetPurchases.Name(ctx)).On(
+			AssetPurchaseColumns.CreatedBy.EQ(UserColumns.ID),
+		),
+	}
+}
 func usersJoinCreatedByAssets[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Assets.Name(ctx)).On(
@@ -414,6 +424,24 @@ func (os UserSlice) CreatedByAssetParts(ctx context.Context, exec bob.Executor, 
 
 	return AssetParts.Query(ctx, exec, append(mods,
 		sm.Where(sqlite.Group(AssetPartColumns.CreatedBy).In(PKArgs...)),
+	)...)
+}
+
+// CreatedByAssetPurchases starts a query for related objects on asset_purchases
+func (o *User) CreatedByAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPurchasesQuery {
+	return AssetPurchases.Query(ctx, exec, append(mods,
+		sm.Where(AssetPurchaseColumns.CreatedBy.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os UserSlice) CreatedByAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetPurchasesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return AssetPurchases.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetPurchaseColumns.CreatedBy).In(PKArgs...)),
 	)...)
 }
 
@@ -475,6 +503,15 @@ func (o *User) Preload(name string, retrieved any) error {
 		}
 
 		o.R.CreatedByAssetParts = rels
+
+		return nil
+	case "CreatedByAssetPurchases":
+		rels, ok := retrieved.(AssetPurchaseSlice)
+		if !ok {
+			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.CreatedByAssetPurchases = rels
 
 		return nil
 	case "CreatedByAssets":
@@ -626,6 +663,72 @@ func (os UserSlice) LoadUserCreatedByAssetParts(ctx context.Context, exec bob.Ex
 			}
 
 			o.R.CreatedByAssetParts = append(o.R.CreatedByAssetParts, rel)
+		}
+	}
+
+	return nil
+}
+
+func ThenLoadUserCreatedByAssetPurchases(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadUserCreatedByAssetPurchases(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load UserCreatedByAssetPurchases", retrieved)
+		}
+
+		err := loader.LoadUserCreatedByAssetPurchases(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadUserCreatedByAssetPurchases loads the user's CreatedByAssetPurchases into the .R struct
+func (o *User) LoadUserCreatedByAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.CreatedByAssetPurchases = nil
+
+	related, err := o.CreatedByAssetPurchases(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.CreatedByAssetPurchases = related
+	return nil
+}
+
+// LoadUserCreatedByAssetPurchases loads the user's CreatedByAssetPurchases into the .R struct
+func (os UserSlice) LoadUserCreatedByAssetPurchases(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assetPurchases, err := os.CreatedByAssetPurchases(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.CreatedByAssetPurchases = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range assetPurchases {
+			if o.ID != rel.CreatedBy {
+				continue
+			}
+
+			o.R.CreatedByAssetPurchases = append(o.R.CreatedByAssetPurchases, rel)
 		}
 	}
 
@@ -878,6 +981,65 @@ func (user0 *User) AttachCreatedByAssetParts(ctx context.Context, exec bob.Execu
 	}
 
 	user0.R.CreatedByAssetParts = append(user0.R.CreatedByAssetParts, assetPart1...)
+
+	return nil
+}
+
+func insertUserCreatedByAssetPurchases0(ctx context.Context, exec bob.Executor, assetPurchases1 []*AssetPurchaseSetter, user0 *User) (AssetPurchaseSlice, error) {
+	for _, assetPurchase1 := range assetPurchases1 {
+		assetPurchase1.CreatedBy = omit.From(user0.ID)
+	}
+
+	ret, err := AssetPurchases.InsertMany(ctx, exec, assetPurchases1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertUserCreatedByAssetPurchases0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachUserCreatedByAssetPurchases0(ctx context.Context, exec bob.Executor, assetPurchases1 AssetPurchaseSlice, user0 *User) error {
+	setter := &AssetPurchaseSetter{
+		CreatedBy: omit.From(user0.ID),
+	}
+
+	err := AssetPurchases.Update(ctx, exec, setter, assetPurchases1...)
+	if err != nil {
+		return fmt.Errorf("attachUserCreatedByAssetPurchases0: %w", err)
+	}
+
+	return nil
+}
+
+func (user0 *User) InsertCreatedByAssetPurchases(ctx context.Context, exec bob.Executor, related ...*AssetPurchaseSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	assetPurchase1, err := insertUserCreatedByAssetPurchases0(ctx, exec, related, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.CreatedByAssetPurchases = append(user0.R.CreatedByAssetPurchases, assetPurchase1...)
+
+	return nil
+}
+
+func (user0 *User) AttachCreatedByAssetPurchases(ctx context.Context, exec bob.Executor, related ...*AssetPurchase) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	assetPurchase1 := AssetPurchaseSlice(related)
+
+	err = attachUserCreatedByAssetPurchases0(ctx, exec, assetPurchase1, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.CreatedByAssetPurchases = append(user0.R.CreatedByAssetPurchases, assetPurchase1...)
 
 	return nil
 }

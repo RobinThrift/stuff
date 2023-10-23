@@ -97,12 +97,12 @@ func mapSnipeITJSONExport(data []byte) ([]*Asset, error) {
 			Manufacturer: data.Manufacturer,
 			Location:     data.Location,
 			Notes:        data.Notes,
-			PurchaseInfo: PurchaseInfo{
+			Purchases: []*Purchase{{
 				Amount:   MonetaryAmount(data.PurchaseCost),
 				Supplier: data.Supplier,
 				OrderNo:  data.OrderNumber,
 				Date:     purchaseDate,
-			},
+			}},
 		})
 	}
 
@@ -401,12 +401,12 @@ func mapSnipeITAPIToAsset(item *snipeITHardwareItem) (*Asset, error) {
 		Location:     item.Location.Name,
 		Notes:        item.Notes,
 		ImageURL:     item.Image,
-		PurchaseInfo: PurchaseInfo{
+		Purchases: []*Purchase{{
 			Amount:   cost,
 			Supplier: item.Supplier.Name,
 			OrderNo:  item.OrderNumber,
 			Date:     purchaseDate,
-		},
+		}},
 	}, nil
 
 }

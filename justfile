@@ -35,7 +35,7 @@ run: build-js build-icons _fonts
     go run -tags dev ./bin/stuff
 
 
-watch: _npm-install _copy-js-libs _fonts
+watch: _npm-install _fonts
     mkdir -p .run
     concurrently "just _watch-go" "just _watch-styles" "just _watch-icons" "just _watch-js"
 
@@ -65,7 +65,7 @@ _build-go:
 build-styles: _npm-install
     postcss -c static/postcss.config.js ./static/src/styles.css -o ./static/build/styles.css --no-map
 
-build-js: _npm-install _copy-js-libs
+build-js: _npm-install
     cd static && esbuild src/index.ts --format=esm --target=es2020 --minify --bundle --outfile=build/bundle.min.js
 
 build-icons: _npm-install
@@ -114,10 +114,6 @@ generate: _go-tools
     bobgen-sqlite -c ./storage/database/sqlite/bob.yaml
     go fmt ./...
     @rm _stuff.db
-
-_copy-js-libs: _npm-install
-    -mkdir static/build
-    cp static/node_modules/flatpickr/dist/flatpickr.min.js static/build/flatpickr.min.js
 
 install:
     just _npm-install
