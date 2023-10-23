@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/form/v4"
 	"github.com/RobinThrift/stuff/server/session"
 	"github.com/RobinThrift/stuff/views"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/form/v4"
 )
 
 type UIRouter struct {

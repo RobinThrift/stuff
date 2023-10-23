@@ -3,8 +3,8 @@ package tags
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/RobinThrift/stuff/views"
+	"github.com/go-chi/chi/v5"
 )
 
 type UIRouter struct {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/csrf"
 	"github.com/RobinThrift/stuff/server/session"
 	"github.com/RobinThrift/stuff/views"
+	"github.com/gorilla/csrf"
 )
 
 type ListUsersPageViewModel struct {

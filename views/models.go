@@ -3,9 +3,9 @@ package views
 import (
 	"net/http"
 
-	"github.com/gorilla/csrf"
 	"github.com/RobinThrift/stuff"
 	"github.com/RobinThrift/stuff/server/session"
+	"github.com/gorilla/csrf"
 )
 
 type Model[D any] struct {

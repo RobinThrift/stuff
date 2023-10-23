@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aarondl/opt/omit"
 	"github.com/RobinThrift/stuff/storage/database/sqlite/models"
 	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
+	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"

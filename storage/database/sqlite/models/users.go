@@ -9,9 +9,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
-	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/clause"
 	"github.com/stephenafamo/bob/dialect/sqlite"
