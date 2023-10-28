@@ -40,6 +40,12 @@
 
 	.btn.btn-muted {
 		@apply text-white bg-gray-500 hover:bg-gray-600 focus:bg-gray-700;
+
+		&.btn-outline {
+			@apply bg-transparent border-2 border-gray-300 text-gray-500;
+			@apply hover:bg-transparent hover:border-gray-600 hover:border-gray-600;
+			@apply focus:bg-transparent focus:text-gray-700 focus:border-gray-700;
+		}
 	}
 
 	.btn.btn-outline.btn-danger {

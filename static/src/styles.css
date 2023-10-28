@@ -32,6 +32,14 @@
 		@apply px-2 md:px-6 lg:px-8 pb-3;
 	}
 
+	.content-inset {
+		@apply px-2 md:px-6 lg:px-8 pb-3;
+	}
+
+	.content-inset-x {
+		@apply px-2 md:px-6 lg:px-8;
+	}
+
 	.pagination {
 		@apply flex items-center justify-between w-full h-16 px-3 border-t border-gray-100;
 		@apply dark:border-primary-700;

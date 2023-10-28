@@ -1,10 +1,16 @@
 {{ template "layout.html.tmpl" . }}
 
 {{ define "header" }}
+{{ with $.Global.Referer }}
+<a href="{{ . }}" class="me-2">
+	<x-icon icon="caret-left" class="h-6 w-6" />
+</a>
+{{ end -}}
+
 {{ with .Data.Asset }}
 <h1 class="font-extrabold text-sm sm:text-base md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
 	{{ .Name }}
-	<span class="hidden lg:inline ms-2 text-slate-400"> ({{ .Tag }})</span>
+	<span class="hidden lg:inline text-slate-400">#{{ .Tag }}</span>
 
 	{{ template "status_badge" dict "Status" .Status "Class" "hidden lg:block sm:ms-3 sm:mt-2" }}
 </h1>
@@ -29,193 +35,171 @@
 	{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
 </h4>
 
-<div class="main grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
-	<div class="lg:col-span-2">
-		<div class="flow-root">
-			<dl class="divide-y divide-gray-100 dark:divide-primary-700 text-sm">
-				{{ with .Parent }}
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-bold">Belongs to</dt>
-					<dd class="sm:col-span-2">
-						<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
-					</dd>
-				</div>
-				{{ end }}
+{{ template "asset_view_tabs" $ }}
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Category</dt>
-					<dd class="sm:col-span-2">{{ .Category }}</dd>
-				</div>
+<div class="main grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
+	<dl class="md:grid md:grid-cols-2 md:gap-2 lg:col-span-2 relative">
+		<a class="btn btn-muted btn-outline absolute right-0 top-0" href="/assets/{{ .ID }}/edit" title="Edit"><x-icon class="h-6 w-6 !me-0" icon="pencil-simple" /></a>
 
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Manufacturer</dt>
-					<dd class="sm:col-span-2">{{ .Manufacturer }}</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Model</dt>
-					<dd class="sm:col-span-2">
-						{{ .Model }}
-						{{ if ne .ModelNo "" }}
-							({{ .ModelNo }})
-						{{ end }}
-					</dd>
-				</div>
-
-
-				{{ if eq .Type "CONSUMABLE" }}
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Quantity Left</dt>
-					<dd class="sm:col-span-2">{{ .Quantity }} {{ .QuantityUnit }}</dd>
-				</div>
-				{{ else }}
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">SerialNo</dt>
-					<dd class="sm:col-span-2">{{ .SerialNo }}</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Warranty Until</dt>
-					<dd class="sm:col-span-2">
-						{{ if not .WarrantyUntil.IsZero }}
-							{{ .WarrantyUntil.Format "2006-01-02" }}
-						{{ end }}
-					</dd>
-				</div>
-
-				{{ end }}
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Location</dt>
-					<dd class="sm:col-span-2">
-						{{ .Location }} <br />
-						{{ if ne .PositionCode "" }}
-							Code: <strong>{{ .PositionCode }}</strong>
-						{{ end }}
-					</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4" >
-					<dt class="font-medium">Notes</dt>
-					<dd class="sm:col-span-2">
-						<p>
-						{{ range split .Notes "\n" }}
-						{{ . }}<br />
-						{{ end }}
-						</p>
-					</dd>
-				</div>
-
-
-				{{ if and (eq (len .Purchases) 1) (ne .Type "CONSUMABLE") }}
-				{{ $purchase := index .Purchases 0 }}
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-					<h3 class="font-bold text-lg">Purchase Info</h3>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium">Supplier</dt>
-					<dd class="sm:col-span-2">{{ $purchase.Supplier }}</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium">Order No.</dt>
-					<dd class="sm:col-span-2">{{ $purchase.OrderNo }}</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium">Purchase Date</dt>
-					<dd class="sm:col-span-2">
-						{{ if not $purchase.Date.IsZero }}
-						{{ $purchase.Date.Format "2006-02-01" }}
-						{{ end }}
-					</dd>
-				</div>
-
-				<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium">Amount</dt>
-					<dd class="sm:col-span-2">
-						{{ $purchase.Amount.Format $.Data.DecimalSeparator }} {{ $purchase.Currency }}
-					</dd>
-				</div>
-
-				{{- else -}}
-
-				{{- with .Purchases }}
-				<div class="lg:col-span-2">
-					<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-						<h3 class="font-bold text-lg">Purchases</h3>
-					</div>
-
-					<table class="min-w-full">
-						<thead class="thead">
-							<tr>
-								<th>Date</th>
-								<th>Supplier</th>
-								<th>OrderNo</th>
-								<th>Amount</th>
-							</tr>
-						</thead>
-
-					<tbody class="tbody">
-						{{ range . }}
-							<tr>
-								<td class="max-w-[100px]">
-									{{- if not .Date.IsZero -}}
-									{{ .Date.Format "2006-02-01" }}
-									{{- end -}}
-								</td>
-								<td>{{ .Supplier }}</td>
-								<td>{{ .OrderNo }}</td>
-								<td class="max-w-[100px]">{{ .Amount.Format $.Data.DecimalSeparator }} {{ .Currency }}</td>
-							</tr>
-						{{ end }}
-						</tbody>
-					</table>
-				</div>
-				{{- end }}
-				{{- end }}
-			</dl>
-		</div>
-	</div>
-
-	<div class="flex flex-col">
-		<div class="rounded bg-gray-100 dark:bg-background-200 p-3 w-full">
-			{{ if ne .ImageURL "" }}
-			<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
+		<div class="lg:col-span-1 space-y-5">
+			{{ with .Parent }}
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Parent</dt>
+				<dd>
+					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }}#{{ .Tag }}</a>
+				</dd>
+			</div>
 			{{ end }}
-		</div>
 
-		<div class="mt-5 rounded border bg-white-100 p-3 w-full">
-			{{ $label := index (.Labels nil 100) 0 }}
-			<div class="flex">
-				<img src="{{ bytesToPNG $label.Image }}" class="h-[100px] w-[100px]" />
-				<div class="flex flex-col">
-					<span class="block">{{ $label.Tag }}</span>
-					<span class="block">{{ $label.Name }}</span>
-					<span class="block">{{ $label.LocationCode }}</span>
-					<span class="block">{{ $label.URL }}</span>
-				</div>
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Name</dt>
+				<dd>{{ .Name }}</dd>
+			</div>
+
+			{{ if eq .Type "CONSUMABLE" }}
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Quantity Left</dt>
+				<dd>{{ .Quantity }} {{ .QuantityUnit }}</dd>
+			</div>
+			{{ end }}
+
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Category</dt>
+				<dd><a href="/assets?query=category:{{ .Category }}">{{ .Category }}</a></dd>
+			</div>
+
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Location</dt>
+				<dd>
+					{{ default .Location "-" }}
+					{{ if ne .PositionCode "" }}
+						({{ .PositionCode }})
+					{{ end }}
+				</dd>
 			</div>
 		</div>
 
-		{{ with .Children }}
-		<div class="mt-5 rounded bg-gray-100 p-3 w-full">
-			<h3 class="mb-5 md:text-md lg:text-xl font-bold">Assets belonging to this Asset</h3>
+		<div class="lg:col-span-1 space-y-5">
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Manufacturer</dt>
+				<dd>{{ default .Manufacturer "-" }}</dd>
+			</div>
 
-			<ul>
-			{{ range . }}
-				<li>
-					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
-				</li>
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Model</dt>
+				<dd>{{ default .Model "-" }} {{ with .ModelNo}} ({{.}}) {{ end }}</dd>
+			</div>
+
+			{{ if ne .Type "CONSUMABLE" }}
+			<div>
+				<dt class="block text-neutral-400 font-semibold">SerialNo</dt>
+				<dd>{{ default .SerialNo "-" }}</dd>
+			</div>
+
+			<div>
+				<dt class="block text-neutral-400 font-semibold">Warranty Until</dt>
+				<dd class="sm:col-span-2">
+					{{ if not .WarrantyUntil.IsZero }}
+						{{ .WarrantyUntil.Format "2006-01-02" }}
+					{{ else }}
+					-
+					{{ end }}
+				</dd>
+			</div>
 			{{ end }}
-			</ul>
+		</div>
+
+		<div class="lg:col-span-2 mb-5">
+			<span class="block text-neutral-400 font-semibold">Notes</span>
+			<p>
+				{{ range split (default .Notes "-") "\n" }}
+				{{ . }}<br />
+				{{ end }}
+			</p>
+		</div>
+	</dl>
+
+	<div class="lg:col-span-1">
+		{{ if ne .ImageURL "" }}
+		<div class="rounded border p-3 w-full">
+			<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
 		</div>
 		{{ end }}
 	</div>
 
-	{{ with .Parts }}
+	{{ if and (eq (len .Purchases) 1) (ne .Type "CONSUMABLE") }}
 	<div class="lg:col-span-2">
+		{{ $purchase := index .Purchases 0 }}
+		<h3 class="font-bold text-xl mt-8 mb-5">Purchase Info</h3>
+
+		<div class="md:grid md:grid-cols-2 md:gap-2 lg:col-span-2 relative">
+			<div class="lg:col-span-1 space-y-5">
+				<div>
+					<span class="block text-neutral-400 font-semibold">Supplier</span>
+					{{ default $purchase.Supplier "-" }}
+				</div>
+
+				<div>
+					<span class="block text-neutral-400 font-semibold">Purchase Date</span>
+					{{ if not $purchase.Date.IsZero }}
+						{{ $purchase.Date.Format "2006-01-02" }}
+					{{ else }}
+					-
+					{{ end }}
+				</div>
+			</div>
+
+			<div class="lg:col-span-1 space-y-5">
+				<div>
+					<span class="block text-neutral-400 font-semibold">Order No.</span>
+					{{ default $purchase.OrderNo "-" }}
+				</div>
+
+				<div>
+					<span class="block text-neutral-400 font-semibold">Amount</span>
+					{{ $purchase.Amount.Format $.Data.DecimalSeparator }} {{ $purchase.Currency }}
+				</div>
+			</div>
+		</div>
+	</div>
+	{{ else }}
+	{{- with .Purchases }}
+	<div class="lg:col-span-2">
+		<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
+			<h3 class="font-bold text-lg">Purchases</h3>
+		</div>
+
+		<table class="min-w-full">
+			<thead class="thead">
+				<tr>
+					<th>Date</th>
+					<th>Supplier</th>
+					<th>OrderNo</th>
+					<th>Amount</th>
+				</tr>
+			</thead>
+
+		<tbody class="tbody">
+			{{ range . }}
+				<tr>
+					<td class="max-w-[100px]">
+						{{- if not .Date.IsZero -}}
+						{{ .Date.Format "2006-02-01" }}
+						{{- end -}}
+					</td>
+					<td>{{ .Supplier }}</td>
+					<td>{{ .OrderNo }}</td>
+					<td class="max-w-[100px]">{{ .Amount.Format $.Data.DecimalSeparator }} {{ .Currency }}</td>
+				</tr>
+			{{ end }}
+			</tbody>
+		</table>
+	</div>
+	{{- end }}
+	{{ end }}
+
+	{{ with .Parts }}
+	<div class="lg:col-span-3">
 		<h2 class="mt-8 mb-5 md:text-xl lg:text-3xl font-bold">Parts</h2>
 
 		<table class="min-w-full">
@@ -252,7 +236,38 @@
 		</table>
 	</div>
 	{{ end }}
+
+	{{ with .Children }}
+	<div class="lg:col-span-3 flex flex-col">
+		<div class="mt-5 rounded w-full">
+			<h3 class="mb-5 md:text-md lg:text-xl font-bold">Assets belonging to this Asset</h3>
+			<ul>
+			{{ range . }}
+				<li>
+					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
+				</li>
+			{{ end }}
+			</ul>
+		</div>
+	</div>
+	{{ end }}
 </div>
+
+{{ end }}
+{{ end }}
+
+{{ define "asset_view_tabs" }}
+{{ with .Data.Asset }}
+<nav class="content-inset-x mb-5 w-full border-b border-gray-100 dark:border-primary-700">
+	<ul class="flex flex-wrap justify-start space-x-5">
+		<li class="flex border-b-2 text-base border-primary-500 text-primary-500">
+			<a class="px-2 pb-2 inline-flex items-center" href="/assets/{{ .ID }}">Details</a>
+		</li>
+		<li class="flex border-b-2 text-base border-transparent text-neutral-400 hover:text-primary-600 hover:border-primary-600">
+			<a class="px-2 pb-2 inline-flex items-center" href="/assets/{{ .ID }}/files">Files</a>
+		</li>
+	</ul>
+</nav>
 {{ end }}
 {{ end }}
 

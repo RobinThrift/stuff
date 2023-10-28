@@ -134,6 +134,10 @@ var templateFuncs = template.FuncMap{
 // Adapted from https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/defaults.go#L35
 // LICENSE MIT (https://github.com/Masterminds/sprig/blob/581758eb7d96ae4d113649668fa96acc74d46e7f/LICENSE.txt)
 func isZeroValue(value any) bool {
+	if s, ok := value.(string); ok {
+		return s == ""
+	}
+
 	val := reflect.ValueOf(value)
 
 	// Basically adapted from text/template.isTrue

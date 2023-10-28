@@ -2,6 +2,7 @@ package views
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/RobinThrift/stuff"
 	"github.com/RobinThrift/stuff/server/session"
@@ -22,6 +23,7 @@ type Global struct {
 	SidebarClosed      bool
 	CurrentUserIsAdmin bool
 	Version            string
+	Referer            string
 }
 
 func NewGlobal(title string, r *http.Request) Global {
@@ -31,6 +33,14 @@ func NewGlobal(title string, r *http.Request) Global {
 
 	currentUserIsAdmin, _ := session.Get[bool](r.Context(), "user_is_admin")
 
+	var referer string
+	if refHeaderURL, err := url.Parse(r.Header.Get("Referer")); err == nil {
+		// @TODO: fix with better fallback
+		if r.URL.Host == refHeaderURL.Host || r.URL.Host == "" {
+			referer = r.Header.Get("Referer")
+		}
+	}
+
 	return Global{
 		Title:              title,
 		CSRFToken:          csrf.Token(r),
@@ -39,6 +49,7 @@ func NewGlobal(title string, r *http.Request) Global {
 		SidebarClosed:      sidebarClosed,
 		CurrentUserIsAdmin: currentUserIsAdmin,
 		Version:            stuff.Version,
+		Referer:            referer,
 	}
 }
 
