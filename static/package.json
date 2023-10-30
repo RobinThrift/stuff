@@ -18,7 +18,6 @@
     },
     "dependencies": {
         "alpinejs": "3.13.0",
-        "flatpickr": "4.6.13",
         "fzy.js": "0.4.1"
     }
 }

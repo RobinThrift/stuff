@@ -77,10 +77,6 @@ Input:
 			x-ref="{{ .XRef }}"
 			{{ end }}
 
-			{{ if has . "XDatePicker" }}
-			x-datepicker="{{ .XDatePicker }}"
-			{{ end }}
-
 			{{ if has . "Required" }}
 			required="{{ .Required }}"
 			{{ end }}
@@ -266,44 +262,6 @@ Select:
 		{{ end }}
 	</select>
 </div>
-{{ end }}
-
-{{- /*
- DatePicker:
-	Class string
-	InputClass string
-	InputWrapperClass string
-	LabelClass string
-	Value time.Time
-	Format string
-	Type string
-	Label string
-	Name string
-	Placeholder string
-	Required bool
-	AutoComplete string
-	Icon templ.Component
-	ValidationErr string
-
-	XBindValue string
-	XBindName string
-	XShow string
-*/ -}}
-{{ define "datepicker" }}
-{{ $value := "" }}
-{{ if not .Value.IsZero }}
-{{ $value = (.Value.Format .Format) }}
-{{end}}
-
-{{-
-	template "field"
-	merge . (dict
-		"Value" $value
-		"AutoComplete" "off"
-		"XRef" "picker"
-		"XDatePicker" (printf `{ value: "%v", format: "Y-m-d" }` $value)
-	)
--}}
 {{ end }}
 
 {{- /*

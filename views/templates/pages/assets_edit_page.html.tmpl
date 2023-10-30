@@ -174,15 +174,15 @@
 				-}}
 
 				{{-
-					template "datepicker" dict
+					template "field" dict
+					"Type" "date"
 					"Class" "col-span-1 col-start-4 mt-3"
 					"LabelClass" "font-bold"
 					"InputWrapperClass" "flex-grow"
 					"Label" "Warranty Until"
 					"Name" "warranty_until"
 					"ValidationErr" .ValidationErrs.warranty_until
-					"Value" .Asset.WarrantyUntil
-					"Format" "2006-01-02"
+					"Value" (.Asset.WarrantyUntil.Format "2006-01-02")
 					"XShow" "type !== 'CONSUMABLE'"
 				-}}
 
@@ -256,7 +256,9 @@
 				-}}
 
 				{{-
-					template "datepicker" dict
+					template "field" dict
+					"Type" "date"
+					"AutoComplete" "off"
 					"Class" "col-span-1 mb-3"
 					"LabelClass" "font-bold"
 					"InputWrapperClass" "flex-grow"
@@ -264,7 +266,7 @@
 					"Name" "purchases[0].order_date"
 					"Format" "2006-01-02"
 					"ValidationErr" (index .ValidationErrs "purchases[0].order_date")
-					"Value" $purchase.Date
+					"Value" (.Asset.WarrantyUntil.Format "2006-01-02")
 					"XBindDisabled" "type === 'CONSUMABLE'"
 				-}}
 
@@ -527,11 +529,11 @@
 				<tr>
 					<td class="pe-3 last:pe-0 max-w-[100px]">
 						{{-
-							template "datepicker" dict
+							template "field" dict
+							"Type" "date"
 							"Placeholder" "Order Date"
 							"XBindName" "`purchases[${i}].order_date`"
-							"XBindValue" "purchase.Date"
-							"Format" "2006-01-02"
+							"XBindValue" "purchase.Date.split('T')[0]"
 						-}}
 					</td>
 
