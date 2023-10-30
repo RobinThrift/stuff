@@ -118,7 +118,7 @@ CREATE TABLE asset_files (
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%SZ', CURRENT_TIMESTAMP)),
 
-    FOREIGN KEY(asset_id) REFERENCES asset(id),
+    FOREIGN KEY(asset_id) REFERENCES assets(id),
     FOREIGN KEY(created_by) REFERENCES users(id)
 );
 

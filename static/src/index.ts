@@ -5,6 +5,7 @@ import { plugin as datepicker } from "./datepicker"
 import { plugin as labels } from "./labels"
 import { plugin as settings } from "./settings"
 import { plugin as theme } from "./theme"
+import { plugin as uploader } from "./uploader"
 
 declare global {
     namespace globalThis {
@@ -17,6 +18,7 @@ _Alpine.plugin(autocomplete)
 _Alpine.plugin(datepicker)
 _Alpine.plugin(commandpalette)
 _Alpine.plugin(settings)
+_Alpine.plugin(uploader)
 _Alpine.plugin(labels)
 _Alpine.plugin(theme)
 

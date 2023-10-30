@@ -115,7 +115,38 @@ func renderViewAssetPage(w http.ResponseWriter, r *http.Request, model ViewAsset
 	}
 
 	return nil
+}
 
+type AssetFilesPageViewModel struct {
+	Asset *Asset
+}
+
+func renderAssetFilesPage(w http.ResponseWriter, r *http.Request, model AssetFilesPageViewModel) error {
+	err := views.Render(w, "assets_files_page", views.Model[AssetFilesPageViewModel]{
+		Global: views.NewGlobal(model.Asset.Name+": Files", r),
+		Data:   model,
+	})
+	if err != nil {
+		return fmt.Errorf("error rendering asset files page: %w", err)
+	}
+
+	return nil
+}
+
+type AssetFileDeletePageViewModel struct {
+	File *File
+}
+
+func renderAssetFileDeletePage(w http.ResponseWriter, r *http.Request, model AssetFileDeletePageViewModel) error {
+	err := views.Render(w, "assets_file_delete_page", views.Model[AssetFileDeletePageViewModel]{
+		Global: views.NewGlobal("Confirm deletion of"+model.File.Name, r),
+		Data:   model,
+	})
+	if err != nil {
+		return fmt.Errorf("error rendering delte asset file page: %w", err)
+	}
+
+	return nil
 }
 
 func renderDeleteAssetPage(w http.ResponseWriter, r *http.Request, model DeleteAssetsPageViewModel) error {

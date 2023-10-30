@@ -36,14 +36,9 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/", views.HTTPHandlerFuncErr(rt.handleAssetsListGet))
 	mux.Get("/assets", views.HTTPHandlerFuncErr(rt.handleAssetsListGet))
+
 	mux.Get("/assets/new", views.HTTPHandlerFuncErr(rt.handleAssetsNewGet))
 	mux.Post("/assets/new", views.HTTPHandlerFuncErr(rt.handleAssetsNewPost))
-	mux.Get("/assets/{id}", views.HTTPHandlerFuncErr(rt.handleAssetsViewGet))
-	mux.Get("/assets/{id}/edit", views.HTTPHandlerFuncErr(rt.handleAssetsEditGet))
-	mux.Post("/assets/{id}/edit", views.HTTPHandlerFuncErr(rt.handleAssetsEditPost))
-
-	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
-	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
 
 	mux.Get("/assets/export/labels", views.HTTPHandlerFuncErr(rt.handleAssetsExportLabelsGet))
 	mux.Post("/assets/export/labels", views.HTTPHandlerFuncErr(rt.handleAssetsExportLabelsPost))
@@ -53,6 +48,19 @@ func (rt *UIRouter) RegisterRoutes(mux *chi.Mux) {
 
 	mux.Get("/assets/import", views.HTTPHandlerFuncErr(rt.handleAssetsImportGet))
 	mux.Post("/assets/import", views.HTTPHandlerFuncErr(rt.handleAssetsImportPost))
+
+	mux.Get("/assets/{id}/edit", views.HTTPHandlerFuncErr(rt.handleAssetsEditGet))
+	mux.Post("/assets/{id}/edit", views.HTTPHandlerFuncErr(rt.handleAssetsEditPost))
+
+	mux.Get("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteGet))
+	mux.Post("/assets/{id}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsDeleteDelete))
+
+	mux.Get("/assets/{id}", views.HTTPHandlerFuncErr(rt.handleAssetsViewGet))
+	mux.Get("/assets/{id}/files", views.HTTPHandlerFuncErr(rt.handleAssetsFilesGet))
+	mux.Post("/assets/{id}/files", views.HTTPHandlerFuncErr(rt.handleAssetsFilesPost))
+
+	mux.Get("/assets/{id}/files/{fileID}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsFilesDeleteGet))
+	mux.Post("/assets/{id}/files/{fileID}/delete", views.HTTPHandlerFuncErr(rt.handleAssetsFilesDeletePost))
 }
 
 // [GET] /
@@ -76,7 +84,7 @@ func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) 
 		return nil
 	}
 
-	asset, err := rt.Control.getAsset(r.Context(), id)
+	asset, err := rt.Control.getAssetWithFiles(r.Context(), id)
 	if err != nil {
 		return err
 	}
@@ -85,6 +93,115 @@ func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) 
 		Asset:            asset,
 		DecimalSeparator: rt.DecimalSeparator,
 	})
+}
+
+// [GET] /assets/{id}/files
+func (rt *UIRouter) handleAssetsFilesGet(w http.ResponseWriter, r *http.Request) error {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	asset, err := rt.Control.getAssetWithFiles(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	return renderAssetFilesPage(w, r, AssetFilesPageViewModel{
+		Asset: asset,
+	})
+}
+
+// [POST] /assets/{id}/files
+func (rt *UIRouter) handleAssetsFilesPost(w http.ResponseWriter, r *http.Request) error {
+	user, ok := session.Get[*auth.User](r.Context(), "user")
+	if !ok {
+		return errors.New("can't find user in session")
+	}
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	asset, err := rt.Control.getAsset(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	err = r.ParseMultipartForm(defaultMaxMemory)
+	if err != nil {
+		return err
+	}
+
+	files := make([]*File, 0, len(r.MultipartForm.File))
+
+	for k := range r.MultipartForm.File {
+		uploaded, header, err := r.FormFile(k)
+		if err != nil {
+			return err
+		}
+
+		files = append(files, &File{
+			AssetID:   asset.ID,
+			Name:      k,
+			Filetype:  header.Header.Get("content-type"),
+			CreatedBy: user.ID,
+			r:         uploaded,
+		})
+	}
+
+	return rt.Control.addAssetFiles(r.Context(), files)
+}
+
+// [GET] /assets/{id}/files/{fileID}/delete
+func (rt *UIRouter) handleAssetsFilesDeleteGet(w http.ResponseWriter, r *http.Request) error {
+	if chi.URLParam(r, "fileID") == "" {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	var id int64
+	var err error
+	if id, err = strconv.ParseInt(chi.URLParam(r, "fileID"), 10, 64); err != nil {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	file, err := rt.Control.getFile(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	return renderAssetFileDeletePage(w, r, AssetFileDeletePageViewModel{
+		File: file,
+	})
+}
+
+// [POST] /assets/{id}/files/{fileID}/delete
+func (rt *UIRouter) handleAssetsFilesDeletePost(w http.ResponseWriter, r *http.Request) error {
+	if chi.URLParam(r, "fileID") == "" {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	var id int64
+	var err error
+	if id, err = strconv.ParseInt(chi.URLParam(r, "fileID"), 10, 64); err != nil {
+		http.Redirect(w, r, "/assets", http.StatusFound)
+		return nil
+	}
+
+	err = rt.Control.deleteFile(r.Context(), id)
+	if err != nil {
+		return err
+	}
+
+	assetID := chi.URLParam(r, "id")
+	http.Redirect(w, r, "/assets/"+assetID+"/files", http.StatusFound)
+	return nil
 }
 
 // [GET] /assets/new

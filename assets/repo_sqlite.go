@@ -58,6 +58,28 @@ func (ar *RepoSQLite) Get(ctx context.Context, exec bob.Executor, idOrTag string
 	return mapDBModelToAsset(asset, children), nil
 }
 
+func (ar *RepoSQLite) GetWithFiles(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error) {
+	mods := []bob.Mod[*dialect.SelectQuery]{
+		models.ThenLoadAssetAssetFiles(),
+	}
+
+	if id, err := strconv.ParseInt(idOrTag, 10, 64); err == nil {
+		mods = append(mods, sqlite.WhereOr(models.SelectWhere.Assets.ID.EQ(id), models.SelectWhere.Assets.Tag.EQ(idOrTag)))
+	} else {
+		mods = append(mods, models.SelectWhere.Assets.Tag.EQ(idOrTag))
+	}
+
+	asset, err := models.Assets.Query(ctx, exec, mods...).One()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %s", ErrAssetNotFound, idOrTag)
+		}
+		return nil, fmt.Errorf("error getting assets: %w", err)
+	}
+
+	return mapDBModelToAsset(asset, nil), nil
+}
+
 func (ar *RepoSQLite) List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error) {
 	var err error
 	var assets models.AssetSlice
@@ -498,6 +520,73 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 	return cats, nil
 }
 
+func (ar *RepoSQLite) CreateFiles(ctx context.Context, exec bob.Executor, files []*File) error {
+	setter := make([]*models.AssetFileSetter, 0, len(files))
+	for _, f := range files {
+		setter = append(setter, &models.AssetFileSetter{
+			AssetID:    omit.From(f.AssetID),
+			Name:       omit.From(f.Name),
+			Filetype:   omit.From(f.Filetype),
+			Sha256:     omit.From(f.Sha256),
+			SizeBytes:  omit.From(f.SizeBytes),
+			CreatedBy:  omit.From(f.SizeBytes),
+			FullPath:   omit.From(f.FullPath),
+			PublicPath: omit.From(f.PublicPath),
+		})
+	}
+
+	_, err := models.AssetFiles.InsertMany(ctx, exec, setter...)
+	return err
+}
+
+func (ar *RepoSQLite) GetFile(ctx context.Context, exec bob.Executor, id int64) (*File, error) {
+	file, err := models.AssetFiles.Query(ctx, exec, models.SelectWhere.AssetFiles.ID.EQ(id)).One()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %d", ErrFileNotFound, id)
+		}
+		return nil, fmt.Errorf("error getting asset file: %w", err)
+	}
+
+	return &File{
+		ID:         file.ID,
+		AssetID:    file.AssetID,
+		PublicPath: file.PublicPath,
+		FullPath:   file.FullPath,
+		Name:       file.Name,
+		Filetype:   file.Filetype,
+		Sha256:     file.Sha256,
+		SizeBytes:  file.SizeBytes,
+		CreatedBy:  file.CreatedBy,
+		CreatedAt:  file.CreatedAt.Time,
+		UpdatedAt:  file.UpdatedAt.Time,
+	}, nil
+}
+
+func (ar *RepoSQLite) FileExists(ctx context.Context, exec bob.Executor, hash []byte) (bool, error) {
+	file, err := models.AssetFiles.Query(ctx, exec, models.SelectWhere.AssetFiles.Sha256.EQ(hash)).One()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, fmt.Errorf("error getting asset file: %w", err)
+	}
+
+	return file != nil, nil
+}
+
+func (ar *RepoSQLite) DeleteFile(ctx context.Context, exec bob.Executor, id int64) error {
+	_, err := models.AssetFiles.DeleteQ(ctx, exec, models.DeleteWhere.AssetFiles.ID.EQ(id)).Exec()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("%w: %d", ErrFileNotFound, id)
+		}
+		return fmt.Errorf("error getting asset file: %w", err)
+	}
+
+	return nil
+}
+
 func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 	purchases := make([]*Purchase, 0, len(model.R.AssetPurchases))
 	for _, p := range model.R.AssetPurchases {
@@ -507,6 +596,23 @@ func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 			Date:     p.OrderDate.GetOrZero().Time,
 			Amount:   MonetaryAmount(p.Amount.GetOrZero()),
 			Currency: p.Currency.GetOrZero(),
+		})
+	}
+
+	files := make([]*File, 0, len(model.R.AssetFiles))
+	for _, f := range model.R.AssetFiles {
+		files = append(files, &File{
+			ID:         f.ID,
+			AssetID:    f.AssetID,
+			PublicPath: f.PublicPath,
+			FullPath:   f.FullPath,
+			Name:       f.Name,
+			Filetype:   f.Filetype,
+			Sha256:     f.Sha256,
+			SizeBytes:  f.SizeBytes,
+			CreatedBy:  f.CreatedBy,
+			CreatedAt:  f.CreatedAt.Time,
+			UpdatedAt:  f.UpdatedAt.Time,
 		})
 	}
 
@@ -536,6 +642,8 @@ func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 		Purchases: purchases,
 
 		PartsTotalCounter: int(model.PartsTotalCounter),
+
+		Files: files,
 
 		MetaInfo: MetaInfo{
 			CreatedBy: model.CreatedBy,

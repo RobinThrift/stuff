@@ -70,6 +70,7 @@ type AssetsStmt = bob.QueryStmt[*Asset, AssetSlice]
 
 // assetR is where relationships are stored.
 type assetR struct {
+	AssetFiles          AssetFileSlice     // fk_asset_files_1
 	AssetParts          AssetPartSlice     // fk_asset_parts_2
 	AssetPurchases      AssetPurchaseSlice // fk_asset_purchases_1
 	CreatedByUser       *User              // fk_assets_0
@@ -505,6 +506,7 @@ type assetColumnNames struct {
 }
 
 type assetRelationshipJoins[Q dialect.Joinable] struct {
+	AssetFiles          bob.Mod[Q]
 	AssetParts          bob.Mod[Q]
 	AssetPurchases      bob.Mod[Q]
 	CreatedByUser       bob.Mod[Q]
@@ -516,6 +518,7 @@ type assetRelationshipJoins[Q dialect.Joinable] struct {
 
 func buildassetRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) assetRelationshipJoins[Q] {
 	return assetRelationshipJoins[Q]{
+		AssetFiles:          assetsJoinAssetFiles[Q](ctx, typ),
 		AssetParts:          assetsJoinAssetParts[Q](ctx, typ),
 		AssetPurchases:      assetsJoinAssetPurchases[Q](ctx, typ),
 		CreatedByUser:       assetsJoinCreatedByUser[Q](ctx, typ),
@@ -741,6 +744,13 @@ func (o AssetSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	return nil
 }
 
+func assetsJoinAssetFiles[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, AssetFiles.Name(ctx)).On(
+			AssetFileColumns.AssetID.EQ(AssetColumns.ID),
+		),
+	}
+}
 func assetsJoinAssetParts[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, AssetParts.Name(ctx)).On(
@@ -789,6 +799,24 @@ func assetsJoinReverseParentAssets[Q dialect.Joinable](ctx context.Context, typ 
 			AssetColumns.ParentAssetID.EQ(AssetColumns.ID),
 		),
 	}
+}
+
+// AssetFiles starts a query for related objects on asset_files
+func (o *Asset) AssetFiles(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetFilesQuery {
+	return AssetFiles.Query(ctx, exec, append(mods,
+		sm.Where(AssetFileColumns.AssetID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os AssetSlice) AssetFiles(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetFilesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return AssetFiles.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetFileColumns.AssetID).In(PKArgs...)),
+	)...)
 }
 
 // AssetParts starts a query for related objects on asset_parts
@@ -923,6 +951,15 @@ func (o *Asset) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
+	case "AssetFiles":
+		rels, ok := retrieved.(AssetFileSlice)
+		if !ok {
+			return fmt.Errorf("asset cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.AssetFiles = rels
+
+		return nil
 	case "AssetParts":
 		rels, ok := retrieved.(AssetPartSlice)
 		if !ok {
@@ -989,6 +1026,72 @@ func (o *Asset) Preload(name string, retrieved any) error {
 	default:
 		return fmt.Errorf("asset has no relationship %q", name)
 	}
+}
+
+func ThenLoadAssetAssetFiles(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadAssetAssetFiles(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load AssetAssetFiles", retrieved)
+		}
+
+		err := loader.LoadAssetAssetFiles(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadAssetAssetFiles loads the asset's AssetFiles into the .R struct
+func (o *Asset) LoadAssetAssetFiles(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.AssetFiles = nil
+
+	related, err := o.AssetFiles(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.AssetFiles = related
+	return nil
+}
+
+// LoadAssetAssetFiles loads the asset's AssetFiles into the .R struct
+func (os AssetSlice) LoadAssetAssetFiles(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assetFiles, err := os.AssetFiles(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.AssetFiles = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range assetFiles {
+			if o.ID != rel.AssetID {
+				continue
+			}
+
+			o.R.AssetFiles = append(o.R.AssetFiles, rel)
+		}
+	}
+
+	return nil
 }
 
 func ThenLoadAssetAssetParts(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
@@ -1521,6 +1624,65 @@ func (os AssetSlice) LoadAssetReverseParentAssets(ctx context.Context, exec bob.
 			o.R.ReverseParentAssets = append(o.R.ReverseParentAssets, rel)
 		}
 	}
+
+	return nil
+}
+
+func insertAssetAssetFiles0(ctx context.Context, exec bob.Executor, assetFiles1 []*AssetFileSetter, asset0 *Asset) (AssetFileSlice, error) {
+	for _, assetFile1 := range assetFiles1 {
+		assetFile1.AssetID = omit.From(asset0.ID)
+	}
+
+	ret, err := AssetFiles.InsertMany(ctx, exec, assetFiles1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertAssetAssetFiles0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachAssetAssetFiles0(ctx context.Context, exec bob.Executor, assetFiles1 AssetFileSlice, asset0 *Asset) error {
+	setter := &AssetFileSetter{
+		AssetID: omit.From(asset0.ID),
+	}
+
+	err := AssetFiles.Update(ctx, exec, setter, assetFiles1...)
+	if err != nil {
+		return fmt.Errorf("attachAssetAssetFiles0: %w", err)
+	}
+
+	return nil
+}
+
+func (asset0 *Asset) InsertAssetFiles(ctx context.Context, exec bob.Executor, related ...*AssetFileSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	assetFile1, err := insertAssetAssetFiles0(ctx, exec, related, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetFiles = append(asset0.R.AssetFiles, assetFile1...)
+
+	return nil
+}
+
+func (asset0 *Asset) AttachAssetFiles(ctx context.Context, exec bob.Executor, related ...*AssetFile) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	assetFile1 := AssetFileSlice(related)
+
+	err = attachAssetAssetFiles0(ctx, exec, assetFile1, asset0)
+	if err != nil {
+		return err
+	}
+
+	asset0.R.AssetFiles = append(asset0.R.AssetFiles, assetFile1...)
 
 	return nil
 }

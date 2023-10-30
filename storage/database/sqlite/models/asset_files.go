@@ -24,15 +24,17 @@ import (
 
 // AssetFile is an object representing the database table.
 type AssetFile struct {
-	ID        int64                `db:"id,pk" `
-	AssetID   int64                `db:"asset_id" `
-	Name      string               `db:"name" `
-	Filetype  string               `db:"filetype" `
-	Sha256    []byte               `db:"sha256" `
-	SizeBytes int64                `db:"size_bytes" `
-	CreatedBy int64                `db:"created_by" `
-	CreatedAt types.SQLiteDatetime `db:"created_at" `
-	UpdatedAt types.SQLiteDatetime `db:"updated_at" `
+	ID         int64                `db:"id,pk" `
+	AssetID    int64                `db:"asset_id" `
+	Name       string               `db:"name" `
+	Filetype   string               `db:"filetype" `
+	Sha256     []byte               `db:"sha256" `
+	SizeBytes  int64                `db:"size_bytes" `
+	CreatedBy  int64                `db:"created_by" `
+	CreatedAt  types.SQLiteDatetime `db:"created_at" `
+	UpdatedAt  types.SQLiteDatetime `db:"updated_at" `
+	FullPath   string               `db:"full_path" `
+	PublicPath string               `db:"public_path" `
 
 	R assetFileR `db:"-" `
 }
@@ -52,26 +54,29 @@ type AssetFilesStmt = bob.QueryStmt[*AssetFile, AssetFileSlice]
 
 // assetFileR is where relationships are stored.
 type assetFileR struct {
-	CreatedByUser *User // fk_asset_files_0
+	CreatedByUser *User  // fk_asset_files_0
+	Asset         *Asset // fk_asset_files_1
 }
 
 // AssetFileSetter is used for insert/upsert/update operations
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AssetFileSetter struct {
-	ID        omit.Val[int64]                `db:"id,pk"`
-	AssetID   omit.Val[int64]                `db:"asset_id"`
-	Name      omit.Val[string]               `db:"name"`
-	Filetype  omit.Val[string]               `db:"filetype"`
-	Sha256    omit.Val[[]byte]               `db:"sha256"`
-	SizeBytes omit.Val[int64]                `db:"size_bytes"`
-	CreatedBy omit.Val[int64]                `db:"created_by"`
-	CreatedAt omit.Val[types.SQLiteDatetime] `db:"created_at"`
-	UpdatedAt omit.Val[types.SQLiteDatetime] `db:"updated_at"`
+	ID         omit.Val[int64]                `db:"id,pk"`
+	AssetID    omit.Val[int64]                `db:"asset_id"`
+	Name       omit.Val[string]               `db:"name"`
+	Filetype   omit.Val[string]               `db:"filetype"`
+	Sha256     omit.Val[[]byte]               `db:"sha256"`
+	SizeBytes  omit.Val[int64]                `db:"size_bytes"`
+	CreatedBy  omit.Val[int64]                `db:"created_by"`
+	CreatedAt  omit.Val[types.SQLiteDatetime] `db:"created_at"`
+	UpdatedAt  omit.Val[types.SQLiteDatetime] `db:"updated_at"`
+	FullPath   omit.Val[string]               `db:"full_path"`
+	PublicPath omit.Val[string]               `db:"public_path"`
 }
 
 func (s AssetFileSetter) SetColumns() []string {
-	vals := make([]string, 0, 9)
+	vals := make([]string, 0, 11)
 	if !s.ID.IsUnset() {
 		vals = append(vals, "id")
 	}
@@ -108,6 +113,14 @@ func (s AssetFileSetter) SetColumns() []string {
 		vals = append(vals, "updated_at")
 	}
 
+	if !s.FullPath.IsUnset() {
+		vals = append(vals, "full_path")
+	}
+
+	if !s.PublicPath.IsUnset() {
+		vals = append(vals, "public_path")
+	}
+
 	return vals
 }
 
@@ -139,6 +152,12 @@ func (s AssetFileSetter) Overwrite(t *AssetFile) {
 	if !s.UpdatedAt.IsUnset() {
 		t.UpdatedAt, _ = s.UpdatedAt.Get()
 	}
+	if !s.FullPath.IsUnset() {
+		t.FullPath, _ = s.FullPath.Get()
+	}
+	if !s.PublicPath.IsUnset() {
+		t.PublicPath, _ = s.PublicPath.Get()
+	}
 }
 
 func (s AssetFileSetter) Apply(q *dialect.UpdateQuery) {
@@ -169,10 +188,16 @@ func (s AssetFileSetter) Apply(q *dialect.UpdateQuery) {
 	if !s.UpdatedAt.IsUnset() {
 		um.Set("updated_at").ToArg(s.UpdatedAt).Apply(q)
 	}
+	if !s.FullPath.IsUnset() {
+		um.Set("full_path").ToArg(s.FullPath).Apply(q)
+	}
+	if !s.PublicPath.IsUnset() {
+		um.Set("public_path").ToArg(s.PublicPath).Apply(q)
+	}
 }
 
 func (s AssetFileSetter) Insert() bob.Mod[*dialect.InsertQuery] {
-	vals := make([]bob.Expression, 0, 9)
+	vals := make([]bob.Expression, 0, 11)
 	if !s.ID.IsUnset() {
 		vals = append(vals, sqlite.Arg(s.ID))
 	}
@@ -209,28 +234,40 @@ func (s AssetFileSetter) Insert() bob.Mod[*dialect.InsertQuery] {
 		vals = append(vals, sqlite.Arg(s.UpdatedAt))
 	}
 
+	if !s.FullPath.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.FullPath))
+	}
+
+	if !s.PublicPath.IsUnset() {
+		vals = append(vals, sqlite.Arg(s.PublicPath))
+	}
+
 	return im.Values(vals...)
 }
 
 type assetFileColumnNames struct {
-	ID        string
-	AssetID   string
-	Name      string
-	Filetype  string
-	Sha256    string
-	SizeBytes string
-	CreatedBy string
-	CreatedAt string
-	UpdatedAt string
+	ID         string
+	AssetID    string
+	Name       string
+	Filetype   string
+	Sha256     string
+	SizeBytes  string
+	CreatedBy  string
+	CreatedAt  string
+	UpdatedAt  string
+	FullPath   string
+	PublicPath string
 }
 
 type assetFileRelationshipJoins[Q dialect.Joinable] struct {
 	CreatedByUser bob.Mod[Q]
+	Asset         bob.Mod[Q]
 }
 
 func buildassetFileRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) assetFileRelationshipJoins[Q] {
 	return assetFileRelationshipJoins[Q]{
 		CreatedByUser: assetFilesJoinCreatedByUser[Q](ctx, typ),
+		Asset:         assetFilesJoinAsset[Q](ctx, typ),
 	}
 }
 
@@ -243,50 +280,58 @@ func assetFilesJoin[Q dialect.Joinable](ctx context.Context) joinSet[assetFileRe
 }
 
 var AssetFileColumns = struct {
-	ID        sqlite.Expression
-	AssetID   sqlite.Expression
-	Name      sqlite.Expression
-	Filetype  sqlite.Expression
-	Sha256    sqlite.Expression
-	SizeBytes sqlite.Expression
-	CreatedBy sqlite.Expression
-	CreatedAt sqlite.Expression
-	UpdatedAt sqlite.Expression
+	ID         sqlite.Expression
+	AssetID    sqlite.Expression
+	Name       sqlite.Expression
+	Filetype   sqlite.Expression
+	Sha256     sqlite.Expression
+	SizeBytes  sqlite.Expression
+	CreatedBy  sqlite.Expression
+	CreatedAt  sqlite.Expression
+	UpdatedAt  sqlite.Expression
+	FullPath   sqlite.Expression
+	PublicPath sqlite.Expression
 }{
-	ID:        sqlite.Quote("asset_files", "id"),
-	AssetID:   sqlite.Quote("asset_files", "asset_id"),
-	Name:      sqlite.Quote("asset_files", "name"),
-	Filetype:  sqlite.Quote("asset_files", "filetype"),
-	Sha256:    sqlite.Quote("asset_files", "sha256"),
-	SizeBytes: sqlite.Quote("asset_files", "size_bytes"),
-	CreatedBy: sqlite.Quote("asset_files", "created_by"),
-	CreatedAt: sqlite.Quote("asset_files", "created_at"),
-	UpdatedAt: sqlite.Quote("asset_files", "updated_at"),
+	ID:         sqlite.Quote("asset_files", "id"),
+	AssetID:    sqlite.Quote("asset_files", "asset_id"),
+	Name:       sqlite.Quote("asset_files", "name"),
+	Filetype:   sqlite.Quote("asset_files", "filetype"),
+	Sha256:     sqlite.Quote("asset_files", "sha256"),
+	SizeBytes:  sqlite.Quote("asset_files", "size_bytes"),
+	CreatedBy:  sqlite.Quote("asset_files", "created_by"),
+	CreatedAt:  sqlite.Quote("asset_files", "created_at"),
+	UpdatedAt:  sqlite.Quote("asset_files", "updated_at"),
+	FullPath:   sqlite.Quote("asset_files", "full_path"),
+	PublicPath: sqlite.Quote("asset_files", "public_path"),
 }
 
 type assetFileWhere[Q sqlite.Filterable] struct {
-	ID        sqlite.WhereMod[Q, int64]
-	AssetID   sqlite.WhereMod[Q, int64]
-	Name      sqlite.WhereMod[Q, string]
-	Filetype  sqlite.WhereMod[Q, string]
-	Sha256    sqlite.WhereMod[Q, []byte]
-	SizeBytes sqlite.WhereMod[Q, int64]
-	CreatedBy sqlite.WhereMod[Q, int64]
-	CreatedAt sqlite.WhereMod[Q, types.SQLiteDatetime]
-	UpdatedAt sqlite.WhereMod[Q, types.SQLiteDatetime]
+	ID         sqlite.WhereMod[Q, int64]
+	AssetID    sqlite.WhereMod[Q, int64]
+	Name       sqlite.WhereMod[Q, string]
+	Filetype   sqlite.WhereMod[Q, string]
+	Sha256     sqlite.WhereMod[Q, []byte]
+	SizeBytes  sqlite.WhereMod[Q, int64]
+	CreatedBy  sqlite.WhereMod[Q, int64]
+	CreatedAt  sqlite.WhereMod[Q, types.SQLiteDatetime]
+	UpdatedAt  sqlite.WhereMod[Q, types.SQLiteDatetime]
+	FullPath   sqlite.WhereMod[Q, string]
+	PublicPath sqlite.WhereMod[Q, string]
 }
 
 func AssetFileWhere[Q sqlite.Filterable]() assetFileWhere[Q] {
 	return assetFileWhere[Q]{
-		ID:        sqlite.Where[Q, int64](AssetFileColumns.ID),
-		AssetID:   sqlite.Where[Q, int64](AssetFileColumns.AssetID),
-		Name:      sqlite.Where[Q, string](AssetFileColumns.Name),
-		Filetype:  sqlite.Where[Q, string](AssetFileColumns.Filetype),
-		Sha256:    sqlite.Where[Q, []byte](AssetFileColumns.Sha256),
-		SizeBytes: sqlite.Where[Q, int64](AssetFileColumns.SizeBytes),
-		CreatedBy: sqlite.Where[Q, int64](AssetFileColumns.CreatedBy),
-		CreatedAt: sqlite.Where[Q, types.SQLiteDatetime](AssetFileColumns.CreatedAt),
-		UpdatedAt: sqlite.Where[Q, types.SQLiteDatetime](AssetFileColumns.UpdatedAt),
+		ID:         sqlite.Where[Q, int64](AssetFileColumns.ID),
+		AssetID:    sqlite.Where[Q, int64](AssetFileColumns.AssetID),
+		Name:       sqlite.Where[Q, string](AssetFileColumns.Name),
+		Filetype:   sqlite.Where[Q, string](AssetFileColumns.Filetype),
+		Sha256:     sqlite.Where[Q, []byte](AssetFileColumns.Sha256),
+		SizeBytes:  sqlite.Where[Q, int64](AssetFileColumns.SizeBytes),
+		CreatedBy:  sqlite.Where[Q, int64](AssetFileColumns.CreatedBy),
+		CreatedAt:  sqlite.Where[Q, types.SQLiteDatetime](AssetFileColumns.CreatedAt),
+		UpdatedAt:  sqlite.Where[Q, types.SQLiteDatetime](AssetFileColumns.UpdatedAt),
+		FullPath:   sqlite.Where[Q, string](AssetFileColumns.FullPath),
+		PublicPath: sqlite.Where[Q, string](AssetFileColumns.PublicPath),
 	}
 }
 
@@ -392,6 +437,13 @@ func assetFilesJoinCreatedByUser[Q dialect.Joinable](ctx context.Context, typ st
 		),
 	}
 }
+func assetFilesJoinAsset[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, Assets.Name(ctx)).On(
+			AssetColumns.ID.EQ(AssetFileColumns.AssetID),
+		),
+	}
+}
 
 // CreatedByUser starts a query for related objects on users
 func (o *AssetFile) CreatedByUser(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) UsersQuery {
@@ -411,6 +463,24 @@ func (os AssetFileSlice) CreatedByUser(ctx context.Context, exec bob.Executor, m
 	)...)
 }
 
+// Asset starts a query for related objects on assets
+func (o *AssetFile) Asset(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetsQuery {
+	return Assets.Query(ctx, exec, append(mods,
+		sm.Where(AssetColumns.ID.EQ(sqlite.Arg(o.AssetID))),
+	)...)
+}
+
+func (os AssetFileSlice) Asset(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetsQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.AssetID)
+	}
+
+	return Assets.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(AssetColumns.ID).In(PKArgs...)),
+	)...)
+}
+
 func (o *AssetFile) Preload(name string, retrieved any) error {
 	if o == nil {
 		return nil
@@ -424,6 +494,15 @@ func (o *AssetFile) Preload(name string, retrieved any) error {
 		}
 
 		o.R.CreatedByUser = rel
+
+		return nil
+	case "Asset":
+		rel, ok := retrieved.(*Asset)
+		if !ok {
+			return fmt.Errorf("assetFile cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Asset = rel
 
 		return nil
 	default:
@@ -515,6 +594,90 @@ func (os AssetFileSlice) LoadAssetFileCreatedByUser(ctx context.Context, exec bo
 	return nil
 }
 
+func PreloadAssetFileAsset(opts ...sqlite.PreloadOption) sqlite.Preloader {
+	return sqlite.Preload[*Asset, AssetSlice](orm.Relationship{
+		Name: "Asset",
+		Sides: []orm.RelSide{
+			{
+				From: "asset_files",
+				To:   TableNames.Assets,
+				ToExpr: func(ctx context.Context) bob.Expression {
+					return Assets.Name(ctx)
+				},
+				FromColumns: []string{
+					ColumnNames.AssetFiles.AssetID,
+				},
+				ToColumns: []string{
+					ColumnNames.Assets.ID,
+				},
+			},
+		},
+	}, Assets.Columns().Names(), opts...)
+}
+
+func ThenLoadAssetFileAsset(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadAssetFileAsset(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load AssetFileAsset", retrieved)
+		}
+
+		err := loader.LoadAssetFileAsset(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadAssetFileAsset loads the assetFile's Asset into the .R struct
+func (o *AssetFile) LoadAssetFileAsset(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Asset = nil
+
+	related, err := o.Asset(ctx, exec, mods...).One()
+	if err != nil {
+		return err
+	}
+
+	o.R.Asset = related
+	return nil
+}
+
+// LoadAssetFileAsset loads the assetFile's Asset into the .R struct
+func (os AssetFileSlice) LoadAssetFileAsset(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	assets, err := os.Asset(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		for _, rel := range assets {
+			if o.AssetID != rel.ID {
+				continue
+			}
+
+			o.R.Asset = rel
+			break
+		}
+	}
+
+	return nil
+}
+
 func attachAssetFileCreatedByUser0(ctx context.Context, exec bob.Executor, assetFile0 *AssetFile, user1 *User) error {
 	setter := &AssetFileSetter{
 		CreatedBy: omit.From(user1.ID),
@@ -553,6 +716,48 @@ func (assetFile0 *AssetFile) AttachCreatedByUser(ctx context.Context, exec bob.E
 	}
 
 	assetFile0.R.CreatedByUser = user1
+
+	return nil
+}
+
+func attachAssetFileAsset0(ctx context.Context, exec bob.Executor, assetFile0 *AssetFile, asset1 *Asset) error {
+	setter := &AssetFileSetter{
+		AssetID: omit.From(asset1.ID),
+	}
+
+	err := AssetFiles.Update(ctx, exec, setter, assetFile0)
+	if err != nil {
+		return fmt.Errorf("attachAssetFileAsset0: %w", err)
+	}
+
+	return nil
+}
+
+func (assetFile0 *AssetFile) InsertAsset(ctx context.Context, exec bob.Executor, related *AssetSetter) error {
+	asset1, err := Assets.Insert(ctx, exec, related)
+	if err != nil {
+		return fmt.Errorf("inserting related objects: %w", err)
+	}
+
+	err = attachAssetFileAsset0(ctx, exec, assetFile0, asset1)
+	if err != nil {
+		return err
+	}
+
+	assetFile0.R.Asset = asset1
+
+	return nil
+}
+
+func (assetFile0 *AssetFile) AttachAsset(ctx context.Context, exec bob.Executor, asset1 *Asset) error {
+	var err error
+
+	err = attachAssetFileAsset0(ctx, exec, assetFile0, asset1)
+	if err != nil {
+		return err
+	}
+
+	assetFile0.R.Asset = asset1
 
 	return nil
 }

@@ -62,15 +62,17 @@ var ColumnNames = struct {
 	Suppliers       supplierColumnNames
 }{
 	AssetFiles: assetFileColumnNames{
-		ID:        "id",
-		AssetID:   "asset_id",
-		Name:      "name",
-		Filetype:  "filetype",
-		Sha256:    "sha256",
-		SizeBytes: "size_bytes",
-		CreatedBy: "created_by",
-		CreatedAt: "created_at",
-		UpdatedAt: "updated_at",
+		ID:         "id",
+		AssetID:    "asset_id",
+		Name:       "name",
+		Filetype:   "filetype",
+		Sha256:     "sha256",
+		SizeBytes:  "size_bytes",
+		CreatedBy:  "created_by",
+		CreatedAt:  "created_at",
+		UpdatedAt:  "updated_at",
+		FullPath:   "full_path",
+		PublicPath: "public_path",
 	},
 	AssetParts: assetPartColumnNames{
 		ID:           "id",

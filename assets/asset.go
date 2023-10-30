@@ -64,6 +64,8 @@ type Asset struct {
 	PartsTotalCounter int     `form:"parts_total_counter"`
 	Parts             []*Part `form:"parts"`
 
+	Files []*File `form:"-"`
+
 	MetaInfo MetaInfo `form:"-"`
 }
 
@@ -100,9 +102,12 @@ type File struct {
 	ID      int64
 	AssetID int64
 
-	Name      string
-	Sha256    []byte
-	SizeBytes int64
+	PublicPath string
+	FullPath   string
+	Name       string
+	Filetype   string
+	Sha256     []byte
+	SizeBytes  int64
 
 	CreatedBy int64
 	CreatedAt time.Time

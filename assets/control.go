@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/RobinThrift/stuff/storage/database"
 	"github.com/RobinThrift/stuff/tags"
@@ -27,6 +28,7 @@ type Control struct {
 
 type AssetRepo interface {
 	Get(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error)
+	GetWithFiles(ctx context.Context, exec bob.Executor, idOrTag string) (*Asset, error)
 	List(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
 	ListForExport(ctx context.Context, exec bob.Executor, query ListAssetsQuery) (*AssetListPage, error)
 	Create(ctx context.Context, exec bob.Executor, asset *Asset) (*Asset, error)
@@ -37,6 +39,11 @@ type AssetRepo interface {
 	DeleteParts(ctx context.Context, exec bob.Executor, assetID int64) error
 
 	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
+
+	CreateFiles(ctx context.Context, exec bob.Executor, files []*File) error
+	GetFile(ctx context.Context, exec bob.Executor, id int64) (*File, error)
+	FileExists(ctx context.Context, exec bob.Executor, hash []byte) (bool, error)
+	DeleteFile(ctx context.Context, exec bob.Executor, id int64) error
 }
 
 func (c *Control) generateTag(ctx context.Context) (string, error) {
@@ -46,6 +53,12 @@ func (c *Control) generateTag(ctx context.Context) (string, error) {
 func (c *Control) getAsset(ctx context.Context, idOrTag string) (*Asset, error) {
 	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
 		return c.AssetRepo.Get(ctx, tx, idOrTag)
+	})
+}
+
+func (c *Control) getAssetWithFiles(ctx context.Context, idOrTag string) (*Asset, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
+		return c.AssetRepo.GetWithFiles(ctx, tx, idOrTag)
 	})
 }
 
@@ -59,12 +72,12 @@ func (c *Control) createAsset(ctx context.Context, asset *Asset, file *File) (*A
 	fileURL := asset.ImageURL
 
 	if file != nil {
-		filename, _, err := c.handleFileUpload(file.Name, file.r)
+		err := c.handleFileUpload(file)
 		if err != nil {
 			return nil, err
 		}
 
-		fileURL = "/assets/files/" + filename
+		fileURL = file.PublicPath
 	}
 
 	created, err := database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
@@ -106,12 +119,12 @@ func (c *Control) createAssets(ctx context.Context, assets []*Asset, ignoreDupli
 			}
 
 			if imgURL, err := url.Parse(assets[i].ImageURL); assets[i].ImageURL != "" && err == nil {
-				filename, _, err := c.downloadImage(ctx, imgURL)
+				file, err := c.downloadImage(ctx, imgURL)
 				if err != nil {
 					return err
 				}
 
-				assets[i].ImageURL = "/assets/files/" + filename
+				assets[i].ImageURL = file.PublicPath
 				assets[i].ThumbnailURL = assets[i].ImageURL
 			} else {
 				assets[i].ImageURL = ""
@@ -131,12 +144,12 @@ func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*A
 	fileURL := asset.ImageURL
 
 	if file != nil {
-		filename, _, err := c.handleFileUpload(file.Name, file.r)
+		err := c.handleFileUpload(file)
 		if err != nil {
 			return nil, err
 		}
 
-		fileURL = "/assets/files/" + filename
+		fileURL = file.PublicPath
 	}
 
 	updated, err := database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*Asset, error) {
@@ -170,6 +183,50 @@ func (c *Control) updateAsset(ctx context.Context, asset *Asset, file *File) (*A
 	}
 
 	return updated, nil
+}
+
+func (c *Control) addAssetFiles(ctx context.Context, files []*File) error {
+	for _, f := range files {
+		err := c.handleFileUpload(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return c.DB.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+		return c.AssetRepo.CreateFiles(ctx, tx, files)
+	})
+}
+
+func (c *Control) getFile(ctx context.Context, id int64) (*File, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) (*File, error) {
+		return c.AssetRepo.GetFile(ctx, tx, id)
+	})
+}
+
+func (c *Control) deleteFile(ctx context.Context, id int64) error {
+	return c.DB.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+		file, err := c.AssetRepo.GetFile(ctx, tx, id)
+		if err != nil {
+			return err
+		}
+
+		err = c.AssetRepo.DeleteFile(ctx, tx, id)
+		if err != nil {
+			return err
+		}
+
+		referenceExists, err := c.AssetRepo.FileExists(ctx, tx, file.Sha256)
+		if err != nil {
+			return err
+		}
+
+		if !referenceExists {
+			return removeFile(c.FileDir, file)
+		}
+
+		return nil
+	})
 }
 
 func (c *Control) deleteAsset(ctx context.Context, asset *Asset) (err error) {
@@ -215,72 +272,96 @@ func (c *Control) getLabelSheets(ctx context.Context, query getLabelSheetsQuery)
 	return query.sheet.Generate()
 }
 
-func (c *Control) handleFileUpload(origFileName string, r io.Reader) (filename string, hash string, err error) { //nolint: unparam // will fix soon
+func (c *Control) handleFileUpload(file *File) (err error) {
 	err = ensureDirExists(c.FileDir)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
-	fh, err := os.CreateTemp(c.TmpDir, origFileName)
+	fhandle, err := os.CreateTemp(c.TmpDir, file.Name)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
 	defer func() {
 		if err != nil {
-			err = errors.Join(err, fh.Close(), os.Remove(fh.Name()))
+			err = errors.Join(err, fhandle.Close(), os.Remove(fhandle.Name()))
 		}
 	}()
 
 	h := sha256.New()
 
-	tee := io.TeeReader(r, h)
+	tee := io.TeeReader(file.r, h)
 
-	_, err = io.Copy(fh, tee)
+	file.SizeBytes, err = io.Copy(fhandle, tee)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
-	err = fh.Close()
+	err = fhandle.Close()
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
-	hash = fmt.Sprintf("%x", h.Sum(nil))
-	filename = hash + path.Ext(origFileName)
-	filepath := path.Join(c.FileDir, filename)
-
-	err = os.Rename(fh.Name(), filepath)
-	if err != nil {
-		return "", "", err
+	ext := path.Ext(file.Name)
+	file.Sha256 = h.Sum(nil)
+	for _, b := range file.Sha256 {
+		file.FullPath = file.FullPath + "/" + fmt.Sprintf("%x", b)
 	}
 
-	return filename, hash, nil
+	file.FullPath += ext
+
+	file.PublicPath = "/assets/files" + file.FullPath
+	file.FullPath = path.Join(c.FileDir, file.FullPath)
+
+	err = ensureDirExists(path.Dir(file.FullPath))
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(fhandle.Name(), file.FullPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (c *Control) downloadImage(ctx context.Context, url *url.URL) (filename string, hash string, err error) {
+func (c *Control) downloadImage(ctx context.Context, url *url.URL) (file *File, err error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url.String(), nil)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	defer func() {
 		err = errors.Join(err, res.Body.Close())
 	}()
 
-	err = checkContentTypeAllowed(res.Header.Get("content-type"), imgAllowList)
+	contentType := res.Header.Get("content-type")
+	err = checkContentTypeAllowed(contentType, imgAllowList)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	origFileName := path.Base(url.Path)
 
-	return c.handleFileUpload(origFileName, res.Body)
+	file = &File{
+		Name:     origFileName,
+		Filetype: contentType,
+		r:        res.Body,
+	}
+
+	err = c.handleFileUpload(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
 }
 
 func ensureDirExists(dir string) error {
@@ -292,7 +373,7 @@ func ensureDirExists(dir string) error {
 	}
 
 	if stat == nil {
-		return os.Mkdir(dir, 0755)
+		return os.MkdirAll(dir, 0755)
 	}
 
 	if !stat.IsDir() {
@@ -300,4 +381,53 @@ func ensureDirExists(dir string) error {
 	}
 
 	return nil
+}
+
+func removeFile(rootDir string, file *File) error {
+	rootDirIndex := strings.Index(file.FullPath, rootDir)
+	if rootDirIndex == -1 {
+		return fmt.Errorf("invalid file path for deletion: file path is not in configured file dir: %s", file.FullPath)
+	}
+
+	filename := path.Base(file.FullPath)
+
+	err := os.Remove(file.FullPath)
+	if err != nil {
+		return err
+	}
+
+	dir := file.FullPath[:len(file.FullPath)-1-len(filename)]
+	for dir != rootDir {
+		isEmpty, err := isEmptyDir(dir)
+		if err != nil {
+			return err
+		}
+
+		if !isEmpty {
+			return nil
+		}
+
+		err = os.RemoveAll(dir)
+		if err != nil {
+			return err
+		}
+
+		slashIndex := strings.LastIndex(dir, "/")
+		if slashIndex == -1 {
+			return nil
+		}
+
+		dir = dir[:slashIndex]
+	}
+
+	return nil
+}
+
+func isEmptyDir(dir string) (bool, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false, err
+	}
+
+	return len(entries) == 0, nil
 }
