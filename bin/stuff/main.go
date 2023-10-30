@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/RobinThrift/stuff/assets"
@@ -33,38 +35,55 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	start, err := setup(ctx)
+	start, stop, err := setup(ctx)
 	if err != nil {
 		return err
 	}
 
+	go func() {
+		shutdown := make(chan os.Signal, 1)
+		signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+		sig := <-shutdown
+
+		stopCtx, stopCtxCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stopCtxCancel()
+
+		slog.InfoContext(ctx, fmt.Sprintf("received signal %v: triggering shutdown", sig))
+
+		err := stop(stopCtx) //nolint: contextcheck // false positive
+		if err != nil {
+			slog.ErrorContext(ctx, "could not stop gracefully", "error", err)
+		}
+	}()
+
 	return start(ctx)
 }
 
-func setup(ctx context.Context) (func(context.Context) error, error) {
+func setup(ctx context.Context) (func(context.Context) error, func(context.Context) error, error) {
 	config, err := config.NewConfigFromEnv()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	baseURL, err := url.Parse(config.BaseURL)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = log.SetupLogger(config.LogLevel, config.LogFormat)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	db, err := sqlite.NewSQLiteDB(config.Database.Path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = sqlite.RunMigrations(ctx, db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	database := &database.Database{DB: bob.NewDB(db)}
@@ -86,7 +105,7 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 
 	err = authCtrl.RunInitSetup(ctx, "admin", config.Auth.Local.InitialAdminPassword)
 	if err != nil {
-		return nil, errors.Join(db.Close(), err)
+		return nil, nil, errors.Join(db.Close(), err)
 	}
 
 	authRouter := &auth.UIRouter{Control: authCtrl, Decoder: auth.NewDecoder()}
@@ -124,10 +143,10 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		tagAPIRouter.RegisterRoutes,
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return func(ctx context.Context) error {
+	start := func(ctx context.Context) error {
 		defer func() {
 			if err := db.Close(); err != nil {
 				slog.ErrorContext(ctx, "error closing database", "error", err)
@@ -135,5 +154,16 @@ func setup(ctx context.Context) (func(context.Context) error, error) {
 		}()
 
 		return srv.Start(ctx)
-	}, nil
+	}
+
+	stop := func(ctx context.Context) error {
+		slog.InfoContext(ctx, "closing database")
+		if err := db.Close(); err != nil {
+			return fmt.Errorf("error closing database: %w", err)
+		}
+
+		return srv.Stop(ctx)
+	}
+
+	return start, stop, nil
 }

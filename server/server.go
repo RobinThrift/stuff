@@ -60,7 +60,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	slog.InfoContext(ctx, "shutting down http server")
+	slog.InfoContext(ctx, "stopping http server")
 	return s.srv.Shutdown(ctx)
 }
 
