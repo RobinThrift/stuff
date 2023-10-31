@@ -239,8 +239,8 @@
 				-}}
 			</div>
 
-			<h3 class="mt-2 px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">Purchase Info</h3>
-			<div class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:grid md:grid-cols-4 lg:ms-2 flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
+			<h3 x-show="type !== 'CONSUMABLE'" class="mt-2 px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">Purchase Info</h3>
+			<div x-show="type !== 'CONSUMABLE'" class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:grid md:grid-cols-4 lg:ms-2 flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
 				{{ $purchase := index .Asset.Purchases 0 }}
 
 				{{-
