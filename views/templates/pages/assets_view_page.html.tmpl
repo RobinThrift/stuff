@@ -1,12 +1,6 @@
 {{ template "layout.html.tmpl" . }}
 
 {{ define "header" }}
-{{ with $.Global.Referer }}
-<a href="{{ . }}" class="me-2">
-	<x-icon icon="caret-left" class="h-6 w-6" />
-</a>
-{{ end -}}
-
 {{ with .Data.Asset }}
 <h1 class="font-extrabold text-sm sm:text-base md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
 	{{ .Name }}
