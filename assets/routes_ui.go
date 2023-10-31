@@ -84,7 +84,7 @@ func (rt *UIRouter) handleAssetsViewGet(w http.ResponseWriter, r *http.Request) 
 		return nil
 	}
 
-	asset, err := rt.Control.getAssetWithFiles(r.Context(), id)
+	asset, err := rt.Control.getAsset(r.Context(), id)
 	if err != nil {
 		return err
 	}
