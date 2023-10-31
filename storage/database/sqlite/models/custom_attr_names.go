@@ -11,8 +11,7 @@ import (
 
 // CustomAttrName is an object representing the database table.
 type CustomAttrName struct {
-	Name null.Val[string] `db:"name" `
-	Type null.Val[string] `db:"type" `
+	AttrName null.Val[string] `db:"attr_name" `
 }
 
 // CustomAttrNameSlice is an alias for a slice of pointers to CustomAttrName.
@@ -29,26 +28,21 @@ type CustomAttrNamesQuery = *sqlite.ViewQuery[*CustomAttrName, CustomAttrNameSli
 type CustomAttrNamesStmt = bob.QueryStmt[*CustomAttrName, CustomAttrNameSlice]
 
 type customAttrNameColumnNames struct {
-	Name string
-	Type string
+	AttrName string
 }
 
 var CustomAttrNameColumns = struct {
-	Name sqlite.Expression
-	Type sqlite.Expression
+	AttrName sqlite.Expression
 }{
-	Name: sqlite.Quote("custom_attr_names", "name"),
-	Type: sqlite.Quote("custom_attr_names", "type"),
+	AttrName: sqlite.Quote("custom_attr_names", "attr_name"),
 }
 
 type customAttrNameWhere[Q sqlite.Filterable] struct {
-	Name sqlite.WhereNullMod[Q, string]
-	Type sqlite.WhereNullMod[Q, string]
+	AttrName sqlite.WhereNullMod[Q, string]
 }
 
 func CustomAttrNameWhere[Q sqlite.Filterable]() customAttrNameWhere[Q] {
 	return customAttrNameWhere[Q]{
-		Name: sqlite.WhereNull[Q, string](CustomAttrNameColumns.Name),
-		Type: sqlite.WhereNull[Q, string](CustomAttrNameColumns.Type),
+		AttrName: sqlite.WhereNull[Q, string](CustomAttrNameColumns.AttrName),
 	}
 }

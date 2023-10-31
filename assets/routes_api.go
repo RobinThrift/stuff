@@ -17,6 +17,7 @@ type APIRouter struct {
 func (rt *APIRouter) RegisterRoutes(mux *chi.Mux) {
 	mux.Get("/api/v1/assets", rt.apiListAssets)
 	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
+	mux.Get("/api/v1/assets/custom_attrs", rt.apiListCustomAttrNames)
 }
 
 // [GET] /api/v1/assets/categories
@@ -56,6 +57,33 @@ func (rt *APIRouter) apiListCategories(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (rt *APIRouter) apiListCustomAttrNames(w http.ResponseWriter, r *http.Request) {
+	type page struct {
+		CustomAttrs []string `json:"customAttrs"`
+	}
+
+	attrNames, err := rt.Control.listCustomAttrNames(r.Context(), ListCustomAttrNamesQuery{Search: r.URL.Query().Get("query")})
+	if err != nil {
+		api.RespondWithError(r.Context(), w, err)
+		return
+	}
+
+	res := page{
+		CustomAttrs: attrNames,
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error marshalling custom attribute names to JSON", "error", err)
+		return
+	}
+
+	api.AddJSONContentType(w)
+	_, err = w.Write(b)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
+	}
+}
 type apiPart struct {
 	ID           int64  `json:"id"`
 	AssetID      int64  `json:"assetID"`

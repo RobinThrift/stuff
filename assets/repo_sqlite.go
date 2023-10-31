@@ -520,6 +520,38 @@ func (ar *RepoSQLite) ListCategories(ctx context.Context, exec bob.Executor, que
 	return cats, nil
 }
 
+func (ar *RepoSQLite) ListCustomAttrNames(ctx context.Context, exec bob.Executor, query ListCustomAttrNamesQuery) ([]string, error) {
+	limit := query.PageSize
+	if limit == 0 {
+		limit = 25
+	}
+	offset := limit * query.Page
+
+	mods := []bob.Mod[*dialect.SelectQuery]{
+		sm.Limit(limit),
+		sm.Offset(offset),
+		sm.Distinct(),
+	}
+
+	if query.Search != "" {
+		mods = append(mods, models.SelectWhere.CustomAttrNames.AttrName.Like("%"+query.Search+"%"))
+	}
+
+	attrs, err := models.CustomAttrNames.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0, len(attrs))
+
+	for _, a := range attrs {
+		if a.AttrName.IsSet() {
+			names = append(names, a.AttrName.GetOrZero())
+		}
+	}
+
+	return names, nil
+}
 func (ar *RepoSQLite) CreateFiles(ctx context.Context, exec bob.Executor, files []*File) error {
 	setter := make([]*models.AssetFileSetter, 0, len(files))
 	for _, f := range files {

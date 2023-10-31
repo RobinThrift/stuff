@@ -38,12 +38,13 @@ type AssetRepo interface {
 	CreateParts(ctx context.Context, exec bob.Executor, parts []*Part) error
 	DeleteParts(ctx context.Context, exec bob.Executor, assetID int64) error
 
-	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
-
 	CreateFiles(ctx context.Context, exec bob.Executor, files []*File) error
 	GetFile(ctx context.Context, exec bob.Executor, id int64) (*File, error)
 	FileExists(ctx context.Context, exec bob.Executor, hash []byte) (bool, error)
 	DeleteFile(ctx context.Context, exec bob.Executor, id int64) error
+
+	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
+	ListCustomAttrNames(ctx context.Context, exec bob.Executor, query ListCustomAttrNamesQuery) ([]string, error)
 }
 
 func (c *Control) generateTag(ctx context.Context) (string, error) {
@@ -246,6 +247,11 @@ func (c *Control) listCategories(ctx context.Context, query ListCategoriesQuery)
 	})
 }
 
+func (c *Control) listCustomAttrNames(ctx context.Context, query ListCustomAttrNamesQuery) ([]string, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]string, error) {
+		return c.AssetRepo.ListCustomAttrNames(ctx, tx, query)
+	})
+}
 type getLabelSheetsQuery struct {
 	baseURL *url.URL
 	ids     []int64

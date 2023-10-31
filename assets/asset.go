@@ -158,3 +158,9 @@ type ListCategoriesQuery struct {
 	Page     int
 	PageSize int
 }
+
+type ListCustomAttrNamesQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}

@@ -176,8 +176,7 @@ var ColumnNames = struct {
 		Name: "name",
 	},
 	CustomAttrNames: customAttrNameColumnNames{
-		Name: "name",
-		Type: "type",
+		AttrName: "attr_name",
 	},
 	Locations: locationColumnNames{
 		Name: "name",
