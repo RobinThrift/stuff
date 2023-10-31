@@ -11,7 +11,7 @@ import (
 
 // PositionCode is an object representing the database table.
 type PositionCode struct {
-	Code null.Val[string] `db:"code" `
+	PosCode null.Val[string] `db:"pos_code" `
 }
 
 // PositionCodeSlice is an alias for a slice of pointers to PositionCode.
@@ -28,21 +28,21 @@ type PositionCodesQuery = *sqlite.ViewQuery[*PositionCode, PositionCodeSlice]
 type PositionCodesStmt = bob.QueryStmt[*PositionCode, PositionCodeSlice]
 
 type positionCodeColumnNames struct {
-	Code string
+	PosCode string
 }
 
 var PositionCodeColumns = struct {
-	Code sqlite.Expression
+	PosCode sqlite.Expression
 }{
-	Code: sqlite.Quote("position_codes", "code"),
+	PosCode: sqlite.Quote("position_codes", "pos_code"),
 }
 
 type positionCodeWhere[Q sqlite.Filterable] struct {
-	Code sqlite.WhereNullMod[Q, string]
+	PosCode sqlite.WhereNullMod[Q, string]
 }
 
 func PositionCodeWhere[Q sqlite.Filterable]() positionCodeWhere[Q] {
 	return positionCodeWhere[Q]{
-		Code: sqlite.WhereNull[Q, string](PositionCodeColumns.Code),
+		PosCode: sqlite.WhereNull[Q, string](PositionCodeColumns.PosCode),
 	}
 }

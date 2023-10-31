@@ -11,7 +11,7 @@ import (
 
 // Location is an object representing the database table.
 type Location struct {
-	Name null.Val[string] `db:"name" `
+	LocName null.Val[string] `db:"loc_name" `
 }
 
 // LocationSlice is an alias for a slice of pointers to Location.
@@ -28,21 +28,21 @@ type LocationsQuery = *sqlite.ViewQuery[*Location, LocationSlice]
 type LocationsStmt = bob.QueryStmt[*Location, LocationSlice]
 
 type locationColumnNames struct {
-	Name string
+	LocName string
 }
 
 var LocationColumns = struct {
-	Name sqlite.Expression
+	LocName sqlite.Expression
 }{
-	Name: sqlite.Quote("locations", "name"),
+	LocName: sqlite.Quote("locations", "loc_name"),
 }
 
 type locationWhere[Q sqlite.Filterable] struct {
-	Name sqlite.WhereNullMod[Q, string]
+	LocName sqlite.WhereNullMod[Q, string]
 }
 
 func LocationWhere[Q sqlite.Filterable]() locationWhere[Q] {
 	return locationWhere[Q]{
-		Name: sqlite.WhereNull[Q, string](LocationColumns.Name),
+		LocName: sqlite.WhereNull[Q, string](LocationColumns.LocName),
 	}
 }

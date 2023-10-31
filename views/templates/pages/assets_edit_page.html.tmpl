@@ -223,6 +223,8 @@
 					"InputWrapperClass" "flex-grow"
 					"Label" "Location"
 					"Name" "location"
+					"AutoCompleteSource" "/api/v1/assets/locations"
+					"AutoCompleteItemsAt" "locations"
 					"ValidationErr" .ValidationErrs.location
 					"Value" .Asset.Location
 				-}}
@@ -234,6 +236,8 @@
 					"InputWrapperClass" "flex-grow"
 					"Label" "Position Code"
 					"Name" "position_code"
+					"AutoCompleteSource" "/api/v1/assets/position_codes"
+					"AutoCompleteItemsAt" "positionCodes"
 					"ValidationErr" .ValidationErrs.position_code
 					"Value" .Asset.PositionCode
 				-}}
@@ -448,6 +452,8 @@
 							template "field" dict
 							"Required" true
 							"Placeholder" "Location"
+							"AutoCompleteSource" "/api/v1/assets/locations"
+							"AutoCompleteItemsAt" "locations"
 							"XBindName" "`parts[${i}].location`"
 							"XBindValue" "part.Location"
 						-}}
@@ -458,6 +464,8 @@
 							template "field" dict
 							"Required" true
 							"Placeholder" "Position Code"
+							"AutoCompleteSource" "/api/v1/assets/position_codes"
+							"AutoCompleteItemsAt" "positionCodes"
 							"XBindName" "`parts[${i}].position_code`"
 							"XBindValue" "part.PositionCode"
 						-}}

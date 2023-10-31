@@ -179,13 +179,13 @@ var ColumnNames = struct {
 		AttrName: "attr_name",
 	},
 	Locations: locationColumnNames{
-		Name: "name",
+		LocName: "loc_name",
 	},
 	Manufacturers: manufacturerColumnNames{
 		Name: "name",
 	},
 	PositionCodes: positionCodeColumnNames{
-		Code: "code",
+		PosCode: "pos_code",
 	},
 	Suppliers: supplierColumnNames{
 		Name: "name",

@@ -18,6 +18,8 @@ func (rt *APIRouter) RegisterRoutes(mux *chi.Mux) {
 	mux.Get("/api/v1/assets", rt.apiListAssets)
 	mux.Get("/api/v1/assets/categories", rt.apiListCategories)
 	mux.Get("/api/v1/assets/custom_attrs", rt.apiListCustomAttrNames)
+	mux.Get("/api/v1/assets/locations", rt.apiListLocations)
+	mux.Get("/api/v1/assets/position_codes", rt.apiListPositionCodes)
 }
 
 // [GET] /api/v1/assets/categories
@@ -84,6 +86,63 @@ func (rt *APIRouter) apiListCustomAttrNames(w http.ResponseWriter, r *http.Reque
 		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
 	}
 }
+
+func (rt *APIRouter) apiListLocations(w http.ResponseWriter, r *http.Request) {
+	type page struct {
+		Locations []string `json:"locations"`
+	}
+
+	locs, err := rt.Control.listLocations(r.Context(), ListLocationsQuery{Search: r.URL.Query().Get("query")})
+	if err != nil {
+		api.RespondWithError(r.Context(), w, err)
+		return
+	}
+
+	res := page{
+		Locations: locs,
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error marshalling locations to JSON", "error", err)
+		return
+	}
+
+	api.AddJSONContentType(w)
+	_, err = w.Write(b)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
+	}
+}
+
+func (rt *APIRouter) apiListPositionCodes(w http.ResponseWriter, r *http.Request) {
+	type page struct {
+		PositionCodes []string `json:"positionCodes"`
+	}
+
+	posCodes, err := rt.Control.listPositionCodes(r.Context(), ListPositionCodesQuery{Search: r.URL.Query().Get("query")})
+	if err != nil {
+		api.RespondWithError(r.Context(), w, err)
+		return
+	}
+
+	res := page{
+		PositionCodes: posCodes,
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error marshalling position codes to JSON", "error", err)
+		return
+	}
+
+	api.AddJSONContentType(w)
+	_, err = w.Write(b)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error writing to HTTP response", "error", err)
+	}
+}
+
 type apiPart struct {
 	ID           int64  `json:"id"`
 	AssetID      int64  `json:"assetID"`

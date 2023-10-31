@@ -45,6 +45,8 @@ type AssetRepo interface {
 
 	ListCategories(ctx context.Context, exec bob.Executor, query ListCategoriesQuery) ([]Category, error)
 	ListCustomAttrNames(ctx context.Context, exec bob.Executor, query ListCustomAttrNamesQuery) ([]string, error)
+	ListLocations(ctx context.Context, exec bob.Executor, query ListLocationsQuery) ([]string, error)
+	ListPositionCodes(ctx context.Context, exec bob.Executor, query ListPositionCodesQuery) ([]string, error)
 }
 
 func (c *Control) generateTag(ctx context.Context) (string, error) {
@@ -252,6 +254,19 @@ func (c *Control) listCustomAttrNames(ctx context.Context, query ListCustomAttrN
 		return c.AssetRepo.ListCustomAttrNames(ctx, tx, query)
 	})
 }
+
+func (c *Control) listLocations(ctx context.Context, query ListLocationsQuery) ([]string, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]string, error) {
+		return c.AssetRepo.ListLocations(ctx, tx, query)
+	})
+}
+
+func (c *Control) listPositionCodes(ctx context.Context, query ListPositionCodesQuery) ([]string, error) {
+	return database.InTransaction(ctx, c.DB, func(ctx context.Context, tx bob.Tx) ([]string, error) {
+		return c.AssetRepo.ListPositionCodes(ctx, tx, query)
+	})
+}
+
 type getLabelSheetsQuery struct {
 	baseURL *url.URL
 	ids     []int64

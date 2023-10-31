@@ -164,3 +164,15 @@ type ListCustomAttrNamesQuery struct {
 	Page     int
 	PageSize int
 }
+
+type ListLocationsQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}
+
+type ListPositionCodesQuery struct {
+	Search   string
+	Page     int
+	PageSize int
+}

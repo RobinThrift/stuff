@@ -552,6 +552,73 @@ func (ar *RepoSQLite) ListCustomAttrNames(ctx context.Context, exec bob.Executor
 
 	return names, nil
 }
+
+func (ar *RepoSQLite) ListLocations(ctx context.Context, exec bob.Executor, query ListLocationsQuery) ([]string, error) {
+	limit := query.PageSize
+	if limit == 0 {
+		limit = 25
+	}
+	offset := limit * query.Page
+
+	mods := []bob.Mod[*dialect.SelectQuery]{
+		sm.Limit(limit),
+		sm.Offset(offset),
+		sm.Distinct(),
+	}
+
+	if query.Search != "" {
+		mods = append(mods, models.SelectWhere.Locations.LocName.Like("%"+query.Search+"%"))
+	}
+
+	locs, err := models.Locations.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, err
+	}
+
+	names := make([]string, 0, len(locs))
+
+	for _, l := range locs {
+		if l.LocName.IsSet() {
+			names = append(names, l.LocName.GetOrZero())
+		}
+	}
+
+	return names, nil
+}
+
+func (ar *RepoSQLite) ListPositionCodes(ctx context.Context, exec bob.Executor, query ListPositionCodesQuery) ([]string, error) {
+	limit := query.PageSize
+	if limit == 0 {
+		limit = 25
+	}
+	offset := limit * query.Page
+
+	mods := []bob.Mod[*dialect.SelectQuery]{
+		sm.Limit(limit),
+		sm.Offset(offset),
+		sm.Distinct(),
+	}
+
+	if query.Search != "" {
+		mods = append(mods, models.SelectWhere.PositionCodes.PosCode.Like("%"+query.Search+"%"))
+	}
+
+	posCodes, err := models.PositionCodes.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, err
+	}
+
+	codes := make([]string, 0, len(posCodes))
+
+	for _, l := range posCodes {
+		if l.PosCode.IsSet() {
+			codes = append(codes, l.PosCode.GetOrZero())
+		}
+	}
+
+	return codes, nil
+}
+
 func (ar *RepoSQLite) CreateFiles(ctx context.Context, exec bob.Executor, files []*File) error {
 	setter := make([]*models.AssetFileSetter, 0, len(files))
 	for _, f := range files {
