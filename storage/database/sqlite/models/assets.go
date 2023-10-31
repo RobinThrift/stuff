@@ -26,31 +26,31 @@ import (
 
 // Asset is an object representing the database table.
 type Asset struct {
-	ID                int64                                      `db:"id,pk" `
-	ParentAssetID     null.Val[int64]                            `db:"parent_asset_id" `
-	Status            string                                     `db:"status" `
-	Tag               null.Val[string]                           `db:"tag" `
-	Name              string                                     `db:"name" `
-	Category          string                                     `db:"category" `
-	Model             null.Val[string]                           `db:"model" `
-	ModelNo           null.Val[string]                           `db:"model_no" `
-	SerialNo          null.Val[string]                           `db:"serial_no" `
-	Manufacturer      null.Val[string]                           `db:"manufacturer" `
-	Notes             null.Val[string]                           `db:"notes" `
-	ImageURL          null.Val[string]                           `db:"image_url" `
-	ThumbnailURL      null.Val[string]                           `db:"thumbnail_url" `
-	WarrantyUntil     null.Val[types.SQLiteDatetime]             `db:"warranty_until" `
-	CustomAttrs       null.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs" `
-	CheckedOutTo      null.Val[int64]                            `db:"checked_out_to" `
-	Location          null.Val[string]                           `db:"location" `
-	PositionCode      null.Val[string]                           `db:"position_code" `
-	PartsTotalCounter int64                                      `db:"parts_total_counter" `
-	CreatedBy         int64                                      `db:"created_by" `
-	CreatedAt         types.SQLiteDatetime                       `db:"created_at" `
-	UpdatedAt         types.SQLiteDatetime                       `db:"updated_at" `
-	Type              string                                     `db:"type" `
-	Quantity          uint64                                     `db:"quantity" `
-	QuantityUnit      null.Val[string]                           `db:"quantity_unit" `
+	ID                int64                                        `db:"id,pk" `
+	ParentAssetID     null.Val[int64]                              `db:"parent_asset_id" `
+	Status            string                                       `db:"status" `
+	Tag               null.Val[string]                             `db:"tag" `
+	Name              string                                       `db:"name" `
+	Category          string                                       `db:"category" `
+	Model             null.Val[string]                             `db:"model" `
+	ModelNo           null.Val[string]                             `db:"model_no" `
+	SerialNo          null.Val[string]                             `db:"serial_no" `
+	Manufacturer      null.Val[string]                             `db:"manufacturer" `
+	Notes             null.Val[string]                             `db:"notes" `
+	ImageURL          null.Val[string]                             `db:"image_url" `
+	ThumbnailURL      null.Val[string]                             `db:"thumbnail_url" `
+	WarrantyUntil     null.Val[types.SQLiteDatetime]               `db:"warranty_until" `
+	CustomAttrs       null.Val[types.SQLiteJSON[[]map[string]any]] `db:"custom_attrs" `
+	CheckedOutTo      null.Val[int64]                              `db:"checked_out_to" `
+	Location          null.Val[string]                             `db:"location" `
+	PositionCode      null.Val[string]                             `db:"position_code" `
+	PartsTotalCounter int64                                        `db:"parts_total_counter" `
+	CreatedBy         int64                                        `db:"created_by" `
+	CreatedAt         types.SQLiteDatetime                         `db:"created_at" `
+	UpdatedAt         types.SQLiteDatetime                         `db:"updated_at" `
+	Type              string                                       `db:"type" `
+	Quantity          uint64                                       `db:"quantity" `
+	QuantityUnit      null.Val[string]                             `db:"quantity_unit" `
 
 	R assetR `db:"-" `
 }
@@ -84,31 +84,31 @@ type assetR struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AssetSetter struct {
-	ID                omit.Val[int64]                                `db:"id,pk"`
-	ParentAssetID     omitnull.Val[int64]                            `db:"parent_asset_id"`
-	Status            omit.Val[string]                               `db:"status"`
-	Tag               omitnull.Val[string]                           `db:"tag"`
-	Name              omit.Val[string]                               `db:"name"`
-	Category          omit.Val[string]                               `db:"category"`
-	Model             omitnull.Val[string]                           `db:"model"`
-	ModelNo           omitnull.Val[string]                           `db:"model_no"`
-	SerialNo          omitnull.Val[string]                           `db:"serial_no"`
-	Manufacturer      omitnull.Val[string]                           `db:"manufacturer"`
-	Notes             omitnull.Val[string]                           `db:"notes"`
-	ImageURL          omitnull.Val[string]                           `db:"image_url"`
-	ThumbnailURL      omitnull.Val[string]                           `db:"thumbnail_url"`
-	WarrantyUntil     omitnull.Val[types.SQLiteDatetime]             `db:"warranty_until"`
-	CustomAttrs       omitnull.Val[types.SQLiteJSON[map[string]any]] `db:"custom_attrs"`
-	CheckedOutTo      omitnull.Val[int64]                            `db:"checked_out_to"`
-	Location          omitnull.Val[string]                           `db:"location"`
-	PositionCode      omitnull.Val[string]                           `db:"position_code"`
-	PartsTotalCounter omit.Val[int64]                                `db:"parts_total_counter"`
-	CreatedBy         omit.Val[int64]                                `db:"created_by"`
-	CreatedAt         omit.Val[types.SQLiteDatetime]                 `db:"created_at"`
-	UpdatedAt         omit.Val[types.SQLiteDatetime]                 `db:"updated_at"`
-	Type              omit.Val[string]                               `db:"type"`
-	Quantity          omit.Val[uint64]                               `db:"quantity"`
-	QuantityUnit      omitnull.Val[string]                           `db:"quantity_unit"`
+	ID                omit.Val[int64]                                  `db:"id,pk"`
+	ParentAssetID     omitnull.Val[int64]                              `db:"parent_asset_id"`
+	Status            omit.Val[string]                                 `db:"status"`
+	Tag               omitnull.Val[string]                             `db:"tag"`
+	Name              omit.Val[string]                                 `db:"name"`
+	Category          omit.Val[string]                                 `db:"category"`
+	Model             omitnull.Val[string]                             `db:"model"`
+	ModelNo           omitnull.Val[string]                             `db:"model_no"`
+	SerialNo          omitnull.Val[string]                             `db:"serial_no"`
+	Manufacturer      omitnull.Val[string]                             `db:"manufacturer"`
+	Notes             omitnull.Val[string]                             `db:"notes"`
+	ImageURL          omitnull.Val[string]                             `db:"image_url"`
+	ThumbnailURL      omitnull.Val[string]                             `db:"thumbnail_url"`
+	WarrantyUntil     omitnull.Val[types.SQLiteDatetime]               `db:"warranty_until"`
+	CustomAttrs       omitnull.Val[types.SQLiteJSON[[]map[string]any]] `db:"custom_attrs"`
+	CheckedOutTo      omitnull.Val[int64]                              `db:"checked_out_to"`
+	Location          omitnull.Val[string]                             `db:"location"`
+	PositionCode      omitnull.Val[string]                             `db:"position_code"`
+	PartsTotalCounter omit.Val[int64]                                  `db:"parts_total_counter"`
+	CreatedBy         omit.Val[int64]                                  `db:"created_by"`
+	CreatedAt         omit.Val[types.SQLiteDatetime]                   `db:"created_at"`
+	UpdatedAt         omit.Val[types.SQLiteDatetime]                   `db:"updated_at"`
+	Type              omit.Val[string]                                 `db:"type"`
+	Quantity          omit.Val[uint64]                                 `db:"quantity"`
+	QuantityUnit      omitnull.Val[string]                             `db:"quantity_unit"`
 }
 
 func (s AssetSetter) SetColumns() []string {
@@ -606,7 +606,7 @@ type assetWhere[Q sqlite.Filterable] struct {
 	ImageURL          sqlite.WhereNullMod[Q, string]
 	ThumbnailURL      sqlite.WhereNullMod[Q, string]
 	WarrantyUntil     sqlite.WhereNullMod[Q, types.SQLiteDatetime]
-	CustomAttrs       sqlite.WhereNullMod[Q, types.SQLiteJSON[map[string]any]]
+	CustomAttrs       sqlite.WhereNullMod[Q, types.SQLiteJSON[[]map[string]any]]
 	CheckedOutTo      sqlite.WhereNullMod[Q, int64]
 	Location          sqlite.WhereNullMod[Q, string]
 	PositionCode      sqlite.WhereNullMod[Q, string]
@@ -635,7 +635,7 @@ func AssetWhere[Q sqlite.Filterable]() assetWhere[Q] {
 		ImageURL:          sqlite.WhereNull[Q, string](AssetColumns.ImageURL),
 		ThumbnailURL:      sqlite.WhereNull[Q, string](AssetColumns.ThumbnailURL),
 		WarrantyUntil:     sqlite.WhereNull[Q, types.SQLiteDatetime](AssetColumns.WarrantyUntil),
-		CustomAttrs:       sqlite.WhereNull[Q, types.SQLiteJSON[map[string]any]](AssetColumns.CustomAttrs),
+		CustomAttrs:       sqlite.WhereNull[Q, types.SQLiteJSON[[]map[string]any]](AssetColumns.CustomAttrs),
 		CheckedOutTo:      sqlite.WhereNull[Q, int64](AssetColumns.CheckedOutTo),
 		Location:          sqlite.WhereNull[Q, string](AssetColumns.Location),
 		PositionCode:      sqlite.WhereNull[Q, string](AssetColumns.PositionCode),

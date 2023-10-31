@@ -239,6 +239,8 @@
 				-}}
 			</div>
 
+			{{ template "edit_custom_attrs" $ }}
+
 			<h3 x-show="type !== 'CONSUMABLE'" class="mt-2 px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">Purchase Info</h3>
 			<div x-show="type !== 'CONSUMABLE'" class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:grid md:grid-cols-4 lg:ms-2 flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
 				{{ $purchase := index .Asset.Purchases 0 }}
@@ -581,5 +583,49 @@
 	</table>
 
 	<button class="btn btn-secondary mt-5" x-on:click.prevent="addItem()">Add Purchase</button>
+</div>
+{{ end }}
+
+{{ define "edit_custom_attrs" }}
+<h3 class="px-3 pb-3 col-span-4 font-bold text-lg md:text-xl">Custom Attributes</h3>
+<div
+	class="lg:ms-2 p-5 border-b mb-5 lg:border border-gray-300 lg:rounded-md flex flex-col"
+	x-data="{
+		customAttrs: {{ json .Data.Asset.CustomAttrs }} ?? [],
+
+		addItem() {
+			this.customAttrs.push({name: `Custom Attribute ${this.customAttrs.length}`, value: 'value'})
+		},
+
+		removeItem(i) {
+			this.customAttrs.splice(i, 1)
+		}
+	}"
+>
+	<ul>
+		<template x-for="(attr, i) in customAttrs">
+			<li class="flex flex-row mb-5">
+				<input
+					class="input w-1/3 me-2"
+					type="text"
+					x-bind:name="`custom_attrs[${i}].name`"
+					x-bind:id="`custom_attrs[${i}].name`"
+					x-bind:value="attr.name"
+				/>
+
+				<input
+					class="input flex-1 me-2"
+					type="text"
+					x-bind:name="`custom_attrs[${i}].value`"
+					x-bind:id="`custom_attrs[${i}].value`"
+					x-bind:value="attr.value"
+				/>
+
+				<button class="btn btn-danger max-w-fit" x-on:click.prevent="removeItem(i)"><x-icon class="w-6 h-6" icon="x-square" /></button>
+			</li>
+		</template>
+	</ul>
+
+	<button class="btn btn-secondary max-w-fit" x-on:click.prevent="addItem()">Add Attribute</button>
 </div>
 {{ end }}

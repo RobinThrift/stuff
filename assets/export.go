@@ -26,6 +26,11 @@ func exportAssetsAsJSON(w io.Writer, assets []*Asset) error {
 			})
 		}
 
+		customAttrs := make([]apiCustomAttr, 0, len(asset.CustomAttrs))
+		for _, ca := range asset.CustomAttrs {
+			customAttrs = append(customAttrs, apiCustomAttr(ca))
+		}
+
 		forExport = append(forExport, &apiAsset{
 			Tag:           asset.Tag,
 			Status:        asset.Status,
@@ -37,7 +42,7 @@ func exportAssetsAsJSON(w io.Writer, assets []*Asset) error {
 			Manufacturer:  asset.Manufacturer,
 			Notes:         asset.Notes,
 			WarrantyUntil: asset.WarrantyUntil,
-			CustomAttrs:   asset.CustomAttrs,
+			CustomAttrs:   customAttrs,
 			Location:      asset.Location,
 			PositionCode:  asset.PositionCode,
 			Purchases:     purchases,

@@ -103,6 +103,15 @@
 			{{ end }}
 		</div>
 
+		<div class="lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-2">
+			{{ range .CustomAttrs }}
+			<div class="lg:col-span-1">
+				<dt class="block text-neutral-400 font-semibold">{{ .Name }}</dt>
+				<dd>{{ .Value }}</dd>
+			</div>
+			{{ end }}
+		</div>
+
 		<div class="lg:col-span-2 mb-5">
 			<span class="block text-neutral-400 font-semibold">Notes</span>
 			<p>

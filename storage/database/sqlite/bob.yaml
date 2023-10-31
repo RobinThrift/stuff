@@ -53,7 +53,7 @@ replacements:
     nullable: true
 
   replace:
-    type: "types.SQLiteJSON[map[string]any]"
+    type: "types.SQLiteJSON[[]map[string]any]"
     imports: ['"github.com/RobinThrift/stuff/storage/database/sqlite/types"']
 
 no_factory: true

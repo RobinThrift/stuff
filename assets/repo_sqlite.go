@@ -632,7 +632,7 @@ func mapDBModelToAsset(model *models.Asset, children []*models.Asset) *Asset {
 		ImageURL:      model.ImageURL.GetOrZero(),
 		ThumbnailURL:  model.ThumbnailURL.GetOrZero(),
 		WarrantyUntil: model.WarrantyUntil.GetOrZero().Time,
-		CustomAttrs:   model.CustomAttrs.GetOrZero().JSON,
+		CustomAttrs:   unmarshalCustomAttrs(model.CustomAttrs.GetOrZero().JSON),
 		Quantity:      model.Quantity,
 		QuantityUnit:  model.QuantityUnit.GetOrZero(),
 		CheckedOutTo:  model.CheckedOutTo.GetOrZero(),
@@ -710,10 +710,15 @@ func omitnullTime(t time.Time) omitnull.Val[types.SQLiteDatetime] {
 	return v
 }
 
-func omitnullCustomAttrs(a map[string]any) omitnull.Val[types.SQLiteJSON[map[string]any]] {
-	j := types.NewSQLiteJSON(a)
+func omitnullCustomAttrs(cas []CustomAttr) omitnull.Val[types.SQLiteJSON[[]map[string]any]] {
+	encoded := make([]map[string]any, 0, len(cas))
+	for _, ca := range cas {
+		encoded = append(encoded, map[string]any{"name": ca.Name, "value": ca.Value})
+	}
+
+	j := types.NewSQLiteJSON(encoded)
 	v := omitnull.From(j)
-	if len(a) == 0 {
+	if len(cas) == 0 {
 		v.Null()
 	}
 
@@ -748,14 +753,31 @@ func nullTime(t time.Time) null.Val[types.SQLiteDatetime] {
 	return v
 }
 
-func nullCustomAttrs(a map[string]any) null.Val[types.SQLiteJSON[map[string]any]] {
-	j := types.NewSQLiteJSON(a)
+func nullCustomAttrs(cas []CustomAttr) null.Val[types.SQLiteJSON[[]map[string]any]] {
+	encoded := make([]map[string]any, 0, len(cas))
+	for _, ca := range cas {
+		encoded = append(encoded, map[string]any{"name": ca.Name, "value": ca.Value})
+	}
+
+	j := types.NewSQLiteJSON(encoded)
 	v := null.From(j)
-	if len(a) == 0 {
+	if len(cas) == 0 {
 		v.Null()
 	}
 
 	return v
+}
+
+func unmarshalCustomAttrs(encoded []map[string]any) []CustomAttr {
+	cas := make([]CustomAttr, 0, len(encoded))
+	for _, ca := range encoded {
+		cas = append(cas, CustomAttr{
+			Name:  ca["name"].(string),
+			Value: ca["value"],
+		})
+	}
+
+	return cas
 }
 
 func isAssetsFTSColumn(s string) (string, bool) {

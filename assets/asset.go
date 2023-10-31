@@ -40,20 +40,20 @@ type Asset struct {
 
 	Status Status `form:"status"`
 
-	Tag           string         `form:"tag"`
-	Name          string         `form:"name"`
-	Category      string         `form:"category"`
-	Model         string         `form:"model"`
-	ModelNo       string         `form:"model_no"`
-	SerialNo      string         `form:"serial_no"`
-	Manufacturer  string         `form:"manufacturer"`
-	Notes         string         `form:"notes"`
-	ImageURL      string         `form:"-"`
-	ThumbnailURL  string         `form:"-"`
-	WarrantyUntil time.Time      `form:"warranty_until,omitempty"`
-	Quantity      uint64         `form:"quantity"`
-	QuantityUnit  string         `form:"quantity_unit"`
-	CustomAttrs   map[string]any `form:"custom_attrs"`
+	Tag           string       `form:"tag"`
+	Name          string       `form:"name"`
+	Category      string       `form:"category"`
+	Model         string       `form:"model"`
+	ModelNo       string       `form:"model_no"`
+	SerialNo      string       `form:"serial_no"`
+	Manufacturer  string       `form:"manufacturer"`
+	Notes         string       `form:"notes"`
+	ImageURL      string       `form:"-"`
+	ThumbnailURL  string       `form:"-"`
+	WarrantyUntil time.Time    `form:"warranty_until,omitempty"`
+	Quantity      uint64       `form:"quantity"`
+	QuantityUnit  string       `form:"quantity_unit"`
+	CustomAttrs   []CustomAttr `form:"custom_attrs"`
 
 	CheckedOutTo int64  `form:"checked_out_to"`
 	Location     string `form:"location"`
@@ -67,6 +67,11 @@ type Asset struct {
 	Files []*File `form:"-"`
 
 	MetaInfo MetaInfo `form:"-"`
+}
+
+type CustomAttr struct {
+	Name  string `form:"name" json:"name,omitempty"`
+	Value any    `form:"value" json:"value,omitempty"`
 }
 
 type Purchase struct {

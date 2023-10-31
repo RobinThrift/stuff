@@ -67,21 +67,21 @@ type apiPart struct {
 }
 
 type apiAsset struct {
-	ID            int64          `json:"id,omitempty"`
-	ParentAssetID int64          `json:"parentAssetID,omitempty"`
-	Tag           string         `json:"tag"`
-	Status        Status         `json:"status"`
-	Name          string         `json:"name"`
-	Category      string         `json:"category"`
-	Model         string         `json:"model,omitempty"`
-	ModelNo       string         `json:"modelNo,omitempty"`
-	SerialNo      string         `json:"serialNo,omitempty"`
-	Manufacturer  string         `json:"manufacturer,omitempty"`
-	Notes         string         `json:"notes,omitempty"`
-	ImageURL      string         `json:"imageURL,omitempty"`
-	ThumbnailURL  string         `json:"thumbnailURL,omitempty"`
-	WarrantyUntil time.Time      `json:"warrantyUntil,omitempty"`
-	CustomAttrs   map[string]any `json:"customAttrs,omitempty"`
+	ID            int64           `json:"id,omitempty"`
+	ParentAssetID int64           `json:"parentAssetID,omitempty"`
+	Tag           string          `json:"tag"`
+	Status        Status          `json:"status"`
+	Name          string          `json:"name"`
+	Category      string          `json:"category"`
+	Model         string          `json:"model,omitempty"`
+	ModelNo       string          `json:"modelNo,omitempty"`
+	SerialNo      string          `json:"serialNo,omitempty"`
+	Manufacturer  string          `json:"manufacturer,omitempty"`
+	Notes         string          `json:"notes,omitempty"`
+	ImageURL      string          `json:"imageURL,omitempty"`
+	ThumbnailURL  string          `json:"thumbnailURL,omitempty"`
+	WarrantyUntil time.Time       `json:"warrantyUntil,omitempty"`
+	CustomAttrs   []apiCustomAttr `json:"customAttrs,omitempty"`
 
 	Location     string `json:"location,omitempty"`
 	PositionCode string `json:"positionCode,omitempty"`
@@ -90,6 +90,11 @@ type apiAsset struct {
 
 	PartsTotalCounter int        `json:"partsTotalCounter,omitempty"`
 	Parts             []*apiPart `json:"parts,omitempty"`
+}
+
+type apiCustomAttr struct {
+	Name  string `json:"name,omitempty"`
+	Value any    `json:"value,omitempty"`
 }
 
 type apiPurchase struct {
@@ -141,6 +146,11 @@ func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		customAttrs := make([]apiCustomAttr, 0, len(asset.CustomAttrs))
+		for _, ca := range asset.CustomAttrs {
+			customAttrs = append(customAttrs, apiCustomAttr(ca))
+		}
+
 		res.Assets = append(res.Assets, &apiAsset{
 			ID:                asset.ID,
 			ParentAssetID:     asset.ParentAssetID,
@@ -156,7 +166,7 @@ func (rt *APIRouter) apiListAssets(w http.ResponseWriter, r *http.Request) {
 			ImageURL:          asset.ImageURL,
 			ThumbnailURL:      asset.ThumbnailURL,
 			WarrantyUntil:     asset.WarrantyUntil,
-			CustomAttrs:       asset.CustomAttrs,
+			CustomAttrs:       customAttrs,
 			Location:          asset.Location,
 			PositionCode:      asset.PositionCode,
 			Purchases:         purchases,

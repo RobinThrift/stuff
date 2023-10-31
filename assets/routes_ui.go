@@ -296,8 +296,10 @@ func (rt *UIRouter) handleAssetsEditPost(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 
+	// set to nil so items can be deleted
 	asset.Parts = nil
 	asset.Purchases = nil
+	asset.CustomAttrs = nil
 
 	err = rt.Decoder.Decode(asset, r.PostForm)
 	if err != nil {
