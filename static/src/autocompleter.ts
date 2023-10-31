@@ -73,49 +73,77 @@ class AutoCompleter {
 }
 
 export function plugin(Alpine: typeof _Alpine) {
-    Alpine.data(
-        "autocompleter",
-        // biome-ignore lint/suspicious/noExplicitAny: The alpine types are bad
-        ({ source, itemsAt, valueAt, labelAt, value }: any) => ({
-            open: false,
-            qs: null,
-            items: [] as SuggestionItem[],
-            value,
+    Alpine.directive(
+        "autocomplete",
+        (el, { expression }, { evaluateLater, effect, cleanup }) => {
+            let input = el as HTMLInputElement
+            let dl = document.createElement("datalist")
+            dl.id = `${input.id}_autocomplete`
+            input.setAttribute("list", dl.id)
+            document.documentElement.appendChild(dl)
 
-            autocompleter: new AutoCompleter({
-                source,
-                itemsAt,
-                valueAt,
-                labelAt: labelAt,
-            }),
+            let state = Alpine.reactive({
+                items: [] as SuggestionItem[],
+                autocompleter: undefined as unknown as AutoCompleter,
+                debounce: 300,
+            })
 
-            async onChange(el: HTMLInputElement) {
-                if (!el.value.length) {
-                    this.items = []
-                    this.open = false
+            let init = evaluateLater(expression)
+
+            effect(() => {
+                // biome-ignore lint/suspicious/noExplicitAny: The alpine types are bad
+                init(({ source, itemsAt, valueAt, labelAt, debounce }: any) => {
+                    state.autocompleter = new AutoCompleter({
+                        source,
+                        itemsAt,
+                        valueAt,
+                        labelAt: labelAt,
+                    })
+                    if (debounce) {
+                        state.debounce = debounce
+                    }
+                })
+            })
+
+            effect(() => {
+                dl.innerHTML = ""
+                state.items.forEach((item) => {
+                    let opt = document.createElement("option")
+                    opt.value = item.value
+                    opt.innerText = item.label
+                    dl.appendChild(opt)
+                })
+            })
+
+            let debounce: ReturnType<typeof setTimeout> | undefined
+            let onchange = () => {
+                if (!input.value.length) {
+                    state.items = []
                     return
                 }
 
-                this.items = await this.autocompleter.fetch(el.value)
-
-                this.open = this.items.length > 0
-                if (this.open) {
-                    let pos = el.getBoundingClientRect()
-                    let top = pos.top + window.scrollY
-                    let left = pos.left + window.scrollX
-                    this.$refs.suggestions.style.left = `${left}px`
-                    this.$refs.suggestions.style.top = `${
-                        top + el.offsetHeight
-                    }px`
-                    this.$refs.suggestions.style.minWidth = `${el.offsetWidth}px`
+                if (debounce) {
+                    clearTimeout(debounce)
                 }
-            },
 
-            onClickSuggestion(item: SuggestionItem) {
-                this.value = ""
-                this.value = item.value
-                this.open = false
-            },
-        }),
+                debounce = setTimeout(() => {
+                    if (!input.value.length) {
+                        state.items = []
+                        return
+                    }
+
+                    state.autocompleter.fetch(input.value).then((items) => {
+                        state.items = items
+                    })
+                }, state.debounce)
+            }
+
+            input.addEventListener("input", onchange)
+
+            cleanup(() => {
+                input.removeEventListener("input", onchange)
+                dl.remove()
+            })
+        },
     )
 }

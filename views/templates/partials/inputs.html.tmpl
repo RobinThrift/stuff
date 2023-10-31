@@ -25,12 +25,14 @@ Input:
 	Required bool
 	Disabled bool
 	Readonly bool
-	AutoComplete string
 	Icon string
-	ValidationErr string
+
+	AutoComplete string
 	AutoCompleteSource string
 	AutoCompleteValueAt string
 	AutoCompleteLabelAt string
+
+	ValidationErr string
 
 	XRef string
 	XData string
@@ -49,15 +51,6 @@ Input:
 	{{ if ne .Class "" -}} class="{{ .Class }}" {{- end -}}
 	{{ if has . "XData" -}} x-data="{{ .XData }}" {{- end -}}
 
-	{{ if has . "AutoCompleteSource" }}
-	x-data="autocompleter({
-		'source': '{{ .AutoCompleteSource}}',
-		'itemsAt': '{{ .AutoCompleteItemsAt }}',
-		'valueAt': '{{ .AutoCompleteValueAt }}',
-		'labelAt': '{{ .AutoCompleteLabelAt }}',
-		'value': '{{ .Value }}',
-	})"
-	{{- end }}
 >
 	{{ if ne .Label "" }}
 	{{ template "_label" . }}
@@ -116,6 +109,12 @@ Input:
 			{{ end }}
 			{{ if has . "AutoCompleteSource" }}
 			autocomplete="off"
+			x-autocomplete="{
+				'source': '{{ .AutoCompleteSource}}',
+				'itemsAt': '{{ .AutoCompleteItemsAt }}',
+				'valueAt': '{{ .AutoCompleteValueAt }}',
+				'labelAt': '{{ .AutoCompleteLabelAt }}',
+			}"
 			{{ end }}
 
 			class="input {{ if has . "Icon"  -}} pl-11 {{- end }} {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
@@ -127,36 +126,7 @@ Input:
 			{{ if has . "XBindValue" }}
 			x-bind:value="{{ .XBindValue }}"
 			{{ end }}
-
-			{{ if has . "AutoCompleteSource"}}
-			@keyup.debounce.300ms="onChange($el)"
-			x-bind:value="value"
-			{{ end }}
 		/>
-
-		{{ if has . "AutoCompleteSource" }}
-		<template x-teleport="body">
-			<div
-				x-ref="suggestions" x-show="open"
-				class="absolute top-0"
-				@click.outside="open = false"
-			>
-				<div class="h-auto overflow-auto bg-white border rounded-md shadow-sm border-neutral-200/70">
-					<ul class="divide-y divide-gray-100 text-sm w-full">
-						<template x-for="item in items">
-							<li class="w-100">
-								<button
-									x-text="item.label"
-									class="p-2 blcok w-full hover:bg-blue-500 hover:text-white text-left"
-									@click="onClickSuggestion(item)"
-								></button>
-							</li>
-						</template>
-					</ul>
-				</div>
-			</div>
-		</template>
-		{{ end }}
 
 		{{ if ne .ValidationErr "" }}
 		<span class="block text-red-500">{{ .ValidationErr }}</span>
