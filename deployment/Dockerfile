@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:20-alpine3.18 as assets
+FROM --platform=$BUILDPLATFORM node:20-alpine3.18 as frontend
 
 RUN apk update && apk upgrade && apk add --no-cache just curl
 
@@ -13,7 +13,7 @@ FROM --platform=$BUILDPLATFORM golang:1.21.2-alpine3.18 as builder
 RUN apk update && apk upgrade && apk add --no-cache just
 
 COPY . /stuff
-COPY --from=assets /stuff/static/build /stuff/static/build
+COPY --from=frontend /stuff/frontend/build /stuff/frontend/build
 
 WORKDIR /stuff
 

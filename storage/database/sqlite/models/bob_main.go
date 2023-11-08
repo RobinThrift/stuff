@@ -24,6 +24,7 @@ var TableNames = struct {
 	CustomAttrNames string
 	Locations       string
 	Manufacturers   string
+	Models          string
 	PositionCodes   string
 	Suppliers       string
 }{
@@ -40,6 +41,7 @@ var TableNames = struct {
 	CustomAttrNames: "custom_attr_names",
 	Locations:       "locations",
 	Manufacturers:   "manufacturers",
+	Models:          "models",
 	PositionCodes:   "position_codes",
 	Suppliers:       "suppliers",
 }
@@ -58,6 +60,7 @@ var ColumnNames = struct {
 	CustomAttrNames customAttrNameColumnNames
 	Locations       locationColumnNames
 	Manufacturers   manufacturerColumnNames
+	Models          modelColumnNames
 	PositionCodes   positionCodeColumnNames
 	Suppliers       supplierColumnNames
 }{
@@ -173,7 +176,7 @@ var ColumnNames = struct {
 		UpdatedAt:   "updated_at",
 	},
 	Categories: categoryColumnNames{
-		Name: "name",
+		CatName: "cat_name",
 	},
 	CustomAttrNames: customAttrNameColumnNames{
 		AttrName: "attr_name",
@@ -183,6 +186,10 @@ var ColumnNames = struct {
 	},
 	Manufacturers: manufacturerColumnNames{
 		Name: "name",
+	},
+	Models: modelColumnNames{
+		Model:   "model",
+		ModelNo: "model_no",
 	},
 	PositionCodes: positionCodeColumnNames{
 		PosCode: "pos_code",
@@ -213,6 +220,7 @@ func Where[Q sqlite.Filterable]() struct {
 	CustomAttrNames customAttrNameWhere[Q]
 	Locations       locationWhere[Q]
 	Manufacturers   manufacturerWhere[Q]
+	Models          modelWhere[Q]
 	PositionCodes   positionCodeWhere[Q]
 	Suppliers       supplierWhere[Q]
 } {
@@ -230,6 +238,7 @@ func Where[Q sqlite.Filterable]() struct {
 		CustomAttrNames customAttrNameWhere[Q]
 		Locations       locationWhere[Q]
 		Manufacturers   manufacturerWhere[Q]
+		Models          modelWhere[Q]
 		PositionCodes   positionCodeWhere[Q]
 		Suppliers       supplierWhere[Q]
 	}{
@@ -246,6 +255,7 @@ func Where[Q sqlite.Filterable]() struct {
 		CustomAttrNames: CustomAttrNameWhere[Q](),
 		Locations:       LocationWhere[Q](),
 		Manufacturers:   ManufacturerWhere[Q](),
+		Models:          ModelWhere[Q](),
 		PositionCodes:   PositionCodeWhere[Q](),
 		Suppliers:       SupplierWhere[Q](),
 	}

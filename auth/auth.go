@@ -1,11 +1,8 @@
 package auth
 
 import (
-	"errors"
 	"time"
 )
-
-var ErrLocalAuthUserNotFound = errors.New("user for local auth not found")
 
 type LocalAuthUser struct {
 	ID                     int64

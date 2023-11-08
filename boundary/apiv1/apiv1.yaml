@@ -1,0 +1,1070 @@
+openapi: 3.0.0
+info:
+  title: Stuff API
+  description: Stuff RESTish API.
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/api
+  description: Locally running development server.
+
+paths:
+  /v1/assets:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: type
+        in: query
+        required: false
+        schema: { type: string }
+      - name: order_by
+        in: query
+        required: false
+        schema: { type: string }
+      - name: order_dir
+        in: query
+        required: false
+        schema: { type: string }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListAssets
+
+      responses:
+        "200":
+          description: A paginated list of assets.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetListPage"
+
+    post:
+      operationId: CreateAsset
+      requestBody:
+        $ref: "#/components/requestBodies/CreateAssetRequest"
+      responses:
+        "201":
+          description: The newly created asset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asset"
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /v1/assets/{tagOrID}:
+    parameters:
+    - name: tagOrID
+      in: path
+      required: true
+      schema:
+        type: string
+
+    get:
+      parameters:
+      - name: include_children
+        in: query
+        required: false
+        schema: { type: boolean }
+
+      operationId: GetAsset
+      responses:
+        "200":
+          description: The requested asset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asset"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Asset not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      operationId: UpdateAsset
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateAssetRequest"
+      responses:
+        "200":
+          description: The updated asset.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asset"
+        "400":
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: DeleteAsset
+      responses:
+        "204":
+          description: The asset was deleted successfully.
+        "401":
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /v1/tags:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListTags
+
+      responses:
+        "200":
+          description: A paginated list of tags.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagListPage"
+
+  /v1/categories:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListCategories
+
+      responses:
+        "200":
+          description: A paginated list of categories.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListPage"
+
+  /v1/locations:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListLocations
+
+      responses:
+        "200":
+          description: A paginated list of locations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationListPage"
+
+  /v1/locations/position_codes:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListPositionCodes
+
+      responses:
+        "200":
+          description: A paginated list of position codes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PositionCodeListPage"
+
+  /v1/models:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListModels
+
+      responses:
+        "200":
+          description: A paginated list of models.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelListPage"
+
+  /v1/manufacturers:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListManufacturers
+
+      responses:
+        "200":
+          description: A paginated list of manufacturers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManufacturerListPage"
+
+  /v1/custom_attrs:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListCustomAttrs
+
+      responses:
+        "200":
+          description: A paginated list of custom attributes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomAttrListPage"
+
+
+  /v1/suppliers:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListSuppliers
+
+      responses:
+        "200":
+          description: A paginated list of suppliers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SupplierListPage"
+
+  /v1/users:
+    get:
+      parameters:
+      - name: page_size
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: page
+        in: query
+        required: false
+        schema: { type: integer }
+      - name: type
+        in: query
+        required: false
+        schema: { type: string }
+      - name: order_by
+        in: query
+        required: false
+        schema: { type: string }
+      - name: order_dir
+        in: query
+        required: false
+        schema: { type: string }
+      - name: query
+        in: query
+        required: false
+        schema: { type: string }
+
+      operationId: ListUsers
+
+      responses:
+        "200":
+          description: A paginated list of users.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListPage"
+
+
+components:
+  schemas:
+    Asset:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        parentAssetID:
+          type: integer
+        checkedOutTo:
+          type: integer
+        status:
+          type: string
+          enum: ["IN_STORAGE", "IN_USE", "ARCHIVED"]
+        tag:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        model:
+          type: string
+        modelNo:
+          type: string
+        serialNo:
+          type: string
+        manufacturer:
+          type: string
+        notes:
+          type: string
+        imageURL:
+          type: string
+        thumbnailURL:
+          type: string
+        warrantyUntil:
+          type: string
+          format: date
+        quantity:
+          type: integer
+        quantityUnit:
+          type: string
+        customAttrs:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomAttr"
+        location:
+          type: string
+        positionCode:
+          type: string
+        purchases:
+          type: array
+          items:
+            $ref: "#/components/schemas/Purchase"
+        partsTotalCount:
+          type: integer
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetPart"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetFile"
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+      required:
+      - id
+      - type
+      - status
+      - tag
+      - name
+      - customAttrs
+      - purchases
+      - parts
+      - files
+      - createdBy
+      - createdAt
+      - updatedAt
+
+    CustomAttr:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        value:
+          x-go-type: any
+      required:
+      - name
+      - value
+
+    Purchase:
+      type: object
+      additionalProperties: false
+      properties:
+        supplier:
+          type: string
+        orderNo:
+          type: string
+        date:
+          type: string
+          format: date
+        amount:
+          type: integer
+        currency:
+          type: string
+
+    AssetPart:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        assetID:
+          type: integer
+        name:
+          type: string
+        tag:
+          type: string
+        location:
+          type: string
+        positionCode:
+          type: string
+        notes:
+          type: string
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+      required:
+      - id
+      - assetID
+      - name
+      - tag
+      - createdBy
+      - createdAt
+      - updatedAt
+
+    AssetFile:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        assetID:
+          type: integer
+        name:
+          type: string
+        filetype:
+          type: string
+        sizeBytes:
+          type: integer
+        publicPath:
+          type: string
+        sha256:
+          type: string
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+      required:
+      - id
+      - assetID
+      - name
+      - filetype
+      - sizeBytes
+      - publicPath
+      - sha256
+      - createdBy
+      - createdAt
+      - updatedAt
+
+    AssetListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - assets
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        tag:
+          type: string
+        inUse:
+          type: boolean
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+      required:
+      - id
+      - tag
+      - inUse
+      - createdAt
+      - updatedAt
+
+    TagListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - tags
+
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
+
+    CategoryListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - categories
+
+    Location:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+      - name
+
+    LocationListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Location"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - locations
+
+    PositionCode:
+      type: object
+      properties:
+        code:
+          type: string
+      required:
+      - code
+
+    PositionCodeListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        positionCodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/PositionCode"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - positionCodes
+
+    Model:
+      type: object
+      properties:
+        name:
+          type: string
+        modelNo:
+          type: string
+      required:
+      - name
+
+    ModelListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        models:
+          type: array
+          items:
+            $ref: "#/components/schemas/Model"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - models
+
+    Manufacturer:
+      type: object
+      properties:
+        name:
+          type: string
+        modelNo:
+          type: string
+      required:
+      - name
+
+    ManufacturerListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        manufacturers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Manufacturer"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - manufacturers
+
+    CustomAttrListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        customAttrs:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomAttr"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - customAttrs
+
+    Supplier:
+      type: object
+      properties:
+        name:
+          type: string
+        modelNo:
+          type: string
+      required:
+      - name
+
+    SupplierListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        suppliers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Supplier"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - suppliers
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          x-go-type: int64
+        username:
+          type: string
+        displayName:
+          type: string
+        isAdmin:
+          type: boolean
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+      required:
+      - id
+      - username
+      - displayName
+      - isAdmin
+      - createdAt
+      - updatedAt
+
+    UserListPage:
+      type: object
+      properties:
+        total:
+          type: integer
+        numPages:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+      required:
+      - total
+      - numPages
+      - page
+      - pageSize
+      - users
+
+    Error:
+      type: object
+      description: API error object that follow RFC7807 (https://datatracker.ietf.org/doc/html/rfc7807).
+      properties:
+        code:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+      required:
+      - code
+      - type
+      - title
+      - detail
+
+  requestBodies:
+    CreateAssetRequest:
+      description: The asset to be created. If not tag is set a free tag will be used or a new tag created if no free tag is available.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              parentAssetID:
+                type: integer
+              checkedOutTo:
+                type: integer
+              status:
+                type: string
+                enum: ["IN_STORAGE", "IN_USE", "ARCHIVED"]
+                x-go-type: "AssetStatus"
+              tag:
+                type: string
+              name:
+                type: string
+              category:
+                type: string
+              model:
+                type: string
+              modelNo:
+                type: string
+              serialNo:
+                type: string
+              manufacturer:
+                type: string
+              notes:
+                type: string
+              warrantyUntil:
+                type: string
+                format: date
+              quantity:
+                type: integer
+              quantityUnit:
+                type: string
+              customAttrs:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomAttr"
+              location:
+                type: string
+              positionCode:
+                type: string
+              purchases:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Purchase"
+              partsTotalCount:
+                type: integer
+              parts:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssetPart"
+            required:
+            - type
+            - status
+            - name
+            - customAttrs
+            - purchases
+            - parts
+
+    UpdateAssetRequest:
+      description: Updated asset data.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              parentAssetID:
+                type: integer
+              checkedOutTo:
+                type: integer
+              status:
+                type: string
+                enum: ["IN_STORAGE", "IN_USE", "ARCHIVED"]
+                x-go-type: "AssetStatus"
+              tag:
+                type: string
+              name:
+                type: string
+              category:
+                type: string
+              model:
+                type: string
+              modelNo:
+                type: string
+              serialNo:
+                type: string
+              manufacturer:
+                type: string
+              notes:
+                type: string
+              warrantyUntil:
+                type: string
+                format: date
+              quantity:
+                type: integer
+              quantityUnit:
+                type: string
+              customAttrs:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomAttr"
+              location:
+                type: string
+              positionCode:
+                type: string
+              purchases:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Purchase"
+              partsTotalCount:
+                type: integer
+              parts:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssetPart"
+            required:
+            - type
+            - status
+            - name
+            - customAttrs
+            - purchases
+            - parts

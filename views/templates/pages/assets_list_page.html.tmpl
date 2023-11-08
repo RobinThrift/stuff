@@ -110,14 +110,14 @@
 
 	{{ template "assets_table" $ }}
 
-	{{ if gt .Page.NumPages 1 }}
+	{{ if gt .Assets.NumPages 1 }}
 		{{ template "pagination" dict
 			"URL" "/assets"
 			"Name" "Assets"
-			"Total" .Page.Total
-			"PageSize" .Page.PageSize
-			"CurrPage" .Page.Page
-			"NumPages" .Page.NumPages
+			"Total" .Assets.Total
+			"PageSize" .Assets.PageSize
+			"CurrPage" .Assets.Page
+			"NumPages" .Assets.NumPages
 		}}
 	{{ end }}
 </div>
@@ -149,7 +149,7 @@
 
 
 		<tbody class="tbody">
-			{{ range .Data.Page.Assets }}
+			{{ range .Data.Assets.Items }}
 			<tr>
 				<td class="w-4">
 					<div class="flex items-center relative">

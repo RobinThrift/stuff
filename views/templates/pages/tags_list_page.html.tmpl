@@ -22,7 +22,7 @@
 	</thead>
 
 		<tbody class="tbody">
-		{{ range .Page.Tags }}
+		{{ range .Tags.Items }}
 		<tr>
 			<td class="w-4">
 				<div class="flex items-center">
@@ -42,14 +42,14 @@
 	</tbody>
 </table>
 
-{{ if gt .Page.NumPages 1 }}
+{{ if gt .Tags.NumPages 1 }}
 {{ template "pagination" dict
 	"URL" "/tags"
 	"Name" "Tags"
-	"Total" .Page.Total
-	"PageSize" .Page.PageSize
-	"CurrPage" .Page.Page
-	"NumPages" .Page.NumPages
+	"Total" .Tags.Total
+	"PageSize" .Tags.PageSize
+	"CurrPage" .Tags.Page
+	"NumPages" .Tags.NumPages
 }}
 {{ end }}
 

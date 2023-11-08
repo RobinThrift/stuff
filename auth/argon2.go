@@ -17,7 +17,7 @@ type Argon2Params struct {
 	Version int    `json:"version"`
 }
 
-func (a *Argon2Params) toJSONString() (string, error) {
+func (a *Argon2Params) ToJSONString() (string, error) {
 	b, err := json.Marshal(a)
 	if err != nil {
 		return "", fmt.Errorf("error marshalling argon2 prams to JSON: %w", err)
@@ -25,7 +25,7 @@ func (a *Argon2Params) toJSONString() (string, error) {
 	return string(b), nil
 }
 
-func checkPassword(candidatePlain []byte, hash []byte, salt, paramsJSON []byte) (bool, error) {
+func CheckPassword(candidatePlain []byte, hash []byte, salt, paramsJSON []byte) (bool, error) {
 	var params Argon2Params
 
 	err := json.Unmarshal(paramsJSON, &params)
@@ -38,7 +38,7 @@ func checkPassword(candidatePlain []byte, hash []byte, salt, paramsJSON []byte) 
 	return subtle.ConstantTimeCompare(hash, candidate) == 1, nil
 }
 
-func encryptPassword(plaintextPasswd []byte, params Argon2Params) ([]byte, []byte, error) {
+func EncryptPassword(plaintextPasswd []byte, params Argon2Params) ([]byte, []byte, error) {
 	var salt [16]byte
 	_, err := rand.Read(salt[:])
 	if err != nil {

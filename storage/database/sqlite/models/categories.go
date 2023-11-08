@@ -11,7 +11,7 @@ import (
 
 // Category is an object representing the database table.
 type Category struct {
-	Name null.Val[string] `db:"name" `
+	CatName null.Val[string] `db:"cat_name" `
 }
 
 // CategorySlice is an alias for a slice of pointers to Category.
@@ -28,21 +28,21 @@ type CategoriesQuery = *sqlite.ViewQuery[*Category, CategorySlice]
 type CategoriesStmt = bob.QueryStmt[*Category, CategorySlice]
 
 type categoryColumnNames struct {
-	Name string
+	CatName string
 }
 
 var CategoryColumns = struct {
-	Name sqlite.Expression
+	CatName sqlite.Expression
 }{
-	Name: sqlite.Quote("categories", "name"),
+	CatName: sqlite.Quote("categories", "cat_name"),
 }
 
 type categoryWhere[Q sqlite.Filterable] struct {
-	Name sqlite.WhereNullMod[Q, string]
+	CatName sqlite.WhereNullMod[Q, string]
 }
 
 func CategoryWhere[Q sqlite.Filterable]() categoryWhere[Q] {
 	return categoryWhere[Q]{
-		Name: sqlite.WhereNull[Q, string](CategoryColumns.Name),
+		CatName: sqlite.WhereNull[Q, string](CategoryColumns.CatName),
 	}
 }

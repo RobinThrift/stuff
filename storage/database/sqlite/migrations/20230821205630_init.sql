@@ -133,7 +133,7 @@ CREATE VIRTUAL TABLE assets_fts USING fts5(id, name, tag, category, model, model
 
 -- +goose StatementBegin
 CREATE TRIGGER assets_after_insert AFTER INSERT ON assets BEGIN
-  INSERT INTO assets_fts(rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
+	INSERT INTO assets_fts(rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
 		new.id,
 		new.id,
 		coalesce(new.name, ""),
@@ -151,14 +151,41 @@ END;
 
 -- +goose StatementBegin
 CREATE TRIGGER assets_after_delete AFTER DELETE ON assets BEGIN
-  INSERT INTO assets_fts(assets_fts, rowid) VALUES("delete", old.id);
+	INSERT INTO assets_fts(assets_fts, rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
+		'delete',
+		old.id,
+		old.id,
+		coalesce(old.name, ""),
+		coalesce(old.tag, ""),
+		coalesce(old.category, ""),
+		coalesce(old.model, ""),
+		coalesce(old.model_no, ""),
+		coalesce(old.serial_no, ""),
+		coalesce(old.manufacturer, ""),
+		coalesce(old.notes, ""),
+		coalesce(old.custom_attrs, "")
+	);
 END;
 -- +goose StatementEnd
 
 -- +goose StatementBegin
 CREATE TRIGGER assets_after_update AFTER UPDATE ON assets BEGIN
-  INSERT INTO assets_fts(assets_fts, rowid) VALUES("delete", old.id);
-  INSERT INTO assets_fts(rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
+	INSERT INTO assets_fts(assets_fts, rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
+		'delete',
+		old.id,
+		old.id,
+		coalesce(old.name, ""),
+		coalesce(old.tag, ""),
+		coalesce(old.category, ""),
+		coalesce(old.model, ""),
+		coalesce(old.model_no, ""),
+		coalesce(old.serial_no, ""),
+		coalesce(old.manufacturer, ""),
+		coalesce(old.notes, ""),
+		coalesce(old.custom_attrs, "")
+	);
+
+	INSERT INTO assets_fts(rowid, id, name, tag, category, model, model_no, serial_no, manufacturer, notes, custom_attrs) VALUES (
 		new.id,
 		new.id,
 		coalesce(new.name, ""),
