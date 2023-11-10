@@ -41,9 +41,9 @@ jobs:
     - name: Install staticcheck@2023.1.5
       run: |
         go install honnef.co/go/tools/cmd/staticcheck@2023.1.5
-    - name: golangci-lint@v1.54.2
+    - name: golangci-lint@v1.55.1
       run: |
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.1
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.1
     - name: "Lint"
       run: |
         just lint

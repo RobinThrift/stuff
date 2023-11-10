@@ -130,7 +130,7 @@ _fonts:
     [ -f frontend/build/fonts/OpenSans-Regular.ttf ] || (mkdir -p frontend/build/fonts && curl -L https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf -o frontend/build/fonts/OpenSans-Regular.ttf)
 
 staticcheck_version := "2023.1.5"
-golangci_lint_version := "v1.54.2"
+golangci_lint_version := "v1.55.1"
 goose_version := "v3.15.0"
 bobgen_version := "v0.22.0"
 wgo_version := "v0.5.3"
