@@ -12,15 +12,15 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/csrf v1.7.1
 	github.com/matoous/go-nanoid/v2 v2.0.0
-	github.com/microcosm-cc/bluemonday v1.0.25
+	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pressly/goose/v3 v3.15.0
 	github.com/segmentio/ksuid v1.0.4
 	github.com/signintech/gopdf v0.19.0
 	github.com/stephenafamo/bob v0.22.0
 	github.com/stephenafamo/scan v0.4.2
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/crypto v0.13.0
-	golang.org/x/net v0.15.0
+	golang.org/x/crypto v0.14.0
+	golang.org/x/net v0.17.0
 	modernc.org/sqlite v1.25.0
 )
 
@@ -95,7 +95,7 @@ require (
 	github.com/yosssi/ace v0.0.5 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.12.0 // indirect
