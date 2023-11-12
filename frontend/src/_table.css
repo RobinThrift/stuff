@@ -1,24 +1,19 @@
 @layer components {
 	.thead {
-		tr {
-			@apply border-0 border-neutral-200 bg-neutral-50 dark:bg-background-200;
-		}
-
 		th {
-			@apply px-4 py-4 text-left text-sm;
-			@apply first:ps-2 first:md:ps-6 first:lg:pe-8;
-			@apply last:pe-2 last:md:pe-6 last:lg:pe-8;
+            @apply border-0 bg-background-200 py-3 ps-3 text-sm font-medium text-left;
+            @apply dark:bg-background-200;
 		}
 	}
 
 	.tbody {
 		tr {
-			@apply border-t border-neutral-200 hover:bg-secondary-100/50 odd:bg-background-200;
-			@apply dark:hover:bg-primary-900 dark:border-primary-700;
+            @apply odd:bg-white even:bg-background-200/50 border-t border-neutral-100 hover:bg-background-300/80 bg-background-100;
+			@apply dark:border-neutral-600 dark:hover:bg-primary-900 dark:bg-background-100 dark:even:bg-background-200;
 		}
 
 		td {
-			@apply px-4 py-2;
+			@apply py-3 ps-3;
 			@apply first:ps-2 first:md:ps-6 first:lg:pe-8;
 			@apply last:pe-2 last:md:pe-6 last:lg:pe-8;
 

@@ -45,7 +45,7 @@
 	}
 
 	.pagination-items {
-		@apply flex items-center text-sm leading-tight bg-white border divide-x rounded h-9 divide-gray-100 border-gray-200;
+		@apply flex items-center text-sm leading-tight bg-background-100 border divide-x rounded h-9 divide-gray-100 border-gray-200;
 		@apply dark:divide-primary-700 dark:border-primary-700;
 	}
 
@@ -55,18 +55,22 @@
 		&:hover {
 			.accent {
 				@apply border-l border-r border-primary-500 left-0 w-full;
+				@apply dark:border-secondary-500;
 			}
 		}
 
 		.accent {
-			@apply box-content absolute bottom-0 w-0 h-px -mx-px translate-y-px border-transparent bg-primary-500 left-1/2 duration-200 ease-out ;
+			@apply box-content absolute bottom-0 w-0 h-px -mx-px translate-y-px border-transparent bg-primary-500 left-1/2 duration-200 ease-out;
+			@apply dark:bg-secondary-500;
 		}
 
 		&.active {
-			@apply relative inline-flex items-center h-full px-3 text-neutral-900 bg-gray-50;
+			@apply relative inline-flex items-center h-full px-3 text-primary-500 bg-background-200;
+			@apply dark:text-secondary-500;
 
 			.accent {
 				@apply left-0 w-full border-l border-r bg-primary-500 border-primary-500;
+			    @apply dark:bg-secondary-500;
 			}
 		}
 	}

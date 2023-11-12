@@ -4,7 +4,7 @@
 {{ $endEllipsis := false }}
 
 <div class="pagination">
-	<p class="pl-2 text-sm text-gray-700">
+	<p class="pl-2 text-sm">
 		Showing <span class="font-medium">{{ (add (mul .CurrPage .PageSize) 1) }}</span> to <span class="font-medium">{{ mul (add .CurrPage 1) .PageSize }}</span> of <span class="font-medium">{{ .Total }}</span> {{ .Name }}
 	</p>
 	<nav>

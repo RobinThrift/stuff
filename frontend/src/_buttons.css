@@ -1,6 +1,6 @@
 @layer components {
 	.btn {
-		@apply flex items-center justify-center px-3 py-2 focus:outline-none rounded-lg;
+		@apply text-sm flex items-center justify-center px-2 py-2 focus:outline-none rounded-lg;
         @apply disabled:cursor-not-allowed disabled:opacity-50;
 
 		.icon {
@@ -9,11 +9,11 @@
 	}
 
 	.btn-sm {
-		@apply text-sm;
+		@apply text-xs;
 	}
 
 	.btn-xs {
-		@apply text-sm px-2 py-1;
+		@apply text-xs px-2 py-1;
 	}
 
 	.btn.btn-primary {
