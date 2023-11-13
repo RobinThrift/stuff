@@ -142,8 +142,8 @@ func NewRouter(
 	mux.Get("/assets/import", viewRenderHandler(r.importAssetsHandler))
 	mux.Post("/assets/import", viewRenderHandler(r.importAssetsSubmitHandler))
 
-	mux.Get("/assets/labels", viewRenderHandler(r.labelsHandler))
-	mux.Post("/assets/labels", viewRenderHandler(r.labelsSubmitHandler))
+	mux.Get("/assets/export/labels", viewRenderHandler(r.labelsHandler))
+	mux.Post("/assets/export/labels", viewRenderHandler(r.labelsSubmitHandler))
 
 	mux.Get("/assets/export/{format}", viewRenderHandler(r.exportAssetsHandler))
 
