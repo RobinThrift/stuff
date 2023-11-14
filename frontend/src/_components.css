@@ -1,0 +1,103 @@
+@layer components {
+    .toasts {
+        @apply fixed right-0 top-0 p-3 w-[300px] z-50;
+
+		&:empty {
+			@apply hidden;
+		}
+    }
+
+    .toast {
+        @apply rounded-md ps-3 pe-8 py-3 m-3 shadow-md relative;
+        &.toast-success {
+            @apply text-background-default bg-success-default;
+        }
+
+        &.toast-error {
+            @apply text-background-default bg-danger-default;
+        }
+
+        h4 {
+            @apply font-medium;
+        }
+
+        .toast-close-btn {
+            @apply absolute top-1/2 -translate-y-1/2 right-2;
+        }
+    }
+
+	.card {
+		@apply rounded-lg border border-border-light bg-background-default;
+	}
+
+    .badge {
+        @apply rounded-lg px-2.5 py-0.5;
+
+        &.in-use {
+            @apply bg-primary-lighter text-primary-darker;
+        }
+
+        &.in-storage {
+            @apply bg-success-lighter text-success-default;
+        }
+
+        &.archived {
+            @apply bg-content-default text-background-default;
+        }
+    }
+
+    .tabs {
+        @apply content-inset-x mb-5 w-full border-b border-border-default;
+
+        &>ul {
+            @apply flex flex-wrap justify-start space-x-5 h-full;
+
+            li {
+                @apply flex border-b-2 text-base border-transparent items-end;
+                @apply hover:text-primary-hover hover:border-primary-hover;
+
+                &.active {
+                    @apply flex text-base border-primary-default text-primary-default;
+                }
+
+                a {
+                    @apply px-2 pb-2 inline-flex items-center;
+                }
+            }
+        }
+	}
+
+	.pagination {
+		@apply flex items-center justify-between w-full h-16 px-3 border-t border-border-default;
+	}
+
+	.pagination-items {
+		@apply flex items-center text-sm leading-tight bg-background-default border divide-x rounded h-9 divide-border-default border-border-default;
+	}
+
+	.pagination-item {
+		@apply relative inline-flex items-center h-full px-3;
+
+		&:hover {
+			.accent {
+				@apply border-l border-r border-primary-default left-0 w-full;
+			}
+		}
+
+		.accent {
+			@apply box-content absolute bottom-0 w-0 h-px -mx-px translate-y-px border-transparent bg-primary-default left-1/2 duration-200 ease-out;
+		}
+
+		&.active {
+			@apply relative inline-flex items-center h-full px-3 text-primary-default bg-background-accent;
+
+			.accent {
+				@apply left-0 w-full border-l border-r bg-primary-default border-primary-default;
+			}
+		}
+	}
+
+}
+
+
+

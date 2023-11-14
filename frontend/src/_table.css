@@ -1,70 +1,86 @@
 @layer components {
-	.thead {
-		th {
-            @apply border-0 bg-background-200 py-3 ps-3 text-sm font-medium text-left;
-            @apply dark:bg-background-200;
-		}
-	}
+    .table-actions {
+        @apply h-16 w-full flex flex-row content-inset-x;
+    }
 
-	.tbody {
-		tr {
-            @apply odd:bg-white even:bg-background-200/50 border-t border-neutral-100 hover:bg-background-300/80 bg-background-100;
-			@apply dark:border-neutral-600 dark:hover:bg-primary-900 dark:bg-background-100 dark:even:bg-background-200;
-		}
+    .table-actions-start {
+        @apply flex flex-1 flex-row sm:justify-start items-center mb-1 sm:mb-0;
+    }
 
-		td {
-			@apply py-3 ps-3;
-			@apply first:ps-2 first:md:ps-6 first:lg:pe-8;
-			@apply last:pe-2 last:md:pe-6 last:lg:pe-8;
+    .table-actions-end {
+        @apply flex flex-grow flex-row sm:justify-end items-center mb-1 sm:mb-0;
+    }
 
-			&:has(a) {
-				@apply p-0
-			}
+    .thead {
+        th {
+            @apply first:content-inset-x;
+            @apply border-0 border-y border-border-default text-left font-medium text-content-lighter bg-background-default;
+            @apply py-3 px-5 xl:px-0;
+        }
+    }
 
-			&>a {
-				@apply px-4 py-2;
-			}
+    .tbody {
+        tr {
+            @apply even:bg-background-default border-t border-border-default hover:bg-background-hover;
+        }
 
-			&:first-child:has(a)>a {
-				@apply ps-2 md:ps-6 lg:pe-8;
-			}
+        td {
+            @apply first:content-inset-x;
+            @apply py-3 px-5 xl:px-0;
 
-			img {
-				@apply h-[50px];
-			}
-		}
-	}
+            &:has(a) {
+                @apply p-0
+            }
 
-	.table.compact {
-		.thead th {
-			@apply text-xs;
-		}
+            &>a {
+                @apply px-5 xl:px-0;
+            }
 
-		.tbody td {
-			@apply text-sm;
+            &:first-child:has(a)>a {
+                @apply py-3 px-5 xl:px-0;
+            }
 
-			&:has(a) {
-				@apply p-0
-			}
+            &:has(img) {
+                @apply px-0 w-20;
+            }
 
-			a {
-				@apply px-2 py-1;
-			}
+            img {
+                @apply w-16 h-16;
+                object-fit: contain;
+            }
+        }
+    }
 
-			&:first-child:has(a) a {
-				@apply ps-1 md:ps-3 lg:pe-4;
-			}
-		}
+    .table.compact {
+        .thead th {
+            @apply text-xs;
+        }
 
-		.thead th, .tbody td {
-			@apply px-2 py-1;
-			@apply first:ps-1 first:md:ps-3 first:lg:pe-4;
-			@apply last:pe-1 last:md:pe-3 last:lg:pe-4;
+        .tbody td {
+            @apply text-sm;
 
-			img {
-				@apply h-[25px];
-			}
-		}
-	}
+            &:has(a) {
+                @apply p-0
+            }
+
+            a {
+                @apply px-2 py-1;
+            }
+
+            &:first-child:has(a) a {
+                @apply ps-1 md:ps-3 lg:pe-4;
+            }
+        }
+
+        .thead th, .tbody td {
+            @apply px-2 py-1;
+            @apply first:ps-1 first:md:ps-3 first:lg:pe-4;
+            @apply last:pe-1 last:md:pe-3 last:lg:pe-4;
+
+            img {
+                @apply h-[25px];
+            }
+        }
+    }
 }
 

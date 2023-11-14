@@ -1,11 +1,11 @@
 {{ template "layout.html.tmpl" . }}
 
 {{ define "header" }}
-<h1 class="font-extrabold md:text-2xl lg:text-4xl">Assets</h1>
+<h1>Assets</h1>
 
 <div class="sm:hidden flex-1 flex justify-end">
 	<x-dropdown-button
-		icon="dots-three-vertical"
+		icon-end="dots-three-vertical"
 		items='[
 			{ "text": "New Asset", "url": "/assets/new", "icon": "plus" },
 			{ "text": "Import", "url": "/assets/import", "icon": "arrow-square-in" }
@@ -15,11 +15,11 @@
 
 <div class="hidden sm:flex flex-1 flex flex-col sm:flex-row justify-center items-end sm:justify-end sm:items-center">
 	<a href="/assets/import" class="btn btn-primary me-2">
-		<x-icon icon="arrow-square-in" class="" /> Import
+		<x-icon icon="arrow-square-in" /> Import
 	</a>
 
 	<a href="/assets/new" class="btn btn-primary">
-		<x-icon icon="plus" class="" /> New Asset
+		<x-icon icon="plus" /> New Asset
 	</a>
 </div>
 {{ end }}
@@ -33,10 +33,10 @@
 		$watch('compact', (v) => $setting({ assetsList: { compact: v }}))
 	"
 >
-	<div class="w-full flex flex-col sm:flex-row main">
-		<div class="flex flex-grow flex-row sm:justify-end items-center mb-1 sm:mb-0">
-			<div class="btn-grp me-2">
-				<button class="btn btn-primary" x-on:click.prevent="compact = !compact">
+	<div class="table-actions">
+		<div class="table-actions-start">
+			<div class="me-2">
+				<button class="btn btn-neutral" x-on:click.prevent="compact = !compact">
 					<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
 					<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
 
@@ -48,7 +48,8 @@
 			<x-dropdown
 				class="me-2"
 				button-text="Columns"
-				button-class="btn-primary"
+				icon="columns"
+				button-class="btn-neutral"
 			>
 				<ul class="dropdown-items">
 					<li>
@@ -96,9 +97,13 @@
 				</ul>
 			</x-dropdown>
 
+		</div>
+
+		<div class="table-actions-end">
 			<x-dropdown-button
 				button-text="Export"
-				button-class="btn-primary"
+				button-class="btn-neutral"
+				icon="export"
 				items='[
 					{ "text": "Create Label Sheet", "url": "/assets/export/labels" },
 					{ "text": "Export All (CSV)", "url": "/assets/export/csv" },
@@ -126,7 +131,7 @@
 
 
 {{ define "assets_table" }}
-<div class="max-w-screen overflow-x-auto">
+<div class="content-inset max-w-screen overflow-x-auto">
 	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
 		<thead class="thead md:sticky md:top-0">
 			<tr>
@@ -137,7 +142,7 @@
 					</div>
 				</th>
 				<th x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>Tag</th>
-				<th x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
+				<th class="w-20" x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
 				<th x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>Name</th>
 				<th x-show="columns.Type" {{ if not $.Data.Columns.Type -}} x-cloak {{- end}}>Type</th>
 				<th x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>Category</th>
@@ -164,7 +169,7 @@
 				</td>
 				<td x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>
 					{{ if ne .ThumbnailURL "" }}
-						<img src={{ .ThumbnailURL }} />
+					<img src={{ .ThumbnailURL }} />
 					{{ end }}
 				</td>
 				<td x-show="columns.Name" {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}>
@@ -188,15 +193,15 @@
 					{{ end }}
 				</td>
 				<td x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>
-					{{ template "status_badge" dict "Status" .Status }}
+					<x-status-badge status="{{ .Status }}" />
 				</td>
 				<td class="text-end">
-					<div class="btn-grp hidden lg:flex">
-						<a class="btn btn-sm" href="{{ printf `/assets/%v/edit` .ID }}">
+					<div class="hidden lg:flex">
+						<a class="btn" href="{{ printf `/assets/%v/edit` .ID }}">
 							<x-icon icon="pencil-simple" class="w-4 h-4" />
 							Edit
 						</a>
-						<a class="btn btn-sm text-red-500 hover:text-red-700" href="{{ printf `/assets/%v/delete` .ID }}">
+						<a class="btn text-danger-default hover:text-red-700" href="{{ printf `/assets/%v/delete` .ID }}">
 							<x-icon icon="trash-simple" class="w-4 h-4" />
 							Delete
 						</a>

@@ -2,6 +2,7 @@ package views
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -22,7 +23,7 @@ type Model[D any] struct {
 type Global struct {
 	Title              string
 	CSRFToken          string
-	FlashMessage       string
+	FlashMessage       FlashMessage
 	Search             string
 	CurrentPage        string
 	SidebarClosed      bool
@@ -31,8 +32,20 @@ type Global struct {
 	Referer            string
 }
 
+type FlashMessage struct {
+	Type FlashMessageType
+	Text string
+}
+
+type FlashMessageType string
+
+const (
+	FlashMessageSuccess FlashMessageType = "success"
+	FlashMessageError   FlashMessageType = "error"
+)
+
 func NewGlobal(title string, r *http.Request) Global {
-	infomsg, _ := session.Pop[string](r.Context(), "info_message")
+	flashMessage, _ := session.Pop[FlashMessage](r.Context(), "flash_message")
 
 	sidebarClosed, _ := session.Get[bool](r.Context(), "sidebar_closed")
 
@@ -49,13 +62,17 @@ func NewGlobal(title string, r *http.Request) Global {
 	return Global{
 		Title:              title,
 		CSRFToken:          csrf.Token(r),
-		FlashMessage:       infomsg,
+		FlashMessage:       flashMessage,
 		CurrentPage:        r.URL.Path,
 		SidebarClosed:      sidebarClosed,
 		CurrentUserIsAdmin: currentUserIsAdmin,
 		Version:            stuff.Version,
 		Referer:            referer,
 	}
+}
+
+func SetFlashMessage(ctx context.Context, typ FlashMessageType, text string) {
+	session.Put(ctx, "flash_message", FlashMessage{Type: typ, Text: text})
 }
 
 type ErrorPageErr struct {

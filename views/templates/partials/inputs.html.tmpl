@@ -42,6 +42,9 @@ Input:
 	XShow string
 */ -}}
 {{ define "field" }}
+
+{{ $isValid := eq (default .ValidationErr "") "" }}
+
 <div
 	{{ if has . "XShow" }}
 	x-cloak
@@ -58,7 +61,7 @@ Input:
 
 	<div class="relative {{- if has . "InputWrapperClass" }} {{ .InputWrapperClass }} {{- end -}}">
 		{{ if has . "Icon" }}
-		<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+		<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-content-lighter">
 			<div class="h-4 w-4">
 				{{ template "icon" dict "icon" .Icon "class" "w-[24px] h-[24px]" }}
 			</div>
@@ -117,7 +120,7 @@ Input:
 			}"
 			{{ end }}
 
-			class="input {{ if has . "Icon"  -}} pl-11 {{- end }} {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}}"
+			class="input {{ if has . "Icon"  -}} pl-11 {{- end }} {{ if has . "InputClass" -}} {{ .InputClass }} {{- end -}} {{ if not $isValid}} invalid {{ end }}"
 
 			{{ if ne (print .Value ) "" }}
 			value="{{ .Value }}"
@@ -128,8 +131,8 @@ Input:
 			{{ end }}
 		/>
 
-		{{ if ne .ValidationErr "" }}
-		<span class="block text-red-500">{{ .ValidationErr }}</span>
+		{{ if not $isValid }}
+		<span class="block text-danger-default">{{ .ValidationErr }}</span>
 		{{ end }}
 	</div>
 </div>
@@ -184,7 +187,7 @@ Textarea:
 	>{{ .Value }}</textarea>
 
 	{{ if ne .ValidationErr "" }}
-	<span class="block text-red-500">{{ .ValidationErr }}</span>
+	<span class="block text-danger-default">{{ .ValidationErr }}</span>
 	{{ end }}
 </div>
 {{ end }}
@@ -265,7 +268,7 @@ x-checkbox:
 	/>
 
 	{{ if has . "icon" }}
-	<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-gray-500">
+	<span class="pointer-events-none absolute ml-3 translate-y-1/2 mt-0.5 text-content-lighter">
 		<div class="h-4 w-4">
 			{{ template "icon" dict "icon" .icon "class" "w-[24px] h-[24px]" }}
 		</div>
@@ -278,7 +281,7 @@ x-checkbox:
 
 	{{ if has . "validation-error" }}
 	<div>
-		<span class="block text-red-500">{{ get . "validation-error" }}</span>
+		<span class="block text-danger-default">{{ get . "validation-error" }}</span>
 	</div>
 	{{ end }}
 </div>

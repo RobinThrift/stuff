@@ -9,6 +9,7 @@ import (
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/internal/requestid"
 	"github.com/RobinThrift/stuff/internal/server/session"
+	"github.com/RobinThrift/stuff/views"
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/csrf"
 	"github.com/segmentio/ksuid"
@@ -35,6 +36,7 @@ func logReqMiddleware(next http.Handler) http.Handler {
 func sessionMiddleware(sessionManager *scs.SessionManager) func(next http.Handler) http.Handler {
 	gob.Register(&auth.User{})
 	gob.Register(map[string]bool{})
+	gob.Register(views.FlashMessage{})
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

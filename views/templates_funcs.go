@@ -15,6 +15,14 @@ var templateFuncs = template.FuncMap{
 		return items
 	},
 
+	"concat": func(items ...string) string {
+		var b strings.Builder
+		for _, i := range items {
+			b.WriteString(i)
+		}
+		return b.String()
+	},
+
 	"split": strings.Split,
 
 	"dict": func(pairs ...any) map[string]any {

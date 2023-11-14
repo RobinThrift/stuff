@@ -14,8 +14,8 @@
 	<div class="bg-slate-950/80 absolute md:hidden top-0 left-0 bottom-0 right-0 z-10 duration-300" x-cloak x-on:click="sidebarOpen = false" x-show="sidebarOpen" x-transition.opacity></div>
 
 	<div class="md:overflow-auto w-full flex flex-col">
-		<header class="h-20 max-w-screen px-2 md:px-6 lg:px-8 py-2 md:py-5 flex flex-row items-center md:justify-start">
-			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-primary-500 focus:outline-none focus:text-black md:hidden mr-2">
+		<header class="page-header">
+			<button x-on:click="sidebarOpen = !sidebarOpen" class="hover:text-primary-default focus:outline-none focus:text-black md:hidden mr-2">
 				<span class="sr-only">Show Menu</span>
 				<x-icon icon="hamburger-menu" class="w-[24px] h-[24px]" />
 			</button>
@@ -24,10 +24,6 @@
 		</header>
 
 		<main id="main" class="max-w-screen md:max-w-none flex-1 flex flex-col">
-			{{ if ne $.Global.FlashMessage "" }}
-			<div class="border rounded p-5 m-5 bg-secondary-500 text-background-200">{{ $.Global.FlashMessage }}</div>
-			{{ end }}
-
 			<div class="flex-1">
 				{{ block "main" . }}{{ end }}
 			</div>
@@ -38,31 +34,47 @@
 </div>
 {{ template "command_palette" . }}
 
+<div class="toasts">
+	{{- if ne $.Global.FlashMessage.Text "" -}}
+	<div x-data="{rem: () => $el.remove() }" class="toast toast-{{ $.Global.FlashMessage.Type }}">
+		{{ $.Global.FlashMessage.Text }}
+
+		<button class="toast-close-btn" x-on:click.prevent="rem()">
+			<x-icon class="h-5 w-5" icon="x" />
+		</button>
+	</div>
+	{{- end -}}
+</div>
+
+
 {{ template "document_footer" . }}
 
 {{ define "sidebar" }}
 <div class="sidebar-content">
-	<button
-		class="sidebar-desktop-toggle-btn"
-		x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $setting({ sidebar: { closed: sidebarDesktopClosed }})"
-	>
-		<x-icon icon="caret-left" class="mr-1 w-5 h-5 sidebar-desktop-closed-hide" />
-		<x-icon icon="hamburger-menu" class="mr-1 w-5 h-5 sidebar-desktop-closed-show" />
-	</button>
+	<div class="sidebar-header">
+		<a class="block flex flex-1 sidebar-desktop-closed-hide" href="/assets">
+			<x-logo class="text-2xl" icon-class="h-6" />
+		</a>
 
-	<div class="pb-4">
-		<div class="h-20 flex items-center justify-center sidebar-desktop-closed-hide">
-			<a class="block flex items-center justify-center w-full h-full" href="/assets">
-				{{ template "logo" dict "Class" "text-3xl justify-start" "IconClass" "h-6" }}
-			</a>
+		<button
+			class="sidebar-desktop-toggle-btn"
+			x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $setting({ sidebar: { closed: sidebarDesktopClosed }})"
+		>
+			<x-icon icon="sidebar" class="mr-1 w-6 h-6" />
+		</button>
+	</div>
+
+	<div class="pb-4 w-full">
+		<div class="sidebar-cmd-plt-btn sidebar-desktop-closed-hide">
+			<button
+				class="input flex justify-between items-center px-2 py-0 bg-background-primary-default text-content-lighter"
+				x-on:click="$dispatch('opencmdplt'); sidebarOpen = false"
+			>
+				<x-icon icon="terminal" class="w-5 h-5 text-content-lighter" />
+				<span class="block flex-1 text-left ps-2">Search/Cmds</span>
+				<div class="key-hint w-5 h-5 text-sm my-1">⌘K</div>
+			</button>
 		</div>
-
-		<form method="get" action="/assets" class="px-4 w-full relative sidebar-desktop-closed-hide">
-			<span class="pointer-events-none absolute ml-2.5 translate-y-1/2 -mt-0.5 text-gray-500">
-				<x-icon icon="magnifying-glass" class="w-5 h-5 text-neutral-400" />
-			</span>
-			<input type="search" id="query" name="query" class="input px-1 py-1 pl-10" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false">
-		</form>
 	
 		<ul class="sidebar-links">
 			<li>
@@ -70,7 +82,7 @@
 					href="/assets"
 					class="sidebar-link {{ if eq $.Global.CurrentPage "/assets" }} active {{ end }}"
 				>
-					<x-icon icon="package-thin" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Assets</span>
+					<x-icon icon="package" /> <span class="sidebar-desktop-closed-hide">Assets</span>
 				</a>
 			</li>
 
@@ -79,7 +91,7 @@
 					href="/tags"
 					class="sidebar-link {{ if eq $.Global.CurrentPage "/tags" }} active {{ end }}"
 				>
-					<x-icon icon="tag-thin" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Tags</span>
+					<x-icon icon="tag" /> <span class="sidebar-desktop-closed-hide">Tags</span>
 				</a>
 			</li>
 
@@ -89,7 +101,7 @@
 					href="/users"
 					class="sidebar-link {{ if eq $.Global.CurrentPage "/users" }} active {{ end }}"
 				>
-					<x-icon icon="user" class="w-5 h-5 mr-1 mt-0.5" /> <span class="sidebar-desktop-closed-hide">Users</span>
+					<x-icon icon="user" /> <span class="sidebar-desktop-closed-hide">Users</span>
 				</a>
 			</li>
 			{{ end }}
@@ -97,13 +109,13 @@
 	</div>
 
 	<div class="sidebar-footer">
-		<a class="block px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/users/me">
-			<x-icon icon="user-gear" class="mr-1 w-[16px] h-[16px]" />
+		<a href="/users/me">
+			<x-icon icon="user-gear" />
 			<span class="sidebar-desktop-closed-hide">My Settings</span>
 		</a>
 
-		<a class="block px-3 pt-5 text-sm text-neutral hover:text-primary-500 flex flex-row items-center" href="/logout">
-			<x-icon icon="sign-out" class="mr-1 w-[16px] h-[16px] rotate-180" />
+		<a href="/logout">
+			<x-icon icon="sign-out" class="rotate-180" />
 			<span class="sidebar-desktop-closed-hide">Logout</span>
 		</a>
 	</div>
@@ -111,11 +123,11 @@
 {{ end }}
 
 {{ define "footer" }}
-<footer class="px-3 md:px-6 lg:px-8 py-5 bg-background-200 w-full border-t border-gray-100 h-14 dark:border-primary-700">
+<footer class="px-3 md:px-6 lg:px-8 py-5 bg-background-accent w-full border-t border-border-default h-16">
 	<div class="flex flex-wrap justify-center text-sm">
 		{{ template "logo" dict "Class" "text-sm" "IconClass" "h-0" }}
 		<span class="px-5">Version {{ $.Global.Version }}</span>
-		<a href="https://github.com/RobinThrift/stuff" class="inline-block group flex flex-row justify-center items-center text-primary-400 hover:text-primary-500" rel="noopener noreferrer">
+		<a href="https://github.com/RobinThrift/stuff" class="inline-block group flex flex-row justify-center items-center text-primary-default hover:text-primary-hover" rel="noopener noreferrer">
 			<x-icon icon="github-logo-duotone" class="h-[16px] w-[16px] !hidden group-hover:!inline-block" />
 			<x-icon icon="github-logo" class="h-[16px] w-[16px] group-hover:!hidden" />
 			GitHub

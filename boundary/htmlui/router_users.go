@@ -11,6 +11,7 @@ import (
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/control"
 	"github.com/RobinThrift/stuff/internal/server/session"
+	"github.com/RobinThrift/stuff/views"
 	"github.com/RobinThrift/stuff/views/pages"
 )
 
@@ -93,7 +94,7 @@ func (rt *Router) usersNewSubmitHandler(w http.ResponseWriter, r *http.Request, 
 		return page.Render(w, r)
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("created user %s", page.User.Username))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Created user %s", page.User.Username))
 
 	http.Redirect(w, r, "/users", http.StatusFound)
 	return nil
@@ -124,15 +125,16 @@ func (rt *Router) usersCurrentSubmitHandler(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 
-	if page.User.Username == "" {
-		page.ValidationErrs["username"] = control.ErrUsernameEmpty.Error()
-	}
-
 	if page.User.DisplayName == "" {
 		page.ValidationErrs["display_name"] = "Display Name must not be empty"
 	}
 
 	if len(page.ValidationErrs) != 0 {
+		page.User, ok = session.Get[*auth.User](r.Context(), "user")
+		if !ok {
+			return errors.New("can't find user in session")
+		}
+
 		return page.Render(w, r)
 	}
 
@@ -143,7 +145,7 @@ func (rt *Router) usersCurrentSubmitHandler(w http.ResponseWriter, r *http.Reque
 		return page.Render(w, r)
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("updated user %s", page.User.Username))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Updated user %s", page.User.Username))
 
 	http.Redirect(w, r, "/users/me", http.StatusFound)
 	return nil
@@ -177,7 +179,7 @@ func (rt *Router) usersResetPasswordHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if params.ID == user.ID {
-		session.Put(r.Context(), "info_message", "can't reset own password")
+		views.SetFlashMessage(r.Context(), views.FlashMessageError, "Can't reset own password")
 		http.Redirect(w, r, "/users", http.StatusFound)
 		return nil
 	}
@@ -221,7 +223,7 @@ func (rt *Router) usersResetPasswordSubmitHandler(w http.ResponseWriter, r *http
 		return err
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("reset password for user %s (%d)", updated.Username, updated.ID))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Reset password for user %s (%d)", updated.Username, updated.ID))
 
 	http.Redirect(w, r, "/users", http.StatusFound)
 	return nil
@@ -243,14 +245,14 @@ func (rt *Router) usersToggleAdminHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	if params.ID == user.ID {
-		session.Put(r.Context(), "info_message", "can't change own permissions")
+		views.SetFlashMessage(r.Context(), views.FlashMessageError, "Can't change own permissions")
 		http.Redirect(w, r, "/users", http.StatusFound)
 		return nil
 	}
 
 	err := rt.auth.ToggleAdmin(r.Context(), params.ID)
 	if err != nil {
-		session.Put(r.Context(), "info_message", fmt.Sprintf("error updating user: %v", err))
+		views.SetFlashMessage(r.Context(), views.FlashMessageError, fmt.Sprintf("Error updating user: %v", err))
 		http.Redirect(w, r, "/users", http.StatusFound)
 		return nil
 	}
@@ -260,7 +262,7 @@ func (rt *Router) usersToggleAdminHandler(w http.ResponseWriter, r *http.Request
 		return err
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("updated user %s (%d)", updated.Username, updated.ID))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Updated user %s (%d)", updated.Username, updated.ID))
 
 	http.Redirect(w, r, "/users", http.StatusFound)
 	return nil
@@ -282,7 +284,7 @@ func (rt *Router) usersDeleteHandler(w http.ResponseWriter, r *http.Request, par
 	}
 
 	if params.ID == user.ID {
-		session.Put(r.Context(), "info_message", "can't delete self")
+		views.SetFlashMessage(r.Context(), views.FlashMessageError, "Can't delete self")
 		http.Redirect(w, r, "/users", http.StatusFound)
 		return nil
 	}
@@ -308,7 +310,7 @@ func (rt *Router) usersDeleteSubmitHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	if params.ID == user.ID {
-		session.Put(r.Context(), "info_message", "can't delete self")
+		views.SetFlashMessage(r.Context(), views.FlashMessageError, "Can't delete self")
 		http.Redirect(w, r, "/users", http.StatusFound)
 		return nil
 	}
@@ -323,7 +325,7 @@ func (rt *Router) usersDeleteSubmitHandler(w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
-	session.Put(r.Context(), "info_message", "user "+toDelete.Username+" deleted")
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, "User "+toDelete.Username+" deleted")
 	http.Redirect(w, r, "/users", http.StatusFound)
 	return nil
 }

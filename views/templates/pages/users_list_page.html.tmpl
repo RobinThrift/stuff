@@ -1,7 +1,15 @@
 {{ template "layout.html.tmpl" . }}
 
 {{ define "header" }}
-<h1 class="font-extrabold md:text-2xl lg:text-4xl">Users</h1>
+<h1>Users</h1>
+
+{{ if $.Global.CurrentUserIsAdmin }}
+<div class="flex flex-1 flex flex-row items-center justify-end">
+	<a href="/users/new" class="btn btn-primary">
+		<x-icon icon="plus" class="" /> New User
+	</a>
+</div>
+{{ end }}
 {{ end }}
 
 {{ define "main" }}
@@ -11,21 +19,17 @@
 	x-data="{ compact: {{ $.Data.Compact }} }"
 	x-init="$watch('compact', (v) => $setting({ usersList: { compact: v }}))"
 >
-	<div class="w-full main flex flex-row justify-end items-center">
-		{{ if $.Global.CurrentUserIsAdmin }}
-		<a href="/users/new" class="btn btn-primary btn-sm me-2">
-			<x-icon icon="plus" class="h-4 w-4" />
-			<span>Add User</span>
-		</a>
-		{{ end }}
 
-		<button class="btn btn-primary btn-sm me-2" x-on:click="compact = !compact">
-			<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
-			<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
+	<div class="table-actions">
+		<div class="table-actions-start">
+			<button class="btn btn-neutral" x-on:click="compact = !compact">
+				<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
+				<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
 
-			<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
-			<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
-		</button>
+				<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
+				<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
+			</button>
+		</div>
 	</div>
 
 	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">

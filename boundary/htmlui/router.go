@@ -125,7 +125,6 @@ func NewRouter(
 	mux.Get("/tags", viewRenderHandler(r.tagsListHandler))
 
 	mux.Get("/assets/{id}", viewRenderHandler(r.assetsGetHandler))
-	mux.Get("/assets/{id}/files", viewRenderHandler(r.assetFilesHandler))
 	mux.Post("/assets/{id}/files", viewRenderHandler(r.assetFilesNewSubmitHandler))
 	mux.Get("/assets/{id}/files/{fileID}/delete", viewRenderHandler(r.assetFilesDeleteHandler))
 	mux.Post("/assets/{id}/files/{fileID}/delete", viewRenderHandler(r.assetFilesDeleteSubmitHandler))

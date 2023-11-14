@@ -1,210 +1,63 @@
 @layer base {
     :root {
-        --colour-background-100: 255 255 255;
-        --colour-background-200: 249 250 251;
-        --colour-background-300: 237 237 237;
+        --colour-background-default: 255 255 255;
+        --colour-background-accent: 248 248 250;
+        --colour-background-hover: 239 239 239;
+        --colour-background-accent-lighter: 252 252 252;
 
-        --colour-content: 27 26 25;
+        --colour-border-default: 228 228 228;
+        --colour-border-light: 228 228 228;
+        --colour-border-lighter: 234 237 236;
 
-        --colour-primary-50: 238 244 255;
-        --colour-primary-100: 224 235 255;
-        --colour-primary-200: 198 217 255;
-        --colour-primary-300: 164 190 253;
-        --colour-primary-400: 127 155 250;
-        --colour-primary-500: 82 106 242;
-        --colour-primary-600: 68 80 231;
-        --colour-primary-700: 54 62 204;
-        --colour-primary-800: 46 54 165;
-        --colour-primary-900: 45 53 130;
-        --colour-primary-950: 26 29 76;
+        --colour-content-default: 27 26 25;
+        --colour-content-light: 96 96 96;
+        --colour-content-lighter: 163 163 163;
 
-        --colour-secondary-50: 244 247 249;
-        --colour-secondary-100: 235 241 244;
-        --colour-secondary-200: 218 229 235;
-        --colour-secondary-300: 195 211 222;
-        --colour-secondary-400: 171 189 206;
-        --colour-secondary-500: 149 168 191;
-        --colour-secondary-600: 128 145 175;
-        --colour-secondary-700: 107 122 151;
-        --colour-secondary-800: 88 101 123;
-        --colour-secondary-900: 75 84 100;
-        --colour-secondary-950: 44 49 58;
+        --colour-primary-lighter: 109 167 236;
+        --colour-primary-darker: 40 70 162;
+        --colour-primary-default: 74 134 229;
+        --colour-primary-hover: 41 97 215;
+        --colour-primary-active: 40 70 162;
 
-        --colour-accent-50: 240 249 244;
-        --colour-accent-100: 218 241 226;
-        --colour-accent-200: 184 226 202;
-        --colour-accent-300: 128 201 163;
-        --colour-accent-400: 87 176 133;
-        --colour-accent-500: 53 148 105;
-        --colour-accent-600: 37 118 83;
-        --colour-accent-700: 29 95 68;
-        --colour-accent-800: 25 76 55;
-        --colour-accent-900: 22 62 47;
-        --colour-accent-950: 11 35 26;
+        --colour-success-lighter: 240 249 243;
+        --colour-success-default: 59 160 100;
+        --colour-success-border: 59 160 100;
+        --colour-success-hover: 51 150 98;
+        --colour-success-active: 35 120 78;
 
-        --colour-neutral-50: 243 246 251;
-        --colour-neutral-100: 228 233 245;
-        --colour-neutral-200: 208 218 237;
-        --colour-neutral-300: 176 194 224;
-        --colour-neutral-400: 138 161 208;
-        --colour-neutral-500: 110 132 195;
-        --colour-neutral-600: 91 109 181;
-        --colour-neutral-700: 80 92 165;
-        --colour-neutral-800: 69 78 136;
-        --colour-neutral-900: 59 66 109;
-        --colour-neutral-950: 24 26 41;
-
-        --colour-blue-50: 238 244 255;
-        --colour-blue-100: 224 235 255;
-        --colour-blue-200: 198 217 255;
-        --colour-blue-300: 164 190 253;
-        --colour-blue-400: 127 155 250;
-        --colour-blue-500: 82 106 242;
-        --colour-blue-600: 68 80 231;
-        --colour-blue-700: 54 62 204;
-        --colour-blue-800: 46 54 165;
-        --colour-blue-900: 45 53 130;
-        --colour-blue-950: 26 29 76;
-
-        --colour-red-50: 253 243 243;
-        --colour-red-100: 251 230 229;
-        --colour-red-200: 248 209 208;
-        --colour-red-300: 242 177 175;
-        --colour-red-400: 231 122 118;
-        --colour-red-500: 220 92 87;
-        --colour-red-600: 199 64 59;
-        --colour-red-700: 167 50 46;
-        --colour-red-800: 139 44 41;
-        --colour-red-900: 116 43 40;
-        --colour-red-950: 62 19 17;
-
-        --colour-yellow-50: 254 249 236;
-        --colour-yellow-100: 251 238 202;
-        --colour-yellow-200: 247 219 144;
-        --colour-yellow-300: 242 191 74;
-        --colour-yellow-400: 240 173 47;
-        --colour-yellow-500: 233 140 23;
-        --colour-yellow-600: 206 105 17;
-        --colour-yellow-700: 171 73 18;
-        --colour-yellow-800: 139 58 21;
-        --colour-yellow-900: 115 48 20;
-        --colour-yellow-950: 66 23 6;
-
-        --colour-green-50: 238 251 244;
-        --colour-green-100: 215 244 226;
-        --colour-green-200: 178 232 201;
-        --colour-green-300: 107 208 157;
-        --colour-green-400: 74 189 135;
-        --colour-green-500: 39 162 108;
-        --colour-green-600: 25 130 86;
-        --colour-green-700: 20 104 71;
-        --colour-green-800: 18 83 58;
-        --colour-green-900: 16 68 48;
-        --colour-green-950: 8 38 28;
+        --colour-danger-default: 232 100 100;
+        --colour-danger-hover: 209 49 49;
+        --colour-danger-active: 176 37 37;
     }
 
     :root[class~="dark"] {
-        --colour-background-100: 9 9 11;
-        --colour-background-200: 24 24 27;
-        --colour-background-300: 39 39 42;
+        --colour-background-default: 5 11 20;
+        --colour-background-accent: 18 22 31;
+        --colour-background-hover: 30 33 38;
+        --colour-background-accent-lighter: 26 33 44;
 
-        --colour-content: 255 255 255;
-        --colour-content-inverse: 26 31 45;
+        --colour-border-default: 76 76 76;
+        --colour-border-light: 81 81 81;
+        --colour-border-lighter: 49 49 49;
 
-        --colour-primary-50: 255 255 255;
-        --colour-primary-100: 239 239 239;
-        --colour-primary-200: 220 220 220;
-        --colour-primary-300: 189 189 189;
-        --colour-primary-400: 152 152 152;
-        --colour-primary-500: 124 124 124;
-        --colour-primary-600: 101 101 101;
-        --colour-primary-700: 82 82 82;
-        --colour-primary-800: 70 70 70;
-        --colour-primary-900: 61 61 61;
-        --colour-primary-950: 41 41 41;
+        --colour-content-default: 250 250 250;
+        --colour-content-light: 212 212 212;
+        --colour-content-lighter: 163 163 163;
 
-        --colour-secondary-50: 245 248 250;
-        --colour-secondary-100: 233 240 245;
-        --colour-secondary-200: 198 218 228;
-        --colour-secondary-300: 164 197 213;
-        --colour-secondary-400: 116 167 188;
-        --colour-secondary-500: 82 140 165;
-        --colour-secondary-600: 63 113 138;
-        --colour-secondary-700: 52 92 112;
-        --colour-secondary-800: 46 77 94;
-        --colour-secondary-900: 42 66 80;
-        --colour-secondary-950: 28 43 53;
+        --colour-primary-lighter: 121 169 225;
+        --colour-primary-darker: 60 94 185;
+        --colour-primary-default: 96 143 217;
+        --colour-primary-hover: 69 112 203;
+        --colour-primary-active: 60 94 185;
 
-        --colour-accent-50: 241 248 244;
-        --colour-accent-100: 220 239 227;
-        --colour-accent-200: 183 220 199;
-        --colour-accent-300: 143 198 170;
-        --colour-accent-400: 95 168 133;
-        --colour-accent-500: 62 139 105;
-        --colour-accent-600: 45 110 83;
-        --colour-accent-700: 36 88 67;
-        --colour-accent-800: 30 71 55;
-        --colour-accent-900: 26 58 47;
-        --colour-accent-950: 13 33 26;
+        --colour-success-lighter: 240 249 243;
+        --colour-success-default: 112 201 64;
+        --colour-success-border: 59 160 100;
+        --colour-success-hover: 51 150 98;
+        --colour-success-active: 35 120 78;
 
-        --colour-neutral-50: 250 250 250;
-        --colour-neutral-100: 245 245 245;
-        --colour-neutral-200: 229 229 229;
-        --colour-neutral-300: 212 212 212;
-        --colour-neutral-400: 163 163 163;
-        --colour-neutral-500: 115 115 115;
-        --colour-neutral-600: 82 82 82;
-        --colour-neutral-700: 64 64 64;
-        --colour-neutral-800: 38 38 38;
-        --colour-neutral-900: 23 23 23;
-        --colour-neutral-950: 10 10 10;
-
-        --colour-blue-50: 242 245 252;
-        --colour-blue-100: 225 233 248;
-        --colour-blue-200: 202 216 243;
-        --colour-blue-300: 166 191 234;
-        --colour-blue-400: 123 158 223;
-        --colour-blue-500: 81 117 210;
-        --colour-blue-600: 72 99 200;
-        --colour-blue-700: 62 82 183;
-        --colour-blue-800: 56 69 149;
-        --colour-blue-900: 49 60 119;
-        --colour-blue-950: 34 39 73;
-
-        --colour-red-50: 254 241 246;
-        --colour-red-100: 253 230 240;
-        --colour-red-200: 254 204 226;
-        --colour-red-300: 255 162 200;
-        --colour-red-400: 253 105 163;
-        --colour-red-500: 247 61 129;
-        --colour-red-600: 233 43 103;
-        --colour-red-700: 201 13 67;
-        --colour-red-800: 166 14 55;
-        --colour-red-900: 138 17 50;
-        --colour-red-950: 85 2 24;
-
-        --colour-yellow-50: 255 249 235;
-        --colour-yellow-100: 254 239 199;
-        --colour-yellow-200: 253 221 138;
-        --colour-yellow-300: 252 197 77;
-        --colour-yellow-400: 250 174 37;
-        --colour-yellow-500: 245 146 25;
-        --colour-yellow-600: 216 103 7;
-        --colour-yellow-700: 180 70 9;
-        --colour-yellow-800: 146 54 14;
-        --colour-yellow-900: 120 45 15;
-        --colour-yellow-950: 69 21 3;
-
-        --colour-green-50: 236 253 246;
-        --colour-green-100: 210 249 231;
-        --colour-green-200: 168 242 211;
-        --colour-green-300: 112 229 188;
-        --colour-green-400: 48 207 156;
-        --colour-green-500: 19 182 135;
-        --colour-green-600: 7 148 110;
-        --colour-green-700: 6 118 91;
-        --colour-green-800: 7 94 73;
-        --colour-green-900: 7 77 61;
-        --colour-green-950: 3 43 36;
+        --colour-danger-default: 199 41 40;
+        --colour-danger-hover: 209 49 49;
+        --colour-danger-active: 176 37 37;
     }
 }

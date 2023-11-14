@@ -35,7 +35,13 @@
 					<strong>{{ .Tag }}</strong>
 				</a>
 			</td>
-			<td>{{ .InUse }}</td>
+				<td>
+					{{ if .InUse }}
+						<x-icon icon="check" class="h-6 w-6 text-green-500" />
+					{{ else }}
+						<x-icon icon="x" class="h-6 w-6 text-red-500" />
+					{{ end }}
+				</td>
 			<td><strong>{{ .UpdatedAt.Format "2006-01-02T15:04:05Z07:00" }}</strong></td>
 		</tr>
 		{{ end }}

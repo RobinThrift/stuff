@@ -1,15 +1,25 @@
-{{ define "status_badge" }}
+{{/*
+x-badge:
+	status string
+	class string
+
+*/}}
+{{ define "status-badge" }}
 
 {{ $class := "" }}
-{{ if eq .Status "IN_STORAGE" }}
-{{ $class = "bg-blue-500 text-blue-100" }}
-{{ else if eq .Status "IN_USE" }}
-{{ $class = "bg-green-100 text-green-700" }}
-{{ else if eq .Status "ARCHIVED" }}
-{{ $class = "bg-neutral-300 text-neutral-700" }}
+{{ if eq .status "IN_STORAGE" }}
+{{ $class = "in-storage" }}
+{{ else if eq .status "IN_USE" }}
+{{ $class = "in-use" }}
+{{ else if eq .status "ARCHIVED" }}
+{{ $class = "archived" }}
 {{ end }}
 
-<span class="rounded px-2.5 py-0.5 font-semibold {{ $class }} {{- if has . "Class" }} {{ .Class }} {{- end -}}" >
-	{{ .Status }}
+{{- if has . "class" }}
+{{  $class = (concat $class " " .class) }}
+{{- end -}}
+
+<span class="badge {{ $class }}">
+	{{ .status }}
 </span>
 {{ end }}

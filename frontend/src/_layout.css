@@ -1,0 +1,11 @@
+@layer components {
+    .page-header {
+        @apply content-inset-x h-12 max-w-screen py-2 flex flex-row items-center md:justify-start border-b border-border-light;
+
+        h1 {
+            @apply font-medium lg:font-bold md:text-xl lg:text-2xl;
+        }
+    }
+}
+
+

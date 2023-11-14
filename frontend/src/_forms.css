@@ -1,24 +1,38 @@
 @layer components {
-	.label {
-		@apply block mb-2 text-sm text-gray-600;
-	}
+    .label {
+        @apply block mb-2 text-sm text-content-light;
+        @apply text-content-lighter;
+    }
 
-	.input {
-		@apply w-full px-3 py-2 placeholder:text-neutral-400 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-primary-300 disabled:cursor-not-allowed disabled:opacity-50;
-		@apply dark:bg-background-200 dark:border-primary-700 dark:focus:ring-primary-300;
-	}
+    .input {
+        @apply w-full px-3 py-2 placeholder:text-content-lighter border border-border-default rounded-md bg-background-accent-lighter;
+        @apply disabled:cursor-not-allowed disabled:opacity-50;
+        @apply dark:placeholder:text-content-light dark:bg-background-default;
 
-	.input[readonly="true"] {
-		@apply cursor-not-allowed opacity-50;
-	}
+        transition: .25s ease;
 
-	.checkbox {
-		@apply w-4 h-4 rounded  text-primary-500 bg-background-200 border-neutral-200 focus:ring-primary-500;
-		@apply dark:text-primary-500 dark:bg-background-200 dark:border-primary-800 dark:focus:ring-primary-500;
-	}
+        &:focus, &:hover {
+            @apply dark:bg-background-accent-lighter;
+            outline: none;
+            background: rgb(var(--colour-background-default)/1);
+            border-color: rgba(var(--colour-primary-default)/0.4);
+            box-shadow: 0 0 0 4px rgba(var(--colour-primary-default)/10%);
+        }
 
-	.checkbox-input {
-		@apply px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-primary-300 disabled:cursor-not-allowed disabled:opacity-50;
-		@apply dark:bg-background-200 dark:border-primary-700 dark:focus:ring-primary-300;
-	}
+        &.invalid {
+            @apply border-danger-default;
+        }
+    }
+
+    .input[readonly="true"] {
+        @apply cursor-not-allowed opacity-50;
+    }
+
+    .checkbox {
+        @apply w-4 h-4 rounded text-primary-default bg-background-accent border-border-default focus:ring-primary-default;
+    }
+
+    .checkbox-input {
+        @apply px-3 py-2 border border-border-default rounded-md focus:outline-none focus:ring focus:border-primary-default disabled:cursor-not-allowed disabled:opacity-50;
+    }
 }

@@ -1,76 +1,111 @@
 @layer components {
-	.sidebar {
-		@apply fixed z-50 top-0 left-0 md:static w-[80%] -translate-x-full md:-translate-x-0 transition duration-300 md:w-56 lg:w-64 flex-none;
-	}
+    .sidebar {
+        @apply fixed z-40 top-0 left-0 md:static w-[80%] -translate-x-full md:-translate-x-0 transition duration-300 md:w-56 lg:w-64 flex-none;
+    }
 
-	.sidebar-content {
-		@apply shadow-md md:shadow-none flex h-screen flex-col justify-between border-e bg-background-200 relative transition;
-		@apply dark:border-primary-700;
-	}
+    .sidebar-content {
+        @apply shadow-md md:shadow-none flex h-screen flex-col border-e border-border-light bg-background-accent transition relative;
+    }
 
-	.sidebar-links {
-		@apply mt-3 md:mt-4 px-2;
-	}
+    .sidebar-header {
+        @apply flex h-12 px-4 py-2 md:py-3 w-full border-b border-border-light;
+    }
 
-	.sidebar-link {
-		@apply flex px-3 py-1 text-gray-500 font-medium transition duration-200 ease-in-out rounded;
-		@apply hover:text-primary-500 hover:bg-background-300;
-		@apply dark:text-primary-400 dark:hover:text-secondary-500;
-	}
+    .sidebar-cmd-plt-btn {
+        @apply w-full px-4 h-16 flex justify-center flex-col;
+    }
 
-	.sidebar-link.active {
-		@apply text-primary-500;
-		@apply dark:text-primary-100;
-	}
+    .sidebar-links {
+        @apply px-2;
+    }
 
+    .sidebar-link {
+        @apply flex px-2 py-1 text-content-light transition duration-200 ease-in-out rounded-md;
+        @apply hover:text-content-default hover:bg-background-hover;
 
-	.sidebar-desktop-closed-show {
-		display: none;
-	}
+        .icon {
+            @apply w-5 h-5 mr-2 mt-0.5;
+        }
+    }
 
-	.sidebar-desktop-toggle-btn {
-		@apply z-10 p-5 hidden md:block text-gray-400 hover:text-primary-500 flex flex-row items-center absolute -left-1 top-10 -translate-y-1/2;
-	}
+    .sidebar-link.active {
+        @apply text-primary-default;
+    }
 
-	.sidebar-footer {
-		@apply sticky inset-x-0 bottom-0 border-t border-gray-100 pb-5;
-		@apply dark:border-primary-700;
-	}
+    .sidebar-desktop-closed-show {
+        display: none;
+    }
 
-	.sidebar-desktop-closed {
-		@apply md:!w-16 lg:!w-16;
+    .sidebar-desktop-toggle-btn {
+        @apply hidden md:block text-content-lighter hover:text-primary-hover;
+    }
 
-		.sidebar-links {
-			@apply mt-0;
-		}
+    .sidebar-footer {
+        @apply absolute inset-x-0 bottom-0 border-t border-border-light pb-5;
 
-		.sidebar-footer {
-			@apply w-full flex flex-col items-center fixed;
+        a {
+            @apply block px-3 pt-5 text-sm text-content-light hover:text-primary-default flex flex-row items-center;
 
-			& a {
-				@apply justify-center w-full;
-			}
-		}
+            .icon {
+                @apply mr-1 w-4 h-4;
+            }
+        }
+    }
 
-		.sidebar-content {
-			@apply justify-start items-start;
-		}
+    .sidebar-desktop-closed {
+        @apply md:!w-16 lg:!w-16;
 
-		.sidebar-desktop-toggle-btn {
-			@apply static h-20 translate-y-0 flex flex-col justify-center items-center;
-		}
+        .sidebar-header {
+            @apply p-0 mb-0 justify-center;
 
-		.logo {
-			display: none;
-		}
+            .icon {
+                @apply mr-0;
+            }
+        }
 
-		.sidebar-desktop-closed-hide {
-			display: none;
-		}
+        .sidebar-desktop-closed-hide {
+            display: none;
+        }
 
-		.sidebar-desktop-closed-show {
-			display: block;
-		}
-	}
+        .sidebar-links {
+            @apply px-0 w-full;
+        }
+
+        .sidebar-links li {
+            @apply w-full;
+        }
+
+        .sidebar-link {
+            @apply w-full flex justify-center items-center h-16 rounded-none;
+
+            .icon {
+                @apply mr-0;
+            }
+        }
+
+        .sidebar-footer {
+            @apply w-full flex flex-col items-center fixed;
+
+            & a {
+                @apply justify-center w-full;
+            }
+
+            .icon {
+                @apply mr-0;
+            }
+        }
+
+        .sidebar-content {
+            @apply justify-start items-start;
+        }
+
+        .sidebar-desktop-toggle-btn {
+            @apply w-full flex flex-col justify-center items-center;
+        }
+
+        .logo {
+            display: none;
+        }
+    }
 }
 

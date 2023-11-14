@@ -2,16 +2,26 @@
 
 {{ define "header" }}
 {{ with .Data.Asset }}
-<h1 class="font-extrabold text-sm sm:text-base md:text-2xl lg:text-4xl flex flex-col items-start sm:flex-row sm:items-center">
+<h1 class="flex flex-col items-start sm:flex-row sm:items-center">
 	{{ .Name }}
-	<span class="hidden lg:inline text-slate-400">#{{ .Tag }}</span>
+	<span class="hidden lg:inline text-content-lighter">#{{ .Tag }}</span>
 
-	{{ template "status_badge" dict "Status" .Status "Class" "hidden lg:block sm:ms-3 sm:mt-2" }}
+	<x-status-badge status="{{ .Status }}" class="hidden lg:block sm:ms-3 text-lg font-normal" />
 </h1>
 
-<div class="sm:mt-3 sm:mt-0 flex-1 flex justify-end">
+<div class="sm:mt-3 lg:mt-0 flex-1 flex justify-end items-center">
+	<a href="/assets/{{ .ID }}/edit" class="hidden sm:flex btn btn-neutral me-3 px-3">
+		<x-icon icon="pencil-simple" />
+		Edit
+	</a>
+	<a href="/assets/{{ .ID }}/delete" class="hidden sm:flex btn btn-danger btn-outline">
+		<x-icon icon="pencil-simple" />
+		Delete
+	</a>
+
 	<x-dropdown-button
-		button-class="text-xs md:text-base btn-primary"
+		class="sm:hidden"
+		button-class="btn-neutral"
 		button-text="Actions"
 		items='[
 			{ "text": "Edit", "url": "(printf \"/assets/%d/edit\" .ID)" },
@@ -24,161 +34,231 @@
 
 {{ define "main" }}
 {{ with .Data.Asset }}
-<h4 class="flex lg:hidden flex-row w-full px-3 mb-3 justify-between">
-	<span class="text-slate-500">Tag: {{ .Tag }}</span>
-	{{ template "status_badge" dict "Status" .Status "Class" "sm:ms-3 sm:mt-2" }}
+<h4 class="flex lg:hidden flex-row w-full content-inset-x my-3 justify-between">
+	<span class="text-content-light">Tag: {{ .Tag }}</span>
+	<x-status-badge status="{{ .Status }}" class="sm:ms-3 sm:mt-2" />
 </h4>
 
-{{ template "asset_view_tabs" $ }}
+<div class="md:grid md:grid-cols-4 mt-5">
+	<div class="col-span-3">
+		{{ template "asset_view_attributes" $ }}
+		{{ template "asset_view_purchases" $ }}
 
-<div class="main grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
-	<dl class="md:grid md:grid-cols-2 md:gap-2 lg:col-span-2 relative">
-		<a class="btn btn-muted btn-outline absolute right-0 top-0" href="/assets/{{ .ID }}/edit" title="Edit"><x-icon class="h-6 w-6 !me-0" icon="pencil-simple" /></a>
+		{{ template "asset_view_parts" $ }}
 
-		<div class="lg:col-span-1 space-y-5">
-			{{ with .Parent }}
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Parent</dt>
-				<dd>
-					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }}#{{ .Tag }}</a>
-				</dd>
-			</div>
-			{{ end }}
+		{{ template "asset_view_files" $ }}
+	</div>
 
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Name</dt>
-				<dd>{{ .Name }}</dd>
-			</div>
+	<div class="col-span-1 content-inset-x">
+		{{ template "asset_view_image" $ }}
 
-			{{ if eq .Type "CONSUMABLE" }}
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Quantity Left</dt>
-				<dd>{{ .Quantity }} {{ .QuantityUnit }}</dd>
-			</div>
-			{{ end }}
+		{{ template "asset_view_children" $ }}
+	</div>
+</div>
 
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Category</dt>
-				<dd><a href="/assets?query=category:{{ .Category }}">{{ .Category }}</a></dd>
-			</div>
+{{ end }}
+{{ end }}
 
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Location</dt>
-				<dd>
-					{{ default .Location "-" }}
-					{{ if ne .PositionCode "" }}
-						({{ .PositionCode }})
-					{{ end }}
-				</dd>
-			</div>
+{{ define "asset_view_tabs" }}
+{{ with .Data.Asset }}
+<nav class="tabs col-span-3 h-12 mt-2 content-inset-x mb-0">
+	<ul>
+		<li class="active"><a href="/assets/{{ .ID }}">Information</a></li>
+		<li><a href="/assets/{{ .ID }}/files">Files</a></li>
+	</ul>
+</nav>
+{{ end }}
+{{ end }}
+
+{{ define "asset_view_attributes" }}
+{{ with .Data.Asset }}
+<dl class="md:grid md:grid-cols-2">
+	<div class="content-inset-s lg:col-span-1 space-y-5">
+		{{ with .Parent }}
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Parent</dt>
+			<dd>
+				<a href="/assets/{{ .ID }}" class="text-primary-default">{{ .Name }}#{{ .Tag }}</a>
+			</dd>
+		</div>
+		{{ end }}
+
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Name</dt>
+			<dd>{{ .Name }}</dd>
 		</div>
 
-		<div class="lg:col-span-1 space-y-5">
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Manufacturer</dt>
-				<dd>{{ default .Manufacturer "-" }}</dd>
-			</div>
+		{{ if eq .Type "CONSUMABLE" }}
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Quantity Left</dt>
+			<dd>{{ .Quantity }} {{ .QuantityUnit }}</dd>
+		</div>
+		{{ end }}
 
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Model</dt>
-				<dd>{{ default .Model "-" }} {{ with .ModelNo}} ({{.}}) {{ end }}</dd>
-			</div>
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Category</dt>
+			<dd><a href="/assets?query=category:{{ .Category }}">{{ .Category }}</a></dd>
+		</div>
 
-			{{ if ne .Type "CONSUMABLE" }}
-			<div>
-				<dt class="block text-neutral-400 font-semibold">SerialNo</dt>
-				<dd>{{ default .SerialNo "-" }}</dd>
-			</div>
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Location</dt>
+			<dd>
+				{{ default .Location "-" }}
+				{{ if ne .PositionCode "" }}
+					({{ .PositionCode }})
+				{{ end }}
+			</dd>
+		</div>
+	</div>
 
-			<div>
-				<dt class="block text-neutral-400 font-semibold">Warranty Until</dt>
-				<dd class="sm:col-span-2">
+	<div class="content-inset-s md:px-0 lg:px-0 lg:col-span-1 space-y-5">
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Manufacturer</dt>
+			<dd>{{ default .Manufacturer "-" }}</dd>
+		</div>
+
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Model</dt>
+			<dd>{{ default .Model "-" }} {{ with .ModelNo }} ({{ . }}) {{- end }}</dd>
+		</div>
+
+		{{ if ne .Type "CONSUMABLE" }}
+		<div>
+			<dt class="block text-neutral-400 font-semibold">SerialNo</dt>
+			<dd>{{ default .SerialNo "-" }}</dd>
+		</div>
+
+		<div>
+			<dt class="block text-neutral-400 font-semibold">Warranty Until</dt>
+			<dd class="sm:col-span-2">
+				<date>
 					{{ if not .WarrantyUntil.IsZero }}
 						{{ .WarrantyUntil.Format "2006-01-02" }}
 					{{ else }}
 					-
 					{{ end }}
-				</dd>
-			</div>
-			{{ end }}
-		</div>
-
-		<div class="lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-2">
-			{{ range .CustomAttrs }}
-			<div class="lg:col-span-1">
-				<dt class="block text-neutral-400 font-semibold">{{ .Name }}</dt>
-				<dd>{{ .Value }}</dd>
-			</div>
-			{{ end }}
-		</div>
-
-		<div class="lg:col-span-2 mb-5">
-			<span class="block text-neutral-400 font-semibold">Notes</span>
-			<p>
-				{{ range split (default .Notes "-") "\n" }}
-				{{ . }}<br />
-				{{ end }}
-			</p>
-		</div>
-	</dl>
-
-	<div class="lg:col-span-1">
-		{{ if ne .ImageURL "" }}
-		<div class="rounded border p-3 w-full">
-			<img src="{{ .ImageURL }}" class="w-full h-auto object-scale-down max-h-[500px]" />
+				</date>
+			</dd>
 		</div>
 		{{ end }}
 	</div>
 
-	{{ if and (eq (len .Purchases) 1) (ne .Type "CONSUMABLE") }}
-	<div class="lg:col-span-2">
-		{{ $purchase := index .Purchases 0 }}
-		<h3 class="font-bold text-xl mt-8 mb-5">Purchase Info</h3>
+	<div class="mt-5 lg:col-span-2 lg:grid lg:grid-cols-2">
+		{{ template "asset_view_custom_attrs" $ }}
+	</div>
 
-		<div class="md:grid md:grid-cols-2 md:gap-2 lg:col-span-2 relative">
-			<div class="lg:col-span-1 space-y-5">
-				<div>
-					<span class="block text-neutral-400 font-semibold">Supplier</span>
-					{{ default $purchase.Supplier "-" }}
-				</div>
+	<div class="content-inset-s lg:col-span-2 mt-5">
+		<span class="block text-neutral-400 font-semibold">Notes</span>
+		<p>
+			{{ range split (default .Notes "-") "\n" }}
+			{{ . }}<br />
+			{{ end }}
+		</p>
+	</div>
+</dl>
+{{ end }}
+{{ end }}
 
-				<div>
-					<span class="block text-neutral-400 font-semibold">Purchase Date</span>
+{{ define "asset_view_custom_attrs" }}
+{{ range .Data.Asset.CustomAttrs }}
+<div class="content-inset-s md:ps-0 mt-5 md:mt-0 odd:content-inset-s lg:col-span-1">
+	<dt class="block text-neutral-400 font-semibold">{{ .Name }}</dt>
+	<dd>{{ .Value }}</dd>
+</div>
+{{ end }}
+{{ end }}
+
+
+{{ define "asset_view_image" }}
+{{ if ne .Data.Asset.ImageURL "" }}
+<div class="card overflow-hidden flex items-center justify-center">
+	<img src="{{ .Data.Asset.ImageURL }}" class="h-auto max-h-[500px]" />
+</div>
+{{ end }}
+{{ end }}
+
+{{ define "asset_view_children" }}
+{{ with .Data.Asset.Children }}
+<div class="mt-5 w-full" x-data="{ open: true }">
+	<h3 class="w-full mb-3 flex items-center">
+		<button class="w-full btn px-0 py-0 text-xl justify-start" x-on:click.prevent="open = !open">
+			<x-icon icon="caret-down" class="text-content-lighter me-2 h-6 w-6" x-show="open" />
+			<x-icon icon="caret-right" class="text-content-lighter me-2 h-6 w-6" x-show="!open" />
+			Assets belonging to this Asset
+		</button>
+	</h3>
+	<div x-show="open" class="main py-3 card">
+		<ul class="list-inside list-disc">
+		{{ range . }}
+			<li>
+				<a href="/assets/{{ .ID }}" class="text-primary-default">{{ .Name }} ({{ .Tag }})</a>
+			</li>
+		{{ end }}
+		</ul>
+	</div>
+</div>
+{{ end }}
+{{ end }}
+
+{{ define "asset_view_purchases" }}
+{{ if and (eq (len .Data.Asset.Purchases) 1) (ne .Data.Asset.Type "CONSUMABLE") }}
+{{ with .Data.Asset }}
+<div class="lg:col-span-2 main">
+	{{ $purchase := index .Purchases 0 }}
+	<h3 class="font-bold text-xl mt-5 mb-5">Purchase Info</h3>
+
+	<div class="md:grid md:grid-cols-2 md:gap-2 lg:col-span-2 relative">
+		<div class="lg:col-span-1 space-y-5">
+			<div>
+				<span class="block text-neutral-400 font-semibold">Supplier</span>
+				{{ default $purchase.Supplier "-" }}
+			</div>
+
+			<div>
+				<span class="block text-neutral-400 font-semibold">Purchase Date</span>
+				<date>
 					{{ if not $purchase.Date.IsZero }}
 						{{ $purchase.Date.Format "2006-01-02" }}
 					{{ else }}
 					-
 					{{ end }}
-				</div>
+				</date>
+			</div>
+		</div>
+
+		<div class="lg:col-span-1 space-y-5">
+			<div>
+				<span class="block text-neutral-400 font-semibold">Order No.</span>
+				{{ default $purchase.OrderNo "-" }}
 			</div>
 
-			<div class="lg:col-span-1 space-y-5">
-				<div>
-					<span class="block text-neutral-400 font-semibold">Order No.</span>
-					{{ default $purchase.OrderNo "-" }}
-				</div>
-
-				<div>
-					<span class="block text-neutral-400 font-semibold">Amount</span>
-					{{ $purchase.Amount.Format $.Data.DecimalSeparator }} {{ $purchase.Currency }}
-				</div>
+			<div>
+				<span class="block text-neutral-400 font-semibold">Amount</span>
+				{{ $purchase.Amount.Format $.Data.DecimalSeparator }} {{ $purchase.Currency }}
 			</div>
 		</div>
 	</div>
-	{{ else }}
-	{{- with .Purchases }}
-	<div class="lg:col-span-2">
-		<div class="grid grid-cols-1 gap-1 p-3 odd:bg-gray-50 dark:odd:bg-background-200 sm:grid-cols-3 sm:gap-4">
-			<h3 class="font-bold text-lg">Purchases</h3>
-		</div>
+</div>
+{{ end }}
+{{ else }}
+{{- with .Data.Asset.Purchases }}
+<div class="main mt-5" x-data="{ open: true }">
+	<h3 class="w-full mb-3 flex items-center">
+		<button class="w-full btn px-0 py-0 text-xl justify-start" x-on:click.prevent="open = !open">
+			<x-icon icon="caret-down" class="text-content-lighter me-2 h-6 w-6" x-show="open" />
+			<x-icon icon="caret-right" class="text-content-lighter me-2 h-6 w-6" x-show="!open" />
+			<strong>Purchases</strong>
+		</button>
+	</h3>
 
+	<div x-show="open" class="min-w-full card overflow-auto">
 		<table class="min-w-full">
 			<thead class="thead">
 				<tr>
-					<th>Date</th>
-					<th>Supplier</th>
-					<th>OrderNo</th>
-					<th>Amount</th>
+					<th class="!border-t-0">Date</th>
+					<th class="!border-t-0">Supplier</th>
+					<th class="!border-t-0">OrderNo</th>
+					<th class="!border-t-0">Amount</th>
 				</tr>
 			</thead>
 
@@ -198,24 +278,34 @@
 			</tbody>
 		</table>
 	</div>
-	{{- end }}
-	{{ end }}
+</div>
+{{- end }}
+{{ end }}
+{{ end }}
 
-	{{ with .Parts }}
-	<div class="lg:col-span-3">
-		<h2 class="mt-8 mb-5 md:text-xl lg:text-3xl font-bold">Parts</h2>
+{{ define "asset_view_parts" }}
+{{ with .Data.Asset.Parts }}
+<div class="main mt-5" x-data="{ open: true }">
+	<h3 class="w-full mb-3 flex items-center">
+		<button class="w-full btn px-0 py-0 text-xl justify-start" x-on:click.prevent="open = !open">
+			<x-icon icon="caret-down" class="text-content-lighter me-2 h-6 w-6" x-show="open" />
+			<x-icon icon="caret-right" class="text-content-lighter me-2 h-6 w-6" x-show="!open" />
+			<strong>Parts</strong>
+		</button>
+	</h3>
 
+	<div x-show="open" class="w-full card overflow-auto">
 		<table class="min-w-full">
 			<thead class="thead">
 				<tr>
-					<th>Tag</th>
-					<th>Name</th>
-					<th>Location</th>
-					<th>Notes</th>
+					<th class="!border-t-0">Tag</th>
+					<th class="!border-t-0">Name</th>
+					<th class="!border-t-0">Location</th>
+					<th class="!border-t-0">Notes</th>
 				</tr>
 			</thead>
 
-		<tbody class="tbody">
+			<tbody class="tbody">
 			{{ range . }}
 				<tr>
 					<td>
@@ -238,39 +328,79 @@
 			</tbody>
 		</table>
 	</div>
-	{{ end }}
+</div>
+{{ end }}
+{{ end }}
 
-	{{ with .Children }}
-	<div class="lg:col-span-3 flex flex-col">
-		<div class="mt-5 rounded w-full">
-			<h3 class="mb-5 md:text-md lg:text-xl font-bold">Assets belonging to this Asset</h3>
-			<ul>
-			{{ range . }}
-				<li>
-					<a href="/assets/{{ .ID }}" class="text-blue-500 hover:text-purple-600">{{ .Name }} ({{ .Tag }})</a>
-				</li>
-			{{ end }}
-			</ul>
+
+{{ define "asset_view_files" }}
+{{ with .Data.Asset }}
+
+<div
+	class="main mt-5 w-full"
+	x-data="{{ printf `{ open: true, assetID: %d , state: 'none', }` .ID }}"
+	x-on:dragover.prevent="state = 'hovering'"
+	x-on:dragleave.prevent="state = 'none'" 
+	x-on:drop.prevent="
+		state = 'uploading';
+		await $upload(assetID, $event.dataTransfer)
+		state = 'none'
+	"
+>
+	<h3 class="w-full mb-3 flex items-center">
+		<button class="w-full btn px-0 py-0 text-xl justify-start" x-on:click.prevent="open = !open">
+			<x-icon icon="caret-down" class="text-content-lighter me-2 h-6 w-6" x-show="open" />
+			<x-icon icon="caret-right" class="text-content-lighter me-2 h-6 w-6" x-show="!open" />
+			<strong>Files</strong>
+		</button>
+	</h3>
+
+	<div x-show="open" class="card w-full min-h-[200px] relative">
+		<div
+			x-cloak
+			x-show="state != 'none'"
+			class="w-full absolute left-0 right-0 top-0 bottom-0 bg-background-accent z-40 rounded-lg"
+		>
+			<div x-show="state == 'hovering'" class="h-full flex flex-col items-center justify-center text-content-light">
+				<x-icon icon="file-arrow-up" class="pointer-events-none" />
+				<p class="mb-2 text-sm font-semibold">Drop to upload</p>
+			</div>
+
+			<div x-show="state == 'uploading'" class="h-full flex flex-col items-center justify-center text-content-light">
+				<x-icon icon="file-arrow-up" class="pointer-events-none" />
+				<p class="mb-2 text-sm font-semibold">Uploading...</p>
+			</div>
 		</div>
+
+
+		<ul class="w-full">
+			<li class="w-full py-2 flex items-center content-inset-x border-b border-border-default">
+				<div class="flex-1 flex me-5 text-content-lighter font-medium"><span class="w-6 h-6 me-2"></span>Name</div>
+				<div class="w-32 me-5 text-content-lighter font-medium">Size</div>
+				<div class="w-64 me-5 text-content-lighter font-medium">Created At</div>
+				<div class="w-24 flex"></div>
+			</li>
+
+			{{ range .Files }}
+			<li class="w-full flex items-center py-2 hover:bg-background-hover content-inset-x">
+				<a href="{{ .PublicPath }}" class="flex-1 flex me-5"><x-icon class="w-6 h-6 me-2" icon="file" /> {{ .Name }}</a>
+				<div class="w-32 me-5">{{ .SizeBytes }}</div>
+				<date class="block w-64 me-5">{{ .CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}</date>
+				<div class="w-24 flex justify-end">
+					<x-dropdown-button
+						button-class="max-w-min btn-neutral"
+						icon-end="dots-three-vertical"
+						items='[
+							{ "text": "Download", "url": "(.PublicPath)" },
+							{ "text": "Delete", "url": "(printf \"/assets/%d/files/%d/delete\" .AssetID .ID)", "class": "text-red-700" }
+						]'
+					/>
+				</div>
+			</li>
+			{{ end }}
+		</ul>
 	</div>
-	{{ end }}
 </div>
 
 {{ end }}
 {{ end }}
-
-{{ define "asset_view_tabs" }}
-{{ with .Data.Asset }}
-<nav class="content-inset-x mb-5 w-full border-b border-gray-100 dark:border-primary-700">
-	<ul class="flex flex-wrap justify-start space-x-5">
-		<li class="flex border-b-2 text-base border-primary-500 text-primary-500">
-			<a class="px-2 pb-2 inline-flex items-center" href="/assets/{{ .ID }}">Information</a>
-		</li>
-		<li class="flex border-b-2 text-base border-transparent text-neutral-400 hover:text-primary-600 hover:border-primary-600">
-			<a class="px-2 pb-2 inline-flex items-center" href="/assets/{{ .ID }}/files">Files</a>
-		</li>
-	</ul>
-</nav>
-{{ end }}
-{{ end }}
-

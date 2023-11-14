@@ -64,6 +64,7 @@ func (rt *Router) assetsGetHandler(w http.ResponseWriter, r *http.Request, param
 	query.IncludeParts = true
 	query.IncludePurchases = true
 	query.IncludeChildren = true
+	query.IncludeFiles = true
 	asset, err := rt.assets.Get(r.Context(), query)
 	if err != nil {
 		return err
@@ -72,22 +73,6 @@ func (rt *Router) assetsGetHandler(w http.ResponseWriter, r *http.Request, param
 	page := &pages.AssetViewPage{
 		Asset:            asset,
 		DecimalSeparator: rt.config.DecimalSeparator,
-	}
-
-	return page.Render(w, r)
-}
-
-// [GET] /assets/{id}/files
-func (rt *Router) assetFilesHandler(w http.ResponseWriter, r *http.Request, params assetsGetParams) error {
-	query := getAssetQuery(params.TagOrID)
-	query.IncludeFiles = true
-	asset, err := rt.assets.Get(r.Context(), query)
-	if err != nil {
-		return err
-	}
-
-	page := &pages.AssetFilesPage{
-		Asset: asset,
 	}
 
 	return page.Render(w, r)
@@ -147,7 +132,9 @@ func (rt *Router) assetFilesDeleteSubmitHandler(w http.ResponseWriter, r *http.R
 		return err
 	}
 
-	http.Redirect(w, r, "/assets/"+params.TagOrID+"/files", http.StatusFound)
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, "Deleted file")
+
+	http.Redirect(w, r, "/assets/"+params.TagOrID, http.StatusFound)
 	return nil
 }
 
@@ -221,7 +208,7 @@ func (rt *Router) assetsNewSubmitHandler(w http.ResponseWriter, r *http.Request,
 		return err
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("New asset '%s' created", created.Name))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("New asset '%s' created", created.Name))
 
 	http.Redirect(w, r, fmt.Sprintf("/assets/%v", created.ID), http.StatusFound)
 	return nil
@@ -328,7 +315,7 @@ func (rt *Router) assetsEditSubmitHandler(w http.ResponseWriter, r *http.Request
 		return fmt.Errorf("error updating asset: %w", err)
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("Asset '%s' updated", updated.Name))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Asset '%s' updated", updated.Name))
 
 	http.Redirect(w, r, fmt.Sprintf("/assets/%v", updated.ID), http.StatusFound)
 	return nil
@@ -369,7 +356,7 @@ func (rt *Router) assetsDeleteSubmitHandler(w http.ResponseWriter, r *http.Reque
 		return page.Render(w, r)
 	}
 
-	session.Put(r.Context(), "info_message", fmt.Sprintf("Asset '%s' deleted", page.Asset.Name))
+	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Asset '%s' deleted", page.Asset.Name))
 
 	http.Redirect(w, r, "/assets", http.StatusFound)
 	return nil

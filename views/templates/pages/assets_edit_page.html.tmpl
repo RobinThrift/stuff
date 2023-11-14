@@ -28,7 +28,7 @@
 
 	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
 
-	<div class="w-full flex flex-col lg:flex-row">
+	<div class="w-full flex flex-col lg:flex-row mt-5">
 		<div class="flex-1 order-1">
 			<h3 class="pb-3 col-span-4 font-bold text-lg md:text-xl">General Information</h3>
 			<div class="p-5 border-b mb-5 lg:mb-0 lg:border border-gray-300 lg:rounded-md flex flex-col md:col-span-3 md:gap-5 md:grid md:grid-cols-4">
@@ -311,12 +311,12 @@
 							name="purchases[0].currency"
 							id="purchases[0].currency"
 							value="{{ $purchase.Currency }}"
-							class="input rounded-l-none w-[64px] border-l-0"
+							class="input rounded-l-none w-[64px] !border-l-0"
 							x-bind:disabled="type === 'CONSUMABLE'"
 						/>
 
 						{{ if has .ValidationErrs "purchases[0].amount" }}
-						<span class="block text-red-500">{{ (index .ValidationErrs "purchases[0].amount") }}</span>
+						<span class="block text-danger-default">{{ (index .ValidationErrs "purchases[0].amount") }}</span>
 						{{ end }}
 					</div>
 				</div>
@@ -498,7 +498,7 @@
 		</tbody>
 	</table>
 
-	<button class="btn btn-secondary mt-5" x-on:click.prevent="addItem()">Add Part</button>
+	<button class="btn btn-neutral mt-5" x-on:click.prevent="addItem()">Add Part</button>
 </div>
 {{ end }}
 

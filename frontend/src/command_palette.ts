@@ -26,7 +26,7 @@ export function plugin(Alpine: typeof _Alpine) {
                     },
                     {
                         name: "All Assets",
-                        icon: "package-thin",
+                        icon: "package",
                         url: "/assets",
                         tags: ["list"],
                     },
@@ -55,7 +55,7 @@ export function plugin(Alpine: typeof _Alpine) {
                 [
                     {
                         name: "All Tags",
-                        icon: "tag-thin",
+                        icon: "tag",
                         url: "/tags",
                         tags: ["list"],
                     },

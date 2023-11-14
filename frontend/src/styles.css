@@ -1,8 +1,10 @@
 @import "./_tailwind.css";
 @import "./_themes.css";
+@import "./_layout.css";
+@import "./_sidebar.css";
+@import "./_components.css";
 @import "./_buttons.css";
 @import "./_forms.css";
-@import "./_sidebar.css";
 @import "./_table.css";
 @import "./_command_palette.css";
 @import "./_assets.css";
@@ -17,62 +19,29 @@
 	[x-cloak] { display: none !important; }
 
     body {
-        @apply bg-background-100 text-content;
+        @apply bg-background-default text-content-default;
     }
 
 	a {
-		@apply hover:text-primary-500;
-		@apply dark:hover:text-secondary-500;
+		@apply hover:text-primary-default;
 	}
 }
 
 @layer components {
-	.main {
-		@apply px-2 md:px-6 lg:px-8 pb-3;
+	.content-inset-x {
+		@apply px-2 md:px-5;
+	}
+
+	.content-inset-s {
+		@apply ps-2 md:ps-5;
 	}
 
 	.content-inset {
-		@apply px-2 md:px-6 lg:px-8 pb-3;
+		@apply content-inset-x pb-3;
 	}
 
-	.content-inset-x {
-		@apply px-2 md:px-6 lg:px-8;
-	}
-
-	.pagination {
-		@apply flex items-center justify-between w-full h-16 px-3 border-t border-gray-100;
-		@apply dark:border-primary-700;
-	}
-
-	.pagination-items {
-		@apply flex items-center text-sm leading-tight bg-background-100 border divide-x rounded h-9 divide-gray-100 border-gray-200;
-		@apply dark:divide-primary-700 dark:border-primary-700;
-	}
-
-	.pagination-item {
-		@apply relative inline-flex items-center h-full px-3;
-
-		&:hover {
-			.accent {
-				@apply border-l border-r border-primary-500 left-0 w-full;
-				@apply dark:border-secondary-500;
-			}
-		}
-
-		.accent {
-			@apply box-content absolute bottom-0 w-0 h-px -mx-px translate-y-px border-transparent bg-primary-500 left-1/2 duration-200 ease-out;
-			@apply dark:bg-secondary-500;
-		}
-
-		&.active {
-			@apply relative inline-flex items-center h-full px-3 text-primary-500 bg-background-200;
-			@apply dark:text-secondary-500;
-
-			.accent {
-				@apply left-0 w-full border-l border-r bg-primary-500 border-primary-500;
-			    @apply dark:bg-secondary-500;
-			}
-		}
+	.main {
+		@apply content-inset;
 	}
 
 	span.disabled {
@@ -84,7 +53,7 @@
 }
 
 .rainbow {
-    @apply from-green-300 via-primary-500 to-purple-600;
+    @apply from-green-300 via-primary-default to-purple-600;
 }
 
 .drag-over .drag-over-show {
@@ -101,21 +70,4 @@
 
 .drag-over-show {
     display: none;
-}
-
-.flatpickr-calendar {
-    @apply text-neutral-500;
-}
-
-.flatpickr-day.today.selected {
-    background: none;
-    @apply bg-primary-500 border-primary-500;
-}
-
-.flatpickr-months .flatpickr-prev-month:hover, .flatpickr-months .flatpickr-next-month:hover {
-    @apply text-primary-500;
-}
-
-.flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
-    fill: currentColor;
 }

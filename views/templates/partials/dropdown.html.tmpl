@@ -9,13 +9,17 @@ x-dropdown
 	x-data="{ open: false }"
 	class="relative {{ if ne .class "" -}} {{ .class }} {{- end -}}"
 >
-	{{ $iconClass := "w-[16px] h-[16px] !me-0" }}
+	{{ $caretClass := "w-[16px] h-[16px] !me-0" }}
+	{{ $iconClass := "w-[16px] h-[16px]" }}
 	{{ if ne (get . "button-text") "" }}
-	{{ $iconClass = "w-[16px] h-[16px] !me-0 ms-2" }}
+	{{ $iconClass := "w-[16px] h-[16px] !me-0" }}
+	{{ $caretClass = "w-[16px] h-[16px] !me-0 ms-2" }}
 	{{- end }}
+
 	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click.prevent="open = !open">
+		{{ if has . "icon" }} <x-icon icon="{{ .icon }}" class="{{ $iconClass }}" /> {{ end }}
 		{{- get . "button-text" }}
-		<x-icon icon="{{ default .icon `caret-down` }}" class="{{ $iconClass }}" />
+		<x-icon icon="caret-down" class="{{ $caretClass }}" />
 	</button>
 
 	<div
@@ -35,26 +39,32 @@ x-dropdown
 
 {{/*
 x-dropdown-button
-	class string
-	text  string
-	items []{ text string; url string; class string }
+	class    string
+	text     string
+	icon     string
+	icon-end string
+	items    []{ text string; url string; class string }
 */}}
 {{ define "dropdown-button" }}
 <div
 	x-data="{ open: false }"
 	class="relative {{ if ne .class "" -}} {{ .class }} {{- end -}}"
 >
-	{{ $iconClass := "w-[16px] h-[16px] !m-0" }}
+
+	{{ $caretClass := "w-[16px] h-[16px] !m-0" }}
+	{{ $iconClass := "w-[16px] h-[16px]" }}
 	{{ if has . "button-text" }}
-	{{ $iconClass = "w-[16px] h-[16px] !m-0 !ms-2 {{ get . `button-text` }}" }}
+	{{ $iconClass = "w-[16px] h-[16px] me-2" }}
+	{{ $caretClass = "w-[16px] h-[16px] !m-0 !ms-2" }}
 	{{- end }}
 	<button x-ref="button" class="btn {{ default (get . `button-class`) `btn-primary` }}" x-on:click.prevent="open = !open">
+		{{ if has . "icon" }} <x-icon icon="{{ .icon }}" class="{{ $iconClass }}" /> {{ end }}
 		{{- get . "button-text" }}
-		<x-icon icon="{{ default .icon `caret-down` }}" class="{{ $iconClass }}" />
+		<x-icon icon="{{ default (get . `icon-end`) `caret-down` }}" class="{{ $caretClass }}" />
 	</button>
 
 	<div
-		class="absolute end-0 z-10 mt-1 min-w-max bg-background-100 border rounded shadow-sm border-neutral-200"
+		class="dropdown-content"
 		role="menu"
 		x-cloak
 		x-ref="dropdown"
