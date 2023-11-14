@@ -23,7 +23,7 @@
     }
 
 	a {
-		@apply hover:text-primary-default;
+		@apply hover:text-primary-hover;
 	}
 }
 

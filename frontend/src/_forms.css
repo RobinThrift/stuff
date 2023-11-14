@@ -8,6 +8,7 @@
         @apply w-full px-3 py-2 placeholder:text-content-lighter border border-border-default rounded-md bg-background-accent-lighter;
         @apply disabled:cursor-not-allowed disabled:opacity-50;
         @apply dark:placeholder:text-content-light dark:bg-background-default;
+        @apply retro:border-2;
 
         transition: .25s ease;
 
@@ -33,6 +34,6 @@
     }
 
     .checkbox-input {
-        @apply px-3 py-2 border border-border-default rounded-md focus:outline-none focus:ring focus:border-primary-default disabled:cursor-not-allowed disabled:opacity-50;
+        @apply w-4 h-4 rounded text-primary-default bg-background-accent border-border-default focus:ring-primary-default;
     }
 }

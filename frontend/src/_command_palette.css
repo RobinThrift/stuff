@@ -1,7 +1,8 @@
 @layer components {
 	.command-palette {
-		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start z-50;
-		@apply dark:border dark:border-border-default dark:rounded-lg;
+		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start z-50 shadow rounded-lg bg-background-default;
+		@apply dark:border dark:border-border-default;
+		@apply retro:border retro:border-border-default;
 	}
 
 	.key-hint {

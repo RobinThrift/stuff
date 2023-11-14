@@ -1,7 +1,8 @@
 @layer components {
     .btn {
-        @apply text-sm flex items-center justify-center px-2 py-2 focus:outline-none;
+        @apply text-sm flex items-center justify-center px-2 py-2 focus:outline-none ease-in-out duration-100;
         @apply disabled:cursor-not-allowed disabled:opacity-50;
+        @apply retro:py-1;
 
         .icon {
             @apply w-4 h-4 me-1;
@@ -13,12 +14,19 @@
         @apply hover:text-background-default hover:bg-primary-hover;
         @apply focus:text-background-default focus:bg-primary-active;
         @apply dark:text-white;
+        @apply retro:border-2 retro:border-border-default retro:text-white;
+        @apply retro:focus:shadow-none retro:focus:bg-primary-active retro:focus:text-white retro:focus:translate-y-1 retro:focus:translate-x-1;
+        @apply retro:hover:bg-primary-active retro:hover:focus:bg-primary-active;
     }
 
     .btn.btn-neutral {
         @apply rounded-md shadow border border-border-lighter bg-background-default;
         @apply hover:text-primary-default hover:border-primary-lighter;
         @apply focus:text-primary-active focus:border-primary-active;
+        @apply retro:border-2 retro:border-border-default retro:text-border-default;
+        @apply retro:focus:shadow-none retro:focus:bg-border-default retro:focus:text-white retro:focus:translate-y-1 retro:focus:translate-x-1;
+        @apply retro:hover:bg-background-hover retro:hover:focus:bg-border-default;
+        @apply dark-retro:text-white;
     }
 
     .btn-sm {
@@ -34,7 +42,9 @@
     }
 
     .btn.btn-outline.btn-danger {
-    	@apply px-3 py-2 bg-background-default border text-danger-default border-danger-default hover:text-white hover:bg-red-600 focus:bg-danger-active;
+        @apply px-3 py-2 bg-background-default border text-danger-default border-danger-default hover:text-white hover:bg-red-600 focus:bg-danger-active;
+        @apply retro:py-1 retro:border-2;
+        @apply retro:focus:shadow-none retro:focus:bg-danger-default retro:focus:text-white retro:focus:translate-y-1 retro:focus:translate-x-1;
     }
 
     .dropdown-content {

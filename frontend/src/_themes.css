@@ -30,7 +30,7 @@
         --colour-danger-active: 176 37 37;
     }
 
-    :root[class~="dark"] {
+    :root.dark {
         --colour-background-default: 5 11 20;
         --colour-background-accent: 18 22 31;
         --colour-background-hover: 30 33 38;
@@ -59,5 +59,72 @@
         --colour-danger-default: 199 41 40;
         --colour-danger-hover: 209 49 49;
         --colour-danger-active: 176 37 37;
+    }
+
+
+    :root.retro:not([class~="dark"]) {
+        --colour-background-default: 242 242 242;
+        --colour-background-accent: 255 255 255;
+        --colour-background-hover: 248 248 250;
+        --colour-background-accent-lighter: 239 239 239;
+
+        --colour-border-default: 0 0 0;
+        --colour-border-light: 0 0 0;
+        --colour-border-lighter: 0 0 0;
+
+        --colour-content-default: 0 0 0;
+        --colour-content-light: 50 50 50;
+        --colour-content-lighter: 60 60 60;
+
+        --colour-primary-lighter: 175 241 242;
+        --colour-primary-darker: 32 94 106;
+        --colour-primary-default: 28 144 158;
+        --colour-primary-hover: 30 118 131;
+        --colour-primary-active: 32 94 106;
+
+        --colour-success-default: 88 208 119;
+        --colour-success-darker: 35 150 64;
+        --colour-success-lighter: 156 232 175;
+        --colour-success-border: 35 150 64;
+        --colour-success-hover: 49 182 83;
+        --colour-success-active: 35 150 64;
+
+        --colour-danger-default: 234 85 94;
+        --colour-danger-darker: 129 26 47;
+        --colour-danger-hover: 213 41 60;
+        --colour-danger-active: 179 29 49;
+
+        --theme-shadow: 0.25rem 0.25rem 0 rgba(var(--colour-border-default)/1);
+    }
+
+    :root.retro.dark {
+        --colour-background-default: 5 11 20;
+        --colour-background-accent: 18 22 31;
+        --colour-background-hover: 30 33 38;
+        --colour-background-accent-lighter: 26 33 44;
+
+        --colour-border-default: 76 76 76;
+        --colour-border-light: 81 81 81;
+        --colour-border-lighter: 200 200 200;
+
+        --colour-primary-lighter: 175 241 242;
+        --colour-primary-darker: 32 94 106;
+        --colour-primary-default: 28 144 158;
+        --colour-primary-hover: 30 118 131;
+        --colour-primary-active: 32 94 106;
+
+        --colour-success-default: 88 208 119;
+        --colour-success-darker: 35 150 64;
+        --colour-success-lighter: 156 232 175;
+        --colour-success-border: 35 150 64;
+        --colour-success-hover: 49 182 83;
+        --colour-success-active: 35 150 64;
+
+        --colour-danger-default: 234 85 94;
+        --colour-danger-darker: 129 26 47;
+        --colour-danger-hover: 213 41 60;
+        --colour-danger-active: 179 29 49;
+
+        --theme-shadow: 0.25rem 0.25rem 0 rgba(var(--colour-border-lighter)/1);
     }
 }
