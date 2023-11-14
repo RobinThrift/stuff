@@ -10,12 +10,16 @@
         @apply dark:placeholder:text-content-light dark:bg-background-default;
         @apply retro:border-2;
 
+        &.input-sm {
+            @apply text-sm px-2 py-1;
+        }
+
         transition: .25s ease;
 
         &:focus, &:hover {
             @apply dark:bg-background-accent-lighter;
             outline: none;
-            background: rgb(var(--colour-background-default)/1);
+            background-color: rgb(var(--colour-background-default)/1);
             border-color: rgba(var(--colour-primary-default)/0.4);
             box-shadow: 0 0 0 4px rgba(var(--colour-primary-default)/10%);
         }

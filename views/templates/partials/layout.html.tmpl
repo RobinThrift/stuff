@@ -109,6 +109,10 @@
 	</div>
 
 	<div class="sidebar-footer">
+		<div class="sidebar-desktop-closed-hide px-3 mt-5">
+			{{ template "theme_switcher" }}
+		</div>
+
 		<a href="/users/me">
 			<x-icon icon="user-gear" />
 			<span class="sidebar-desktop-closed-hide">My Settings</span>
@@ -134,4 +138,28 @@
 		</a>
 	</div>
 </footer>
+{{ end }}
+
+
+{{ define "theme_switcher" }}
+<div class="flex">
+	<select
+		class="input input-sm me-3"
+		name="theme" id="theme"
+		x-on:input="$store.theme.setTheme($event.target.value)"
+	>
+		<option value="default" x-bind:selected="$store.theme.name === '' || $store.theme.name === 'default'">Default</option>
+		<option value="retro" x-bind:selected="$store.theme.name === 'retro'">Retro</option>
+	</select>
+
+	<select
+		class="input input-sm"
+		name="theme_mode" id="theme_mode"
+		x-on:input="$store.theme.setMode($event.target.value)"
+	>
+		<option value="system" x-bind:selected="$store.theme.mode === '' || $store.theme.mode === 'system'">System</option>
+		<option value="light" x-bind:selected="$store.theme.mode === 'light'">Light</option>
+		<option value="dark" x-bind:selected="$store.theme.mode === 'dark'">Dark</option>
+	</select>
+</div>
 {{ end }}

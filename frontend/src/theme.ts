@@ -1,48 +1,71 @@
 import type _Alpine from "alpinejs"
 
-export function plugin(Alpine: typeof _Alpine) {
-    let theme = {
-        name: "default",
-        dark: window.matchMedia("(prefers-color-scheme: dark)").matches,
+type ThemeNames = "default" | "retro"
+type ThemeModes = "system" | "light" | "dark"
 
-        set(name: string) {
-            document.documentElement.classList.remove(`theme-${this.name}`)
+class Theme {
+    name: ThemeNames = "default"
+    mode: ThemeModes = "system"
 
-            this.name = name
-            document.documentElement.classList.add(`theme-${this.name}`)
-            localStorage.set(
-                "theme",
-                JSON.stringify({ name: this.name, dark: this.dark }),
-            )
-        },
+    get dark(): boolean {
+        return (
+            this.mode === "dark" ||
+            (this.mode === "system" &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches)
+        )
+    }
 
-        toggleDark() {
-            this.dark = !this.dark
-
-            if (this.dark) {
-                document.documentElement.classList.add("dark")
-            } else {
-                document.documentElement.classList.remove("dark")
+    constructor() {
+        let storedTheme = localStorage.getItem("theme")
+        if (storedTheme) {
+            let loaded = JSON.parse(storedTheme) as {
+                name: ThemeNames
+                mode: ThemeModes
             }
+            this.name = loaded.name
+            this.mode = loaded.mode
+        }
 
-            localStorage.set(
-                "theme",
-                JSON.stringify({ name: this.name, dark: this.dark }),
-            )
-        },
+        this._onChange()
     }
 
-    let storedJSON = localStorage.getItem("theme")
-
-    if (storedJSON) {
-        let stored = JSON.parse(storedJSON)
-        theme.dark = stored.dark
-        theme.name = stored.name
+    setTheme(name: Theme["name"]) {
+        this.name = name
+        this._onChange()
     }
 
-    if (theme.dark) {
-        document.documentElement.classList.add("dark")
+    setMode(mode: Theme["mode"]) {
+        this.mode = mode
+        this._onChange()
     }
 
-    Alpine.store("theme", theme)
+    _onChange() {
+        if (this.dark) {
+            document.documentElement.classList.add("dark")
+        } else {
+            document.documentElement.classList.remove("dark")
+        }
+
+        if (this.name === "retro") {
+            document.documentElement.classList.add("retro")
+        } else {
+            document.documentElement.classList.remove("retro")
+        }
+
+        this._save()
+    }
+
+    _save() {
+        localStorage.setItem(
+            "theme",
+            JSON.stringify({
+                name: this.name,
+                mode: this.mode,
+            }),
+        )
+    }
+}
+
+export function plugin(Alpine: typeof _Alpine) {
+    Alpine.store("theme", new Theme())
 }
