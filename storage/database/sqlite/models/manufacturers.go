@@ -11,7 +11,7 @@ import (
 
 // Manufacturer is an object representing the database table.
 type Manufacturer struct {
-	Name null.Val[string] `db:"name" `
+	Manufacturer null.Val[string] `db:"manufacturer" `
 }
 
 // ManufacturerSlice is an alias for a slice of pointers to Manufacturer.
@@ -28,21 +28,21 @@ type ManufacturersQuery = *sqlite.ViewQuery[*Manufacturer, ManufacturerSlice]
 type ManufacturersStmt = bob.QueryStmt[*Manufacturer, ManufacturerSlice]
 
 type manufacturerColumnNames struct {
-	Name string
+	Manufacturer string
 }
 
 var ManufacturerColumns = struct {
-	Name sqlite.Expression
+	Manufacturer sqlite.Expression
 }{
-	Name: sqlite.Quote("manufacturers", "name"),
+	Manufacturer: sqlite.Quote("manufacturers", "manufacturer"),
 }
 
 type manufacturerWhere[Q sqlite.Filterable] struct {
-	Name sqlite.WhereNullMod[Q, string]
+	Manufacturer sqlite.WhereNullMod[Q, string]
 }
 
 func ManufacturerWhere[Q sqlite.Filterable]() manufacturerWhere[Q] {
 	return manufacturerWhere[Q]{
-		Name: sqlite.WhereNull[Q, string](ManufacturerColumns.Name),
+		Manufacturer: sqlite.WhereNull[Q, string](ManufacturerColumns.Manufacturer),
 	}
 }

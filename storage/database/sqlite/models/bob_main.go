@@ -185,7 +185,7 @@ var ColumnNames = struct {
 		LocName: "loc_name",
 	},
 	Manufacturers: manufacturerColumnNames{
-		Name: "name",
+		Manufacturer: "manufacturer",
 	},
 	Models: modelColumnNames{
 		Model:   "model",

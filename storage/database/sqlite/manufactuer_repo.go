@@ -27,7 +27,7 @@ func (cr *ManufacturerRepo) List(ctx context.Context, exec bob.Executor, query d
 	}
 
 	if query.Search != "" {
-		qmods = append(qmods, models.SelectWhere.Manufacturers.Name.Like("%"+query.Search+"%"))
+		qmods = append(qmods, models.SelectWhere.Manufacturers.Manufacturer.Like("%"+query.Search+"%"))
 	}
 
 	count, err := models.Manufacturers.Query(ctx, exec, qmods...).Count()
@@ -50,8 +50,8 @@ func (cr *ManufacturerRepo) List(ctx context.Context, exec bob.Executor, query d
 	}
 
 	for _, l := range manufacturers {
-		if l.Name.IsSet() {
-			page.Items = append(page.Items, &entities.Manufacturer{Name: l.Name.GetOrZero()})
+		if l.Manufacturer.IsSet() {
+			page.Items = append(page.Items, &entities.Manufacturer{Name: l.Manufacturer.GetOrZero()})
 		}
 	}
 
