@@ -19,13 +19,18 @@ import (
 )
 
 type ImporterCtrl struct {
+	config ImporterCtrlConfig
 	db     *database.Database
 	assets *AssetControl
 	tags   *TagControl
 }
 
-func NewImporterCtrl(db *database.Database, assets *AssetControl, tags *TagControl) *ImporterCtrl {
-	return &ImporterCtrl{db: db, assets: assets, tags: tags}
+type ImporterCtrlConfig struct {
+	DefaultCurrency string
+}
+
+func NewImporterCtrl(config ImporterCtrlConfig, db *database.Database, assets *AssetControl, tags *TagControl) *ImporterCtrl {
+	return &ImporterCtrl{config: config, db: db, assets: assets, tags: tags}
 }
 
 type ImportCmd struct {
@@ -78,38 +83,53 @@ func (ic *ImporterCtrl) createAssets(ctx context.Context, assets []*entities.Ass
 			return fmt.Errorf("asset with tag '%s' already exists", assets[i].Tag)
 		}
 
-		if assets[i].Tag == "" {
-			assets[i].Tag, err = ic.tags.GetNext(ctx)
-			if err != nil {
-				return err
-			}
+		err = ic.createAsset(ctx, assets[i])
+		if err != nil {
+			return err
 		}
+	}
 
-		_, err = ic.tags.CreateIfNotExists(ctx, assets[i].Tag)
+	return nil
+}
+
+func (ic *ImporterCtrl) createAsset(ctx context.Context, asset *entities.Asset) error {
+	for j := range asset.Purchases {
+		if asset.Purchases[j].Amount != 0 && asset.Purchases[j].Currency == "" {
+			asset.Purchases[j].Currency = ic.config.DefaultCurrency
+		}
+	}
+
+	if asset.Tag == "" {
+		tag, err := ic.tags.GetNext(ctx)
+		if err != nil {
+			return err
+		}
+		asset.Tag = tag
+	}
+
+	if _, err := ic.tags.CreateIfNotExists(ctx, asset.Tag); err != nil {
+		return err
+	}
+
+	var imgFile *entities.File
+	if imgURL, err := url.Parse(asset.ImageURL); asset.ImageURL != "" && err == nil {
+		imgFile, err = downloadImage(ctx, imgURL)
 		if err != nil {
 			return err
 		}
 
-		var imgFile *entities.File
-		if imgURL, err := url.Parse(assets[i].ImageURL); assets[i].ImageURL != "" && err == nil {
-			imgFile, err = downloadImage(ctx, imgURL)
-			if err != nil {
-				return err
-			}
+		asset.ImageURL = imgFile.PublicPath
+		asset.ThumbnailURL = asset.ImageURL
+	} else {
+		asset.ImageURL = ""
+	}
 
-			assets[i].ImageURL = imgFile.PublicPath
-			assets[i].ThumbnailURL = assets[i].ImageURL
-		} else {
-			assets[i].ImageURL = ""
-		}
-
-		_, err = ic.assets.Create(ctx, CreateAssetCmd{
-			Asset: assets[i],
-			Image: imgFile,
-		})
-		if err != nil {
-			return err
-		}
+	_, err := ic.assets.Create(ctx, CreateAssetCmd{
+		Asset: asset,
+		Image: imgFile,
+	})
+	if err != nil {
+		return err
 	}
 
 	return nil

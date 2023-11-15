@@ -112,7 +112,7 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 	supplierCtrl := control.NewSupplierCtrl(database, &sqlite.SupplierRepo{})
 	customAttrCtrl := control.NewCustomAttrCtrl(database, &sqlite.CustomAttrRepo{})
 
-	importerCtrl := control.NewImporterCtrl(database, assetCtrl, tagCtrl)
+	importerCtrl := control.NewImporterCtrl(control.ImporterCtrlConfig{DefaultCurrency: config.DefaultCurrency}, database, assetCtrl, tagCtrl)
 	exporterCtrl := control.NewExporterCtrl(database, assetCtrl)
 	labelsCtrl := control.NewLabelController(assetCtrl)
 
