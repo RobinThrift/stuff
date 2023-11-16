@@ -116,14 +116,7 @@
 	{{ template "assets_table" $ }}
 
 	{{ if gt .Assets.NumPages 1 }}
-		{{ template "pagination" dict
-			"URL" "/assets"
-			"Name" "Assets"
-			"Total" .Assets.Total
-			"PageSize" .Assets.PageSize
-			"CurrPage" .Assets.Page
-			"NumPages" .Assets.NumPages
-		}}
+		{{ template "pagination" .Assets }}
 	{{ end }}
 </div>
 {{ end }}

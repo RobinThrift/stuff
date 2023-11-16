@@ -38,7 +38,10 @@ func (rt *Router) usersListHandler(w http.ResponseWriter, r *http.Request, param
 		return err
 	}
 
-	page := pages.UsersListPage{Users: users}
+	page := pages.UsersListPage{Users: &views.Pagination[*auth.User]{
+		ListPage: users,
+		URL:      r.URL,
+	}}
 
 	return page.Render(w, r)
 }

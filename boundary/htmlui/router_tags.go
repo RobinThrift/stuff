@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/RobinThrift/stuff/control"
+	"github.com/RobinThrift/stuff/entities"
+	"github.com/RobinThrift/stuff/views"
 	"github.com/RobinThrift/stuff/views/pages"
 )
 
@@ -33,7 +35,10 @@ func (rt *Router) tagsListHandler(w http.ResponseWriter, r *http.Request, params
 	}
 
 	page := &pages.TagListPage{
-		Tags:   list,
+		Tags: &views.Pagination[*entities.Tag]{
+			ListPage: list,
+			URL:      r.URL,
+		},
 		Search: params.Query,
 	}
 

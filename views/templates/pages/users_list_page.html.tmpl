@@ -96,14 +96,7 @@
 </div>
 
 {{ if gt .Users.NumPages 1 }}
-{{ template "pagination" dict
-	"URL" "/users"
-	"Name" "Users"
-	"Total" .Users.Total
-	"PageSize" .Users.PageSize
-	"CurrPage" .Users.Page
-	"NumPages" .Users.NumPages
-}}
+{{ template "pagination" .Users }}
 {{ end }}
 
 {{ end }}

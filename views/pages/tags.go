@@ -8,7 +8,7 @@ import (
 )
 
 type TagListPage struct {
-	Tags   *entities.ListPage[*entities.Tag]
+	Tags   *views.Pagination[*entities.Tag]
 	Search string
 }
 

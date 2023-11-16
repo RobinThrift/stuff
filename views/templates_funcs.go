@@ -98,10 +98,6 @@ var templateFuncs = template.FuncMap{
 		return max(a, b)
 	},
 
-	"between": func(a, lower, upper int) bool {
-		return a > lower && a < upper
-	},
-
 	"json": func(v any) template.JS {
 		j, err := json.Marshal(v)
 		if err != nil {

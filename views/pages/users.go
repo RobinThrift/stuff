@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/RobinThrift/stuff/auth"
-	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/RobinThrift/stuff/views"
 )
 
 type UsersListPage struct {
-	Users   *entities.ListPage[*auth.User]
+	Users   *views.Pagination[*auth.User]
 	Compact bool
 }
 

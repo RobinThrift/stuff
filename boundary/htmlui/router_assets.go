@@ -46,7 +46,10 @@ func (rt *Router) assetsListHandler(w http.ResponseWriter, r *http.Request, para
 	}
 
 	page := &pages.AssetListPage{
-		Assets: list,
+		Assets: &views.Pagination[*entities.Asset]{
+			ListPage: list,
+			URL:      r.URL,
+		},
 		Search: params.Query,
 	}
 

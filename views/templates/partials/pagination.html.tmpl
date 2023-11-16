@@ -1,64 +1,50 @@
+{{/*
+    pagination:
+       Pagination[Item any]
+*/}}
 {{ define "pagination" }}
-
-{{ $startEllipsis := false }}
-{{ $endEllipsis := false }}
-
 <div class="pagination">
 	<p class="pl-2 text-sm">
-		Showing <span class="font-medium">{{ (add (mul .CurrPage .PageSize) 1) }}</span> to <span class="font-medium">{{ mul (add .CurrPage 1) .PageSize }}</span> of <span class="font-medium">{{ .Total }}</span> {{ .Name }}
+		Showing <span class="font-medium">{{ (add (mul .Page .PageSize) 1) }}</span> to <span class="font-medium">{{ mul (add .Page 1) .PageSize }}</span> of <span class="font-medium">{{ .Total }}</span>.
 	</p>
 	<nav>
 		<ul class="pagination-items">
 			<li class="h-full">
-				{{- if eq 0 .CurrPage }}
+                {{- $prev := .PrevPageURL -}}
+                {{- if eq $prev "" }}
 				<span class="pagination-item ml-0 rounded-l disabled">
 					Previous
 				</span>
 				{{ else }}
-				<a href="{{ .URL }}?page={{ (max 0 (add .CurrPage -1)) }}&pageSize={{ .PageSize }}" class="pagination-item ml-0 rounded-l hover:text-primary-500">
+				<a href="{{ $prev }}" class="pagination-item ml-0 rounded-l hover:text-primary-500">
 					Previous
 				</a>
 				{{ end }}
 			</li>
 
-			{{ range $i := (sequence 0 (add .NumPages -1)) }}
-				{{ if or (between $i (add $.CurrPage -3) (add $.CurrPage 3)) (between $i (add $.NumPages -2) (add $.NumPages 3)) (between $i -1 2)}}
+            {{ range $p := .PaginationURLs }}
+                {{ if ne $p.Text "..." }}
 				<li class="h-full block">
-					<a href="{{ $.URL }}?page={{ $i }}&pageSize={{ $.PageSize }}" class="pagination-item {{- if eq $i $.CurrPage }} active {{- end }}">
-						<span>{{ add $i 1 }}</span>
+					<a href="{{ $p.URL }}" class="pagination-item {{- if $p.IsCurrent }} active {{- end }}">
+						<span>{{ $p.Text }}</span>
 						<span class="accent"></span>
 					</a>
 				</li>
-				{{ else }}
-					{{ if and (lt $i $.CurrPage) (not $startEllipsis ) }}
-						<li class="h-full block">
-							<div class="relative inline-flex items-center h-full px-2.5 group"><span>...</span></div>
-						</li>
-						{{ $startEllipsis = true}}
-					{{ end }}
-
-					{{ if and (gt $i $.CurrPage) (not $endEllipsis ) }}
-						<li class="h-full block">
-							<div class="relative inline-flex items-center h-full px-2.5 group"><span>...</span></div>
-						</li>
-						{{ $endEllipsis = true}}
-					{{ end }}
-				{{ end }}
-			{{ end }}
-
-			{{ if false }}
-				<li class="h-full block">
-					<div class="relative inline-flex items-center h-full px-2.5 group"><span>...</span></div>
-				</li>
-			{{ end }}
+                {{ else }}
+                <li class="h-full block">
+                    <div class="relative inline-flex items-center h-full px-2.5 group"><span>...</span></div>
+                </li>
+                {{ end }}
+            {{ end }}
 
 			<li class="h-full">
-				{{- if eq .CurrPage (add .NumPages -1) }}
+                {{- $next := .NextPageURL -}}
+				{{- if eq $next "" }}
 				<span class="pagination-item ml-0 rounded-l disabled">
 					Next
 				</span>
 				{{ else }}
-				<a href="{{ .URL }}?page={{ (min (add .NumPages -1) (add .CurrPage 1)) }}&pageSize={{ .PageSize }}" class="pagination-item ml-0 rounded-l group hover:text-primary-500">
+				<a href="{{ $next }}" class="pagination-item ml-0 rounded-l group hover:text-primary-500">
 					Next
 				</a>
 				{{ end }}

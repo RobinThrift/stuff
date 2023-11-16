@@ -9,7 +9,7 @@ import (
 )
 
 type AssetListPage struct {
-	Assets  *entities.ListPage[*entities.Asset]
+	Assets  *views.Pagination[*entities.Asset]
 	Search  string
 	Columns map[string]bool
 	Compact bool
