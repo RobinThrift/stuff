@@ -420,4 +420,12 @@ func sanitizeAssetFields(asset *entities.Asset) {
 		asset.Purchases[i].OrderNo = html.UnescapeString(policy.Sanitize(asset.Purchases[i].OrderNo))
 		asset.Purchases[i].Currency = html.UnescapeString(policy.Sanitize(asset.Purchases[i].Currency))
 	}
+
+	for i := range asset.Parts {
+		asset.Parts[i].Tag = html.UnescapeString(policy.Sanitize(asset.Parts[i].Tag))
+		asset.Parts[i].Name = html.UnescapeString(policy.Sanitize(asset.Parts[i].Name))
+		asset.Parts[i].Location = html.UnescapeString(policy.Sanitize(asset.Parts[i].Location))
+		asset.Parts[i].PositionCode = html.UnescapeString(policy.Sanitize(asset.Parts[i].PositionCode))
+		asset.Parts[i].Notes = html.UnescapeString(policy.Sanitize(asset.Parts[i].Notes))
+	}
 }
