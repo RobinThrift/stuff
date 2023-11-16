@@ -1,4 +1,8 @@
 @layer components {
+    .table {
+        table-layout: fixed;
+    }
+
     .table-actions {
         @apply h-16 w-full flex flex-row content-inset-x;
     }
@@ -112,7 +116,7 @@
             }
 
             &:has(img) {
-                @apply px-0 w-20;
+                @apply px-0 w-20 lg:w-24;
             }
 
             img {
@@ -120,7 +124,21 @@
                 object-fit: contain;
             }
         }
+
+        .small-column {
+            @apply xl:pr-5;
+            width: 0.1%;
+
+            &:has(a) {
+                @apply pr-5 xl:pr-0;
+            }
+
+            &>a {
+                @apply xl:pr-5;
+            }
+        }
     }
+
 
     .table.compact {
         .thead th {

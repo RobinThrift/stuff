@@ -135,7 +135,7 @@
 					</div>
 				</th>
 				<th
-					class="sortable"
+					class="sortable small-column"
 					x-show="columns.Tag"
 					{{ if eq (getQueryParam $.Global.CurrentURL "order_by") "tag" -}}
 					data-order-dir="{{ getQueryParam $.Global.CurrentURL "order_dir" }}"
@@ -181,9 +181,9 @@
 						<label for="selected_{{ .ID }}" class="sr-only">Select Tag {{ .Tag }}</label>
 					</div>
 				</td>
-				<td x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>
+				<td class="small-column" x-show="columns.Tag" {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}>
 					<a class="block w-full h-full" href="{{ printf "/assets/%v" .ID }}">
-						<strong>{{ .Tag }}</strong>
+						<strong>{{- .Tag -}}</strong>
 					</a>
 				</td>
 				<td x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>
@@ -214,8 +214,8 @@
 				<td x-show="columns.Status" {{ if not $.Data.Columns.Status -}} x-cloak {{- end}}>
 					<x-status-badge status="{{ .Status }}" />
 				</td>
-				<td class="text-end">
-					<div class="hidden lg:flex">
+				<td class="small-column">
+					<div class="hidden lg:flex justify-end">
 						<a class="btn" href="{{ printf `/assets/%v/edit` .ID }}">
 							<x-icon icon="pencil-simple" class="w-4 h-4" />
 							Edit
