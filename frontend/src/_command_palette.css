@@ -1,13 +1,13 @@
 @layer components {
-	.command-palette {
-		@apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex min-h-[370px] justify-center w-full max-w-xl items-start z-50 shadow rounded-lg bg-background-default;
-		@apply dark:border dark:border-border-default;
-		@apply retro:border retro:border-border-default;
-	}
+    .command-palette {
+        @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-full md:h-auto min-h-[370px] justify-center w-full max-w-xl items-start z-50 shadow-md rounded-lg bg-background-default;
+        @apply dark:border dark:border-border-default;
+        @apply retro:border retro:border-border-default;
+    }
 
-	.key-hint {
-		@apply inline-flex items-center justify-center rounded border border-b-2 border-gray-200 bg-gray-100 p-3 shadow-sm;
-		@apply dark:border-gray-900 dark:bg-gray-800;
-	}
+    .key-hint {
+        @apply inline-flex items-center justify-center rounded border border-b-2 border-gray-200 bg-gray-100 p-3 shadow-sm;
+        @apply dark:border-gray-900 dark:bg-gray-800;
+    }
 }
 

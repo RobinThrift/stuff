@@ -9,6 +9,12 @@
         }
     }
 
+    .btn.icon-only {
+        .icon {
+            @apply me-0;
+        }
+    }
+
     .btn.btn-primary {
         @apply text-background-default bg-primary-default rounded-md shadow;
         @apply hover:text-background-default hover:bg-primary-hover;
