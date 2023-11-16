@@ -19,6 +19,76 @@
         }
     }
 
+    th.sortable {
+        @apply py-0 px-0;
+
+        a {
+            @apply py-3 pl-6 pr-5 xl:pr-0;
+            color: inherit;
+            display: flex;
+        }
+
+        &:hover {
+            a {
+                @apply pl-0;
+            }
+
+            .table-asc-icon {
+                @apply text-content-light;
+                display: block;
+            }
+
+            .table-desc-icon {
+                @apply text-content-light;
+                display: none;
+            }
+        }
+
+        .table-asc-icon, .table-desc-icon  {
+            display: none;
+        }
+
+        &[data-order-dir="asc"] {
+            a {
+                @apply pl-0;
+            }
+
+            .table-asc-icon {
+                display: block; 
+            }
+
+            &:hover {
+                .table-asc-icon {
+                    display: none;
+                }
+
+                .table-desc-icon {
+                    display: block;
+                }
+            }
+        }
+
+        &[data-order-dir="desc"]  {
+            a {
+                @apply pl-0;
+            }
+
+            .table-desc-icon {
+                display: block; 
+            }
+
+            &:hover {
+                .table-asc-icon {
+                    display: block;
+                }
+
+                .table-desc-icon {
+                    display: none;
+                }
+            }
+        }
+    }
+
     .tbody {
         tr {
             @apply even:bg-background-default border-t border-border-default hover:bg-background-hover;

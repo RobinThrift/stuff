@@ -80,7 +80,7 @@
 			<li>
 				<a
 					href="/assets"
-					class="sidebar-link {{ if eq $.Global.CurrentPage "/assets" }} active {{ end }}"
+					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/assets" }} active {{ end }}"
 				>
 					<x-icon icon="package" /> <span class="sidebar-desktop-closed-hide">Assets</span>
 				</a>
@@ -89,7 +89,7 @@
 			<li class="mt-1">
 				<a
 					href="/tags"
-					class="sidebar-link {{ if eq $.Global.CurrentPage "/tags" }} active {{ end }}"
+					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/tags" }} active {{ end }}"
 				>
 					<x-icon icon="tag" /> <span class="sidebar-desktop-closed-hide">Tags</span>
 				</a>
@@ -99,7 +99,7 @@
 			<li class="mt-1">
 				<a
 					href="/users"
-					class="sidebar-link {{ if eq $.Global.CurrentPage "/users" }} active {{ end }}"
+					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/users" }} active {{ end }}"
 				>
 					<x-icon icon="user" /> <span class="sidebar-desktop-closed-hide">Users</span>
 				</a>

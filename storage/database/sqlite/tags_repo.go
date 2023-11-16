@@ -16,7 +16,6 @@ import (
 	"github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
-	"github.com/stephenafamo/bob/mods"
 	"github.com/stephenafamo/scan"
 )
 
@@ -38,18 +37,6 @@ func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.List
 	offset := limit * query.Page
 
 	qmods := make([]bob.Mod[*dialect.SelectQuery], 0, 3)
-
-	if query.OrderBy != "" {
-		if query.OrderDir == "" {
-			query.OrderDir = "ASC"
-		}
-
-		qmods = append(qmods, mods.OrderBy[*dialect.SelectQuery]{
-			Expression: query.OrderBy,
-			Direction:  query.OrderDir,
-		})
-	}
-
 	if query.Search != "" {
 		qmods = append(qmods, models.SelectWhere.Tags.Tag.Like("%"+query.Search+"%"))
 	}
@@ -63,11 +50,19 @@ func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.List
 		return nil, fmt.Errorf("error counting tags: %w", err)
 	}
 
+	if query.OrderBy != "" {
+		if query.OrderDir == "" {
+			query.OrderDir = "ASC"
+		}
+
+		qmods = append(qmods, orderByClause(models.TableNames.Tags, query.OrderBy, query.OrderDir))
+	}
+
 	qmods = append(qmods, sm.Limit(limit), sm.Offset(offset))
 
 	tags, err := models.Tags.Query(ctx, exec, qmods...).All()
 	if err != nil {
-		return nil, fmt.Errorf("error getting tags: %w", err)
+		return nil, fmt.Errorf("error getting tags: %w", wrapSqliteErr(err))
 	}
 
 	numPages, pageSize := calcNumPages(query.PageSize, count)

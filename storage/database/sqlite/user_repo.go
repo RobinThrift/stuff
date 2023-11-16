@@ -16,7 +16,6 @@ import (
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
-	bmods "github.com/stephenafamo/bob/mods"
 )
 
 var ErrUserNotFound = errors.New("user not found")
@@ -101,29 +100,26 @@ func (*UserRepo) List(ctx context.Context, exec bob.Executor, query database.Lis
 		sm.Offset(offset),
 	}
 
-	if query.OrderBy != "" {
-		if query.OrderDir == "" {
-			query.OrderDir = "ASC"
-		}
-
-		mods = append(mods, bmods.OrderBy[*dialect.SelectQuery]{
-			Expression: query.OrderBy,
-			Direction:  query.OrderDir,
-		})
-	}
-
 	if query.Search != "" {
 		mods = append(mods, models.SelectWhere.Users.Username.Like("%"+query.Search+"%"))
-	}
-
-	users, err := models.Users.Query(ctx, exec, mods...).All()
-	if err != nil {
-		return nil, fmt.Errorf("error getting users: %w", err)
 	}
 
 	count, err := models.Users.Query(ctx, exec, mods...).Count()
 	if err != nil {
 		return nil, fmt.Errorf("error counting users: %w", err)
+	}
+
+	if query.OrderBy != "" {
+		if query.OrderDir == "" {
+			query.OrderDir = "ASC"
+		}
+
+		mods = append(mods, orderByClause(models.TableNames.Users, query.OrderBy, query.OrderDir))
+	}
+
+	users, err := models.Users.Query(ctx, exec, mods...).All()
+	if err != nil {
+		return nil, fmt.Errorf("error getting users: %w", err)
 	}
 
 	pageSize := limit

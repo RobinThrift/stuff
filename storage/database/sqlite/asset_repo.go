@@ -20,7 +20,6 @@ import (
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/dialect/sqlite/im"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
-	"github.com/stephenafamo/bob/mods"
 )
 
 var ErrAssetNotFound = errors.New("asset not found")
@@ -208,20 +207,17 @@ func listAssets(ctx context.Context, exec bob.Executor, query database.ListAsset
 		qmods = append(qmods, models.SelectWhere.Assets.ID.In(query.IDs...))
 	}
 
+	count, err := models.Assets.Query(ctx, exec, qmods...).Count()
+	if err != nil {
+		return nil, 0, fmt.Errorf("error counting assets: %w", err)
+	}
+
 	if query.OrderBy != "" {
 		if query.OrderDir == "" {
 			query.OrderDir = database.OrderASC
 		}
 
-		qmods = append(qmods, mods.OrderBy[*dialect.SelectQuery]{
-			Expression: query.OrderBy,
-			Direction:  query.OrderDir,
-		})
-	}
-
-	count, err := models.Assets.Query(ctx, exec, qmods...).Count()
-	if err != nil {
-		return nil, 0, fmt.Errorf("error counting assets: %w", err)
+		qmods = append(qmods, orderByClause(models.TableNames.Assets, query.OrderBy, query.OrderDir))
 	}
 
 	if limit > 0 {
@@ -234,7 +230,7 @@ func listAssets(ctx context.Context, exec bob.Executor, query database.ListAsset
 
 	assets, err := models.Assets.Query(ctx, exec, qmods...).All()
 	if err != nil {
-		return nil, 0, fmt.Errorf("error getting assets: %w", err)
+		return nil, 0, fmt.Errorf("error getting assets: %w", wrapSqliteErr(err))
 	}
 
 	return assets, count, nil

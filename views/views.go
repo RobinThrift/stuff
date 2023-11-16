@@ -25,7 +25,7 @@ type Global struct {
 	CSRFToken          string
 	FlashMessage       FlashMessage
 	Search             string
-	CurrentPage        string
+	CurrentURL         *url.URL
 	SidebarClosed      bool
 	CurrentUserIsAdmin bool
 	Version            string
@@ -63,7 +63,7 @@ func NewGlobal(title string, r *http.Request) Global {
 		Title:              title,
 		CSRFToken:          csrf.Token(r),
 		FlashMessage:       flashMessage,
-		CurrentPage:        r.URL.Path,
+		CurrentURL:         r.URL,
 		SidebarClosed:      sidebarClosed,
 		CurrentUserIsAdmin: currentUserIsAdmin,
 		Version:            stuff.Version,

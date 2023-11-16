@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net/url"
 	"reflect"
 	"strings"
 )
@@ -132,6 +133,32 @@ var templateFuncs = template.FuncMap{
 		}
 
 		return r, nil
+	},
+
+	"getQueryParam": func(u *url.URL, name string) string {
+		return u.Query().Get(name)
+	},
+
+	"orderURL": func(u *url.URL, name string) string {
+		clone := *u
+		q := clone.Query()
+
+		if name != q.Get("order_by") {
+			q.Set("order_by", name)
+			q.Set("order_dir", "asc")
+		} else {
+			orderDir := q.Get("order_dir")
+			switch orderDir {
+			case "asc":
+				q.Set("order_dir", "desc")
+			case "desc":
+				q.Del("order_dir")
+				q.Del("order_by")
+			}
+		}
+
+		clone.RawQuery = q.Encode()
+		return clone.String()
 	},
 }
 
