@@ -22,7 +22,7 @@ export function plugin(Alpine: typeof _Alpine) {
                         name: "Add Asset",
                         icon: "plus",
                         url: "/assets/new",
-                        tags: ["create"],
+                        tags: ["create", "new"],
                     },
                     {
                         name: "All Assets",
@@ -77,7 +77,7 @@ export function plugin(Alpine: typeof _Alpine) {
                         name: "Create User",
                         icon: "user-plus",
                         url: "/users/new",
-                        tags: ["add"],
+                        tags: ["add", "new"],
                     },
                 ],
             ])
@@ -108,11 +108,9 @@ export function plugin(Alpine: typeof _Alpine) {
                         cmds[0],
                         cmds[1]
                             .map((c) => {
-                                let score = Math.max(
-                                    hasMatch(this.search, c.name),
-                                    ...c.tags.map((t) =>
-                                        hasMatch(this.search, t),
-                                    ),
+                                let score = hasMatch(
+                                    this.search,
+                                    c.tags.join(" ") + c.name,
                                 )
                                 return {
                                     ...c,
