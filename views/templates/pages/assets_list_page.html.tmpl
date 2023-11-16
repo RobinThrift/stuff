@@ -203,7 +203,9 @@
                     {{- end }}
 				</td>
 				<td x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>
+					<a href='{{ urlWithParams $.Global.CurrentURL "query" (concat "category:" .Category) "page" "0" }}'>
 					{{ .Category }}
+					</a>
 				</td>
 				<td x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>
 					{{  .Location  }}

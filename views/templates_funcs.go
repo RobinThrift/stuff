@@ -168,6 +168,16 @@ var templateFuncs = template.FuncMap{
 		return clone.String()
 	},
 
+	"urlWithParams": func(u *url.URL, paramValues ...string) string {
+		clone := *u
+		q := clone.Query()
+		for i := 0; i < len(paramValues); i += 2 {
+			q.Set(paramValues[i], paramValues[i+1])
+		}
+		clone.RawQuery = q.Encode()
+		return clone.String()
+	},
+
 	"markdown": func(source string) (template.HTML, error) {
 		var out bytes.Buffer
 
