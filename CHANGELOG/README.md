@@ -8,3 +8,4 @@
 - [CHANGELOG-v0.3.1.md](./CHANGELOG-v0.3.1.md)
 - [CHANGELOG-v0.4.0.md](./CHANGELOG-v0.4.0.md)
 - [CHANGELOG-v0.5.0.md](./CHANGELOG-v0.5.0.md)
+- [CHANGELOG-v0.5.1.md](./CHANGELOG-v0.5.1.md)
