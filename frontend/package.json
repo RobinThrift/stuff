@@ -11,7 +11,7 @@
         "concurrently": "8.2.1",
         "esbuild": "0.19.2",
         "openapi-typescript": "^6.7.0",
-        "postcss": "8.4.29",
+        "postcss": "8.4.31",
         "postcss-cli": "10.1.0",
         "postcss-import": "15.1.0",
         "svg-sprite": "2.0.2",
