@@ -147,6 +147,7 @@
 		class="input input-sm me-3"
 		name="theme" id="theme"
 		x-on:input="$store.theme.setTheme($event.target.value)"
+		x-bind:value="$store.theme.name"
 	>
 		<option value="default" x-bind:selected="$store.theme.name === '' || $store.theme.name === 'default'">Default</option>
 		<option value="retro" x-bind:selected="$store.theme.name === 'retro'">Retro</option>
@@ -156,6 +157,7 @@
 		class="input input-sm"
 		name="theme_mode" id="theme_mode"
 		x-on:input="$store.theme.setMode($event.target.value)"
+		x-bind:value="$store.theme.mode"
 	>
 		<option value="system" x-bind:selected="$store.theme.mode === '' || $store.theme.mode === 'system'">System</option>
 		<option value="light" x-bind:selected="$store.theme.mode === 'light'">Light</option>
