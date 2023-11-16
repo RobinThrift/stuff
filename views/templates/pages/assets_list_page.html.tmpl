@@ -135,34 +135,34 @@
 					</div>
 				</th>
 				<th
-                    class="sortable"
-                    x-show="columns.Tag"
-                    {{ if eq (getQueryParam $.Global.CurrentURL "order_by") "tag" -}}
-                    data-order-dir="{{ getQueryParam $.Global.CurrentURL "order_dir" }}"
-                    {{- end }} 
-                    {{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}
-                >
-                    <a href='{{ orderURL $.Global.CurrentURL "tag" }}'>
-                        <x-icon icon="asc" class="table-asc-icon h-6 w-6" />
-                        <x-icon icon="desc" class="table-desc-icon h-6 w-6" />
-                        Tag
-                    </a>
-                </th>
+					class="sortable"
+					x-show="columns.Tag"
+					{{ if eq (getQueryParam $.Global.CurrentURL "order_by") "tag" -}}
+					data-order-dir="{{ getQueryParam $.Global.CurrentURL "order_dir" }}"
+					{{- end }} 
+					{{ if not $.Data.Columns.Tag -}} x-cloak {{- end}}
+				>
+					<a href='{{ orderURL $.Global.CurrentURL "tag" }}'>
+						Tag
+						<x-icon icon="asc" class="table-asc-icon h-6 w-6" />
+						<x-icon icon="desc" class="table-desc-icon h-6 w-6" />
+					</a>
+				</th>
 				<th class="w-20" x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
 				<th
-                    class="sortable"
-                    x-show="columns.Name"
-                    {{ if eq (getQueryParam $.Global.CurrentURL "order_by") "name" -}}
-                    data-order-dir="{{ getQueryParam $.Global.CurrentURL "order_dir" }}"
-                    {{- end }} 
-                    {{ if not $.Data.Columns.Name -}} x-cloak {{- end}}
-                >
-                    <a href='{{ orderURL $.Global.CurrentURL "name" }}'>
-                        <x-icon icon="asc" class="table-asc-icon h-6 w-6" />
-                        <x-icon icon="desc" class="table-desc-icon h-6 w-6" />
-                        Name
-                    </a>
-                </th>
+					class="sortable"
+					x-show="columns.Name"
+					{{ if eq (getQueryParam $.Global.CurrentURL "order_by") "name" -}}
+					data-order-dir="{{ getQueryParam $.Global.CurrentURL "order_dir" }}"
+					{{- end }} 
+					{{ if not $.Data.Columns.Name -}} x-cloak {{- end}}
+				>
+					<a href='{{ orderURL $.Global.CurrentURL "name" }}'>
+						Name
+						<x-icon icon="asc" class="table-asc-icon h-6 w-6" />
+						<x-icon icon="desc" class="table-desc-icon h-6 w-6" />
+					</a>
+				</th>
 				<th x-show="columns.Type" {{ if not $.Data.Columns.Type -}} x-cloak {{- end}}>Type</th>
 				<th x-show="columns.Category" {{ if not $.Data.Columns.Category -}} x-cloak {{- end}}>Category</th>
 				<th x-show="columns.Location" {{ if not $.Data.Columns.Location -}} x-cloak {{- end}}>Location</th>

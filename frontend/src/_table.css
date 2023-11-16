@@ -23,14 +23,14 @@
         @apply py-0 px-0;
 
         a {
-            @apply py-3 pl-6 pr-5 xl:pr-0;
+            @apply py-3 pr-5 pr-7 xl:pr-0;
             color: inherit;
             display: flex;
         }
 
         &:hover {
             a {
-                @apply pl-0;
+                @apply pr-0;
             }
 
             .table-asc-icon {
@@ -45,6 +45,7 @@
         }
 
         .table-asc-icon, .table-desc-icon  {
+            @apply pl-1;
             display: none;
         }
 
