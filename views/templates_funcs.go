@@ -1,6 +1,7 @@
 package views
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -9,7 +10,13 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
+
+var markdown = goldmark.New(goldmark.WithExtensions(extension.GFM), goldmark.WithRendererOptions(html.WithHardWraps(), html.WithXHTML()))
 
 var templateFuncs = template.FuncMap{
 	"list": func(items ...any) []any {
@@ -159,6 +166,16 @@ var templateFuncs = template.FuncMap{
 
 		clone.RawQuery = q.Encode()
 		return clone.String()
+	},
+
+	"markdown": func(source string) (template.HTML, error) {
+		var out bytes.Buffer
+
+		if err := markdown.Convert([]byte(source), &out); err != nil {
+			return "", err
+		}
+
+		return template.HTML(out.String()), nil
 	},
 }
 

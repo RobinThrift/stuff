@@ -19,6 +19,7 @@ require (
 	github.com/stephenafamo/bob v0.22.0
 	github.com/stephenafamo/scan v0.4.2
 	github.com/stretchr/testify v1.8.4
+	github.com/yuin/goldmark v1.4.13
 	golang.org/x/crypto v0.15.0
 	golang.org/x/net v0.17.0
 	modernc.org/sqlite v1.25.0

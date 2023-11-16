@@ -149,11 +149,13 @@
 
 	<div class="content-inset-s lg:col-span-2 mt-5">
 		<span class="block text-neutral-400 font-semibold">Notes</span>
-		<p>
-			{{ range split (default .Notes "-") "\n" }}
-			{{ . }}<br />
-			{{ end }}
-		</p>
+		<div class="asset_notes">
+		{{- if eq .Notes "" }}
+		-
+		{{- else }}
+		{{ .Notes | markdown -}}
+		{{- end }}
+		</div>
 	</div>
 </dl>
 {{ end }}

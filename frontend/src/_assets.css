@@ -1,4 +1,11 @@
 @layer components {
+	.asset_notes a {
+		@apply text-primary-default;
+
+		&:hover {
+			@apply text-primary-hover;
+		}
+	}
 }
 
 
