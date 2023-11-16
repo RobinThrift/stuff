@@ -15,10 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/go-playground/form/v4"
-	"github.com/microcosm-cc/bluemonday"
 )
-
-var policy = bluemonday.StrictPolicy()
 
 type Router struct {
 	config   Config

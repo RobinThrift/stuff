@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -15,6 +16,8 @@ import (
 	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/RobinThrift/stuff/views"
 	"github.com/RobinThrift/stuff/views/pages"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type assetsListParams struct {
@@ -398,21 +401,23 @@ func getAssetQuery(tagOrID string) control.GetAssetQuery {
 	return query
 }
 
+var policy = bluemonday.StrictPolicy()
+
 func sanitizeAssetFields(asset *entities.Asset) {
-	asset.Tag = policy.Sanitize(asset.Tag)
-	asset.Name = policy.Sanitize(asset.Name)
-	asset.Category = policy.Sanitize(asset.Category)
-	asset.Model = policy.Sanitize(asset.Model)
-	asset.ModelNo = policy.Sanitize(asset.ModelNo)
-	asset.SerialNo = policy.Sanitize(asset.SerialNo)
-	asset.Manufacturer = policy.Sanitize(asset.Manufacturer)
-	asset.Location = policy.Sanitize(asset.Location)
-	asset.PositionCode = policy.Sanitize(asset.PositionCode)
-	asset.Notes = policy.Sanitize(asset.Notes)
-	asset.QuantityUnit = policy.Sanitize(asset.QuantityUnit)
+	asset.Tag = html.UnescapeString(policy.Sanitize(asset.Tag))
+	asset.Name = html.UnescapeString(policy.Sanitize(asset.Name))
+	asset.Category = html.UnescapeString(policy.Sanitize(asset.Category))
+	asset.Model = html.UnescapeString(policy.Sanitize(asset.Model))
+	asset.ModelNo = html.UnescapeString(policy.Sanitize(asset.ModelNo))
+	asset.SerialNo = html.UnescapeString(policy.Sanitize(asset.SerialNo))
+	asset.Manufacturer = html.UnescapeString(policy.Sanitize(asset.Manufacturer))
+	asset.Location = html.UnescapeString(policy.Sanitize(asset.Location))
+	asset.PositionCode = html.UnescapeString(policy.Sanitize(asset.PositionCode))
+	asset.Notes = html.UnescapeString(policy.Sanitize(asset.Notes))
+	asset.QuantityUnit = html.UnescapeString(policy.Sanitize(asset.QuantityUnit))
 	for i := range asset.Purchases {
-		asset.Purchases[i].Supplier = policy.Sanitize(asset.Purchases[i].Supplier)
-		asset.Purchases[i].OrderNo = policy.Sanitize(asset.Purchases[i].OrderNo)
-		asset.Purchases[i].Currency = policy.Sanitize(asset.Purchases[i].Currency)
+		asset.Purchases[i].Supplier = html.UnescapeString(policy.Sanitize(asset.Purchases[i].Supplier))
+		asset.Purchases[i].OrderNo = html.UnescapeString(policy.Sanitize(asset.Purchases[i].OrderNo))
+		asset.Purchases[i].Currency = html.UnescapeString(policy.Sanitize(asset.Purchases[i].Currency))
 	}
 }
