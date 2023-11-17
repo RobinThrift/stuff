@@ -18,10 +18,12 @@ COPY --from=frontend /stuff/frontend/build /stuff/frontend/build
 WORKDIR /stuff
 
 ARG TARGETOS TARGETARCH
+ARG VERSION
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 \
     GO_LDFLGAS="-s -w" GO_BUILD_FLAGS="-trimpath" \
+	VERSION=$VERSION \
     just _build-go
 
 # Create a nonroot user to copy

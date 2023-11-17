@@ -7,7 +7,7 @@ oci_repo       := env_var_or_default("OCI_REPO", "ghcr.io/robinthrift/stuff")
 export PATH := "./frontend/node_modules/.bin:" + "./node_modules/.bin:" + env_var('PATH')
 export STUFF_LOG_LEVEL := "debug"
 export STUFF_LOG_FORMAT := "console"
-export STUFF_ADDRESS := "localhost:8080"
+export STUFF_ADDRESS := "localhost:8888"
 export STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD := "admin"
 export STUFF_FILE_DIR := ".run/files_dev_run"
 export STUFF_DATABASE_PATH := ".run/stuff.db"
@@ -77,7 +77,7 @@ build-icons: _npm-install
 
 docker_cmd := env_var_or_default("DOCKER_CMD", "build")
 build-oci-image:
-    docker {{ docker_cmd }} -f ./deployment/Dockerfile  -t {{ oci_repo }}:{{ version }} .
+    docker {{ docker_cmd }} --build-arg="VERSION={{ version }}" -f ./deployment/Dockerfile  -t {{ oci_repo }}:{{ version }} .
 
 run-oci-image: build-oci-image
     docker run --rm \

@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/RobinThrift/stuff"
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/boundary/apiv1"
 	"github.com/RobinThrift/stuff/boundary/htmlui"
@@ -71,6 +72,8 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 	if err != nil {
 		return nil, nil, err
 	}
+
+	slog.InfoContext(ctx, "starting stuff service", "version", stuff.Version)
 
 	db, err := sqlite.NewSQLiteDB(config.Database.Path)
 	if err != nil {
