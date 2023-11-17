@@ -21,11 +21,3 @@ type User struct {
 	CreatedAt time.Time `form:"-"`
 	UpdatedAt time.Time `form:"-"`
 }
-
-type UserListPage struct {
-	Users    []*User
-	Total    int
-	NumPages int
-	Page     int
-	PageSize int
-}
