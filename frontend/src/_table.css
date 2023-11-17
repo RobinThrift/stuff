@@ -108,7 +108,7 @@
             }
 
             &>a {
-                @apply px-5 xl:px-0;
+                @apply block py-3 px-5 xl:px-0;
             }
 
             &:first-child:has(a)>a {

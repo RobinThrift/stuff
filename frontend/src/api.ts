@@ -45,4 +45,21 @@ export class API {
 
         return data
     }
+
+    async setSettings(values: Record<string, unknown>): Promise<void> {
+        let csrf =
+            document
+                .querySelector(`meta[name="csrf-token"]`)
+                ?.getAttribute("content") ?? ""
+
+        fetch(`${this.baseURL}/users/settings`, {
+            method: "post",
+            credentials: "same-origin",
+            headers: {
+                "X-CSRF-Token": csrf,
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            body: JSON.stringify(values),
+        }).catch(console.error)
+    }
 }

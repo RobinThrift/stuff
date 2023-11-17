@@ -2,6 +2,7 @@
 <svg class="icon {{ default .class "" }}"
 	{{- if has . "x-bind:class" }} x-bind:class="{{ get . "x-bind:class" }}" {{- end }}
 	{{ if has . "x-show" }} x-show="{{ get . "x-show" }}" {{- end }}
+	{{ if (default (get . "x-cloak") false) }} x-cloak {{- end }}
 >
 	<use xlink:href="/static/icons.svg#{{ .icon }}"></use>
 </svg>

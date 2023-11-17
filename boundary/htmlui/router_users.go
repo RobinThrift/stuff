@@ -335,51 +335,82 @@ func (rt *Router) usersDeleteSubmitHandler(w http.ResponseWriter, r *http.Reques
 
 // [POST] /users/settings
 func (rt *Router) usersSettingsSubmitHandler(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		Sidebar *struct {
-			Closed bool `json:"closed"`
-		} `json:"sidebar,omitempty"`
-		Assets *struct {
-			Columns map[string]bool `json:"columns,omitempty"`
-			Compact *bool           `json:"compact,omitempty"`
-		} `json:"assetsList,omitempty"`
-		Users *struct {
-			Compact *bool `json:"compact,omitempty"`
-		} `json:"usersList,omitempty"`
+	user, ok := session.Get[*auth.User](r.Context(), "user")
+	if !ok {
+		slog.ErrorContext(r.Context(), "can't find user in session")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 
+	payload, err := decodeUserSettingsBody(r)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error reading request body", "error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if payload.ThemeName != nil {
+		user.Preferences.ThemeName = *payload.ThemeName
+	}
+
+	if payload.ThemeMode != nil {
+		user.Preferences.ThemeMode = *payload.ThemeMode
+	}
+
+	if payload.SidebarClosedDesktop != nil {
+		user.Preferences.SidebarClosedDesktop = *payload.SidebarClosedDesktop
+	}
+
+	if len(payload.AssetListColumns) != 0 {
+		user.Preferences.AssetListColumns = payload.AssetListColumns
+	}
+
+	if payload.AssetListCompact != nil {
+		user.Preferences.AssetListCompact = *payload.AssetListCompact
+	}
+
+	if payload.UserListCompact != nil {
+		user.Preferences.UserListCompact = *payload.UserListCompact
+	}
+
+	fmt.Printf("user %#v\n", user.Preferences)
+	err = rt.users.SetUserPreferences(r.Context(), user)
+	if err != nil {
+		slog.ErrorContext(r.Context(), "error setting user preferences", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	session.Put(r.Context(), "user", user)
+}
+
+type userSettingsBody struct {
+	ThemeName *string `json:"theme_name,omitempty"`
+	ThemeMode *string `json:"theme_mode,omitempty"`
+
+	SidebarClosedDesktop *bool `json:"sidebar_closed_desktop,omitempty"`
+
+	AssetListColumns []string `json:"asset_list_columns,omitempty"`
+	AssetListCompact *bool    `json:"asset_list_compact,omitempty"`
+
+	UserListCompact *bool `json:"user_list_compact,omitempty"`
+}
+
+func decodeUserSettingsBody(r *http.Request) (payload *userSettingsBody, err error) {
 	body, err := io.ReadAll(r.Body)
 	defer func() {
 		err = errors.Join(err, r.Body.Close())
 	}()
 
 	if err != nil {
-		slog.ErrorContext(r.Context(), "error reading request body", "error", err)
 		return
 	}
 
 	err = json.Unmarshal(body, &payload)
 	if err != nil {
-		slog.ErrorContext(r.Context(), "error unmarshalling request body as JSON", "error", err)
+		err = fmt.Errorf("error unmarshalling request body as JSON: %w", err)
+		return
 	}
 
-	if payload.Sidebar != nil {
-		session.Put(r.Context(), "sidebar_closed", payload.Sidebar.Closed)
-	}
-
-	if payload.Assets != nil {
-		if len(payload.Assets.Columns) != 0 {
-			session.Put(r.Context(), "assets_list_columns", payload.Assets.Columns)
-		}
-
-		if payload.Assets.Compact != nil {
-			session.Put(r.Context(), "assets_lists_compact", payload.Assets.Compact)
-		}
-	}
-
-	if payload.Users != nil {
-		if payload.Users.Compact != nil {
-			session.Put(r.Context(), "users_lists_compact", payload.Users.Compact)
-		}
-	}
+	return
 }

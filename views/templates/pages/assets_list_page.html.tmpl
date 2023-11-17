@@ -27,21 +27,24 @@
 {{ define "main" }}
 {{ with .Data }}
 <div
-	x-data="{ columns: {{ $.Data.Columns | json }}, compact: {{ $.Data.Compact }} }"
+	x-data="{
+		compact: {{ $.Global.User.Preferences.AssetListCompact }},
+		columns: {{ $.Data.Columns | json }}, 
+	}"
 	x-init="
-		$watch('columns', (v) => $setting({ assetsList: { columns: v }}))
-		$watch('compact', (v) => $setting({ assetsList: { compact: v }}))
+		$watch('columns', (v) => $setting({ asset_list_columns: Object.keys(v).filter(k => v[k]) }))
+		$watch('compact', (v) => $setting({ asset_list_compact: v }))
 	"
 >
 	<div class="table-actions">
 		<div class="table-actions-start">
 			<div class="me-2">
 				<button class="btn btn-neutral" x-on:click.prevent="compact = !compact">
-					<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
-					<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
+					<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" x-cloak="{{ $.Global.User.Preferences.AssetListCompact }}" />
+					<span x-show="!compact" {{ if $.Global.User.Preferences.AssetListCompact -}} x-cloak {{- end }}>Compact</span>
 
-					<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
-					<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
+					<x-icon icon="rows" class="h-4 w-4" x-show="compact" x-cloak="{{ not $.Global.User.Preferences.AssetListCompact }}" />
+					<span x-show="compact" {{ if not $.Global.User.Preferences.AssetListCompact -}} x-cloak {{- end }}>Normal</span>
 				</button>
 			</div>
 
@@ -125,7 +128,7 @@
 
 {{ define "assets_table" }}
 <div class="content-inset max-w-screen overflow-x-auto">
-	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
+	<table class="table {{ if $.Global.User.Preferences.AssetListCompact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
 		<thead class="thead md:sticky md:top-0">
 			<tr>
 				<th>

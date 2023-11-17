@@ -1,10 +1,10 @@
 {{ template "document_head" . }}
 <div
-	class="min-h-screen md:h-screen flex" x-data="{ sidebarOpen: false, sidebarDesktopClosed: {{ $.Global.SidebarClosed }}  }"
+	class="min-h-screen md:h-screen flex" x-data="{ sidebarOpen: false, sidebarDesktopClosed: {{ $.Global.User.Preferences.SidebarClosedDesktop }}  }"
 	x-bind:class="{ 'overflow-hidden h-screen block': sidebarOpen }"
 >
 	<nav
-		class="sidebar {{- if $.Global.SidebarClosed }} sidebar-desktop-closed {{- end }}"
+		class="sidebar {{- if $.Global.User.Preferences.SidebarClosedDesktop }} sidebar-desktop-closed {{- end }}"
 		x-bind:class="{ 'translate-x-0': sidebarOpen, 'sidebar-desktop-closed': sidebarDesktopClosed }"
 		x-on:keydown.escape.window="sidebarOpen = false"
 	>
@@ -58,7 +58,7 @@
 
 		<button
 			class="sidebar-desktop-toggle-btn"
-			x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $setting({ sidebar: { closed: sidebarDesktopClosed }})"
+			x-on:click="sidebarDesktopClosed = !sidebarDesktopClosed; $setting({ sidebar_closed_desktop: sidebarDesktopClosed })"
 		>
 			<x-icon icon="sidebar" class="mr-1 w-6 h-6" />
 		</button>
@@ -95,7 +95,7 @@
 				</a>
 			</li>
 
-			{{ if $.Global.CurrentUserIsAdmin }}
+			{{ if $.Global.User.IsAdmin }}
 			<li class="mt-1">
 				<a
 					href="/users"
@@ -110,7 +110,7 @@
 
 	<div class="sidebar-footer">
 		<div class="sidebar-desktop-closed-hide px-3 mt-5">
-			{{ template "theme_switcher" }}
+			{{ template "theme_switcher" $ }}
 		</div>
 
 		<a href="/users/me">
@@ -146,22 +146,22 @@
 	<select
 		class="input input-sm me-3"
 		name="theme" id="theme"
-		x-on:input="$store.theme.setTheme($event.target.value)"
+		x-on:input="$store.theme.setTheme($event.target.value); $setting({ theme_name: $event.target.value })"
 		x-bind:value="$store.theme.name"
 	>
-		<option value="default" x-bind:selected="$store.theme.name === '' || $store.theme.name === 'default'">Default</option>
-		<option value="retro" x-bind:selected="$store.theme.name === 'retro'">Retro</option>
+		<option value="default" {{ if or (eq $.Global.User.Preferences.ThemeName "") (eq $.Global.User.Preferences.ThemeName "default") -}} selected {{- end }}>Default</option>
+		<option value="retro" {{ if eq $.Global.User.Preferences.ThemeName "retro" -}} selected {{- end }}>Retro</option>
 	</select>
 
 	<select
 		class="input input-sm"
 		name="theme_mode" id="theme_mode"
-		x-on:input="$store.theme.setMode($event.target.value)"
+		x-on:input="$store.theme.setMode($event.target.value); $setting({ theme_mode: $event.target.value })"
 		x-bind:value="$store.theme.mode"
 	>
-		<option value="system" x-bind:selected="$store.theme.mode === '' || $store.theme.mode === 'system'">System</option>
-		<option value="light" x-bind:selected="$store.theme.mode === 'light'">Light</option>
-		<option value="dark" x-bind:selected="$store.theme.mode === 'dark'">Dark</option>
+		<option value="system" {{ if or (eq $.Global.User.Preferences.ThemeMode "") (eq $.Global.User.Preferences.ThemeMode "system") -}} selected {{- end }}>System</option>
+		<option value="light" {{ if eq $.Global.User.Preferences.ThemeMode "light" -}} selected {{- end }}>Light</option>
+		<option value="dark" {{ if eq $.Global.User.Preferences.ThemeMode "dark" -}} selected {{- end }}>Dark</option>
 	</select>
 </div>
 {{ end }}

@@ -1,6 +1,15 @@
 {{ define "document_head" }}
+{{- $class := "" -}}
+
+{{- if ne $.Global.User.Preferences.ThemeName "default" -}}
+{{- $class = $.Global.User.Preferences.ThemeName  -}}
+{{- end -}}
+
+{{- if ne $.Global.User.Preferences.ThemeMode "" -}}
+{{- $class = concat $class " " $.Global.User.Preferences.ThemeMode  -}}
+{{- end -}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" {{ if ne $class "" -}} class="{{ $class }}" {{- end }}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />

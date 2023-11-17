@@ -3,7 +3,7 @@
 {{ define "header" }}
 <h1>Users</h1>
 
-{{ if $.Global.CurrentUserIsAdmin }}
+{{ if $.Global.User.IsAdmin }}
 <div class="flex flex-1 flex flex-row items-center justify-end">
 	<a href="/users/new" class="btn btn-primary">
 		<x-icon icon="plus" class="" /> New User
@@ -16,30 +16,30 @@
 {{ with .Data }}
 <div
 	class="w-full h-full"
-	x-data="{ compact: {{ $.Data.Compact }} }"
-	x-init="$watch('compact', (v) => $setting({ usersList: { compact: v }}))"
+	x-data="{ compact: {{ $.Global.User.Preferences.UserListCompact }} }"
+	x-init="$watch('compact', (v) => $setting({ user_list_compact:  v }))"
 >
 
 	<div class="table-actions">
 		<div class="table-actions-start">
 			<button class="btn btn-neutral" x-on:click="compact = !compact">
-				<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }} />
-				<span x-show="!compact" {{ if $.Data.Compact -}} x-cloak {{- end }}>Compact</span>
+				<x-icon icon="grid-nine" class="h-4 w-4" x-show="!compact" x-cloak="{{ $.Global.User.Preferences.UserListCompact }}" />
+				<span x-show="!compact" {{ if $.Global.User.Preferences.UserListCompact -}} x-cloak {{- end }}>Compact</span>
 
-				<x-icon icon="rows" class="h-4 w-4" x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }} />
-				<span x-show="compact" {{ if not $.Data.Compact -}} x-cloak {{- end }}>Normal</span>
+				<x-icon icon="rows" class="h-4 w-4" x-show="compact" x-cloak="{{ not $.Global.User.Preferences.UserListCompact }}" />
+				<span x-show="compact" {{ if not $.Global.User.Preferences.UserListCompact -}} x-cloak {{- end }}>Normal</span>
 			</button>
 		</div>
 	</div>
 
-	<table class="table {{ if $.Data.Compact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
+	<table class="table {{ if $.Global.User.Preferences.UserListCompact -}} compact {{- end }} min-w-full" x-bind:class=" { 'compact': compact }">
 		<thead class="thead">
 			<tr>
 				<th>ID</th>
 				<th>Username</th>
 				<th>Display Name</th>
 				<th>Admin</th>
-				{{ if $.Global.CurrentUserIsAdmin }}
+				{{ if $.Global.User.IsAdmin }}
 				<th></th>
 				{{ end }}
 			</tr>
@@ -58,7 +58,7 @@
 						<x-icon icon="x" class="h-6 w-6 text-red-500" />
 					{{ end }}
 				</td>
-				{{ if $.Global.CurrentUserIsAdmin }}
+				{{ if $.Global.User.IsAdmin }}
 				<td>
 					<div class="btn-grp hidden lg:flex">
 						<a class="btn btn-xs" href="{{ printf `/users/%v/reset_password` .ID }}">

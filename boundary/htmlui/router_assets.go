@@ -53,7 +53,6 @@ func (rt *Router) assetsListHandler(w http.ResponseWriter, r *http.Request, para
 			ListPage: list,
 			URL:      r.URL,
 		},
-		Search: params.Query,
 	}
 
 	return page.Render(w, r)

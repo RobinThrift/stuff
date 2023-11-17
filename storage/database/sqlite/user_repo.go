@@ -3,8 +3,11 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
+	"strconv"
 	"time"
 
 	"github.com/RobinThrift/stuff/auth"
@@ -15,6 +18,7 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
+	"github.com/stephenafamo/bob/dialect/sqlite/im"
 	"github.com/stephenafamo/bob/dialect/sqlite/sm"
 )
 
@@ -23,63 +27,45 @@ var ErrUserNotFound = errors.New("user not found")
 type UserRepo struct{}
 
 func (*UserRepo) Get(ctx context.Context, exec bob.Executor, id int64) (*auth.User, error) {
-	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.ID.EQ(id))
+	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.ID.EQ(id), models.ThenLoadUserUserPreferences())
 	user, err := query.One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, fmt.Errorf("%w: id %d", ErrUserNotFound, id)
 		}
+
+		return nil, fmt.Errorf("error getting user by id: id %d: %w", id, err)
 	}
 
-	return &auth.User{
-		ID:          user.ID,
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
-		IsAdmin:     user.IsAdmin,
-		AuthRef:     user.AuthRef,
-		CreatedAt:   user.CreatedAt.Time,
-		UpdatedAt:   user.UpdatedAt.Time,
-	}, nil
+	return mapUserModelToEntity(ctx, user)
 }
 
 func (*UserRepo) GetByUsername(ctx context.Context, exec bob.Executor, username string) (*auth.User, error) {
-	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.Username.EQ(username))
+	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.Username.EQ(username), models.ThenLoadUserUserPreferences())
 	user, err := query.One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, fmt.Errorf("%w: username %s", ErrUserNotFound, username)
 		}
+
+		return nil, fmt.Errorf("error getting user by username: username %s: %w", username, err)
 	}
 
-	return &auth.User{
-		ID:          user.ID,
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
-		IsAdmin:     user.IsAdmin,
-		AuthRef:     user.AuthRef,
-		CreatedAt:   user.CreatedAt.Time,
-		UpdatedAt:   user.UpdatedAt.Time,
-	}, nil
+	return mapUserModelToEntity(ctx, user)
 }
 
 func (*UserRepo) GetByRef(ctx context.Context, exec bob.Executor, ref string) (*auth.User, error) {
-	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.AuthRef.EQ(ref))
+	query := models.Users.Query(ctx, exec, models.SelectWhere.Users.AuthRef.EQ(ref), models.ThenLoadUserUserPreferences())
 	user, err := query.One()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, fmt.Errorf("%w: ref %s", ErrUserNotFound, ref)
 		}
+
+		return nil, fmt.Errorf("error getting user by ref: ref %s: %w", ref, err)
 	}
 
-	return &auth.User{
-		ID:          user.ID,
-		Username:    user.Username,
-		DisplayName: user.DisplayName,
-		IsAdmin:     user.IsAdmin,
-		AuthRef:     user.AuthRef,
-		CreatedAt:   user.CreatedAt.Time,
-		UpdatedAt:   user.UpdatedAt.Time,
-	}, nil
+	return mapUserModelToEntity(ctx, user)
 }
 
 func (*UserRepo) List(ctx context.Context, exec bob.Executor, query database.ListUsersQuery) (*entities.ListPage[*auth.User], error) {
@@ -199,6 +185,174 @@ func (*UserRepo) Delete(ctx context.Context, exec bob.Executor, id int64) error 
 		}
 		return err
 	}
+
+	return nil
+}
+
+func (*UserRepo) UpsertPreferences(ctx context.Context, exec bob.Executor, user *auth.User) error {
+	// exec = bob.Debug(exec)
+	inserts := make([]bob.Mod[*dialect.InsertQuery], 0, 8)
+
+	inserts = append(
+		inserts,
+		im.IntoAs(models.TableNames.UserPreferences, models.TableNames.UserPreferences,
+			models.ColumnNames.UserPreferences.UserID,
+			models.ColumnNames.UserPreferences.Key,
+			models.ColumnNames.UserPreferences.Value,
+			models.ColumnNames.UserPreferences.CreatedAt,
+			models.ColumnNames.UserPreferences.UpdatedAt,
+		),
+		im.OnConflict(
+			models.ColumnNames.UserPreferences.UserID,
+			models.ColumnNames.UserPreferences.Key,
+		).SetExcluded(
+			models.ColumnNames.UserPreferences.Value,
+			models.ColumnNames.UserPreferences.UpdatedAt,
+		).DoUpdate(),
+	)
+
+	setters, err := mapUserPrefsToInsert(user.ID, user.Preferences)
+	if err != nil {
+		return err
+	}
+
+	inserts = append(inserts, setters...)
+
+	_, err = models.UserPreferences.InsertQ(ctx, exec, inserts...).Exec()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func mapUserModelToEntity(ctx context.Context, user *models.User) (*auth.User, error) {
+	var prefs auth.UserPreferences
+	for _, pref := range user.R.UserPreferences {
+		err := mapUserPrefValueToEntity(ctx, &prefs, pref)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &auth.User{
+		ID:          user.ID,
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
+		IsAdmin:     user.IsAdmin,
+		AuthRef:     user.AuthRef,
+		Preferences: prefs,
+		CreatedAt:   user.CreatedAt.Time,
+		UpdatedAt:   user.UpdatedAt.Time,
+	}, nil
+}
+
+func mapUserPrefsToInsert(userID int64, prefs auth.UserPreferences) ([]bob.Mod[*dialect.InsertQuery], error) {
+	inserts := make([]bob.Mod[*dialect.InsertQuery], 0, 6)
+
+	inserts = append(inserts,
+		models.UserPreferenceSetter{
+			UserID:    omit.From(userID),
+			Key:       omit.From("sidebar_closed_desktop"),
+			Value:     omit.From([]byte(fmt.Sprint(prefs.SidebarClosedDesktop))),
+			CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+		}.Insert(),
+		models.UserPreferenceSetter{
+			UserID:    omit.From(userID),
+			Key:       omit.From("asset_list_compact"),
+			Value:     omit.From([]byte(fmt.Sprint(prefs.AssetListCompact))),
+			CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+		}.Insert(),
+		models.UserPreferenceSetter{
+			UserID:    omit.From(userID),
+			Key:       omit.From("user_list_compact"),
+			Value:     omit.From([]byte(fmt.Sprint(prefs.UserListCompact))),
+			CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+		}.Insert(),
+	)
+
+	if prefs.AssetListColumns != nil {
+		val, err := json.Marshal(prefs.AssetListColumns)
+		if err != nil {
+			return nil, err
+		}
+		inserts = append(inserts,
+
+			models.UserPreferenceSetter{
+				UserID:    omit.From(userID),
+				Key:       omit.From("asset_list_columns"),
+				Value:     omit.From(val),
+				CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+				UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			}.Insert(),
+		)
+	}
+
+	if prefs.ThemeName != "" {
+		inserts = append(inserts,
+			models.UserPreferenceSetter{
+				UserID:    omit.From(userID),
+				Key:       omit.From("theme_name"),
+				Value:     omit.From([]byte(prefs.ThemeName)),
+				CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+				UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			}.Insert(),
+		)
+	}
+
+	if prefs.ThemeMode != "" {
+		inserts = append(inserts,
+			models.UserPreferenceSetter{
+				UserID:    omit.From(userID),
+				Key:       omit.From("theme_mode"),
+				Value:     omit.From([]byte(prefs.ThemeMode)),
+				CreatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+				UpdatedAt: omit.From(types.NewSQLiteDatetime(time.Now())),
+			}.Insert(),
+		)
+	}
+
+	return inserts, nil
+}
+
+func mapUserPrefValueToEntity(ctx context.Context, prefs *auth.UserPreferences, pref *models.UserPreference) error {
+	switch pref.Key {
+	case "sidebar_closed_desktop":
+		val, err := strconv.ParseBool(string(pref.Value))
+		if err != nil {
+			return err
+		}
+		prefs.SidebarClosedDesktop = val
+		return nil
+	case "asset_list_compact":
+		val, err := strconv.ParseBool(string(pref.Value))
+		if err != nil {
+			return err
+		}
+		prefs.AssetListCompact = val
+		return nil
+	case "user_list_compact":
+		val, err := strconv.ParseBool(string(pref.Value))
+		if err != nil {
+			return err
+		}
+		prefs.UserListCompact = val
+		return nil
+	case "theme_name":
+		prefs.ThemeName = string(pref.Value)
+		return nil
+	case "theme_mode":
+		prefs.ThemeMode = string(pref.Value)
+		return nil
+	case "asset_list_columns":
+		err := json.Unmarshal(pref.Value, &prefs.AssetListColumns)
+		return err
+	}
+
+	slog.WarnContext(ctx, fmt.Sprintf("unknown preference key: %s", pref.Key))
 
 	return nil
 }

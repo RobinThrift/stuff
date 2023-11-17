@@ -1,4 +1,5 @@
 import type _Alpine from "alpinejs"
+import { API } from "./api"
 
 type ThemeNames = "default" | "retro"
 type ThemeModes = "system" | "light" | "dark"
@@ -6,6 +7,8 @@ type ThemeModes = "system" | "light" | "dark"
 class Theme {
     name: ThemeNames = "default"
     mode: ThemeModes = "system"
+
+    private api: API = new API({ baseURL: `${location.origin}` })
 
     get dark(): boolean {
         return (
@@ -16,14 +19,16 @@ class Theme {
     }
 
     constructor() {
-        let storedTheme = localStorage.getItem("theme")
-        if (storedTheme) {
-            let loaded = JSON.parse(storedTheme) as {
-                name: ThemeNames
-                mode: ThemeModes
-            }
-            this.name = loaded.name
-            this.mode = loaded.mode
+        if (document.documentElement.classList.contains("dark")) {
+            this.mode = "dark"
+        } else if (document.documentElement.classList.contains("light")) {
+            this.mode = "light"
+        }
+
+        if (document.documentElement.classList.contains("default")) {
+            this.name = "default"
+        } else if (document.documentElement.classList.contains("retro")) {
+            this.name = "retro"
         }
 
         this._onChange()
@@ -32,11 +37,13 @@ class Theme {
     setTheme(name: Theme["name"]) {
         this.name = name
         this._onChange()
+        this._save()
     }
 
     setMode(mode: Theme["mode"]) {
         this.mode = mode
         this._onChange()
+        this._save()
     }
 
     _onChange() {
@@ -51,18 +58,15 @@ class Theme {
         } else {
             document.documentElement.classList.remove("retro")
         }
-
-        this._save()
     }
 
     _save() {
-        localStorage.setItem(
-            "theme",
-            JSON.stringify({
-                name: this.name,
-                mode: this.mode,
-            }),
-        )
+        this.api
+            .setSettings({
+                theme_name: this.name,
+                theme_mode: this.mode,
+            })
+            .catch(console.error)
     }
 }
 

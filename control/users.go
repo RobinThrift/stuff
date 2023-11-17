@@ -28,6 +28,8 @@ type UserRepo interface {
 	GetByRef(ctx context.Context, exec bob.Executor, ref string) (*auth.User, error)
 	CountAdmins(ctx context.Context, exec bob.Executor) (int64, error)
 	Delete(ctx context.Context, exec bob.Executor, id int64) error
+
+	UpsertPreferences(ctx context.Context, exec bob.Executor, user *auth.User) error
 }
 
 func NewUserCtrl(db *database.Database, repo UserRepo) *UserControl {
@@ -111,5 +113,11 @@ func (cc *UserControl) Delete(ctx context.Context, id int64) error {
 func (cc *UserControl) CountAdmins(ctx context.Context) (int64, error) {
 	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (int64, error) {
 		return cc.repo.CountAdmins(ctx, tx)
+	})
+}
+
+func (cc *UserControl) SetUserPreferences(ctx context.Context, user *auth.User) error {
+	return cc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+		return cc.repo.UpsertPreferences(ctx, tx, user)
 	})
 }

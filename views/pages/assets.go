@@ -3,6 +3,7 @@ package pages
 import (
 	"net/http"
 
+	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/RobinThrift/stuff/views"
@@ -12,27 +13,30 @@ type AssetListPage struct {
 	Assets  *views.Pagination[*entities.Asset]
 	Search  string
 	Columns map[string]bool
-	Compact bool
+}
+
+var defaultAssetListColumns = map[string]bool{
+	"Tag": true, "Image": true, "Name": true, "Type": true, "Category": true, "Location": true, "Status": true,
 }
 
 func (m *AssetListPage) Render(w http.ResponseWriter, r *http.Request) error {
 	global := views.NewGlobal("Assets", r)
-	global.Search = m.Search
 
-	m.Columns, _ = session.Get[map[string]bool](r.Context(), "assets_list_columns")
-	if len(m.Columns) == 0 {
-		m.Columns = map[string]bool{
-			"Tag": true, "Image": true, "Name": true, "Type": true, "Category": true, "Location": true, "Status": true,
+	user, _ := session.Get[*auth.User](r.Context(), "user")
+
+	m.Columns = defaultAssetListColumns
+
+	if len(user.Preferences.AssetListColumns) != 0 {
+		m.Columns = make(map[string]bool, len(user.Preferences.AssetListColumns))
+		for _, c := range user.Preferences.AssetListColumns {
+			m.Columns[c] = true
 		}
 	}
-
-	m.Compact, _ = session.Get[bool](r.Context(), "assets_lists_compact")
 
 	return views.Render(w, "assets_list_page", views.Model[*AssetListPage]{
 		Global: global,
 		Data:   m,
 	})
-
 }
 
 type AssetEditPage struct {

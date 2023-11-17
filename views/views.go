@@ -11,6 +11,7 @@ import (
 	"net/url"
 
 	"github.com/RobinThrift/stuff"
+	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/gorilla/csrf"
 )
@@ -21,15 +22,13 @@ type Model[D any] struct {
 }
 
 type Global struct {
-	Title              string
-	CSRFToken          string
-	FlashMessage       FlashMessage
-	Search             string
-	CurrentURL         *url.URL
-	SidebarClosed      bool
-	CurrentUserIsAdmin bool
-	Version            string
-	Referer            string
+	Title        string
+	CSRFToken    string
+	FlashMessage FlashMessage
+	CurrentURL   *url.URL
+	Version      string
+	Referer      string
+	User         *auth.User
 }
 
 type FlashMessage struct {
@@ -47,9 +46,7 @@ const (
 func NewGlobal(title string, r *http.Request) Global {
 	flashMessage, _ := session.Pop[FlashMessage](r.Context(), "flash_message")
 
-	sidebarClosed, _ := session.Get[bool](r.Context(), "sidebar_closed")
-
-	currentUserIsAdmin, _ := session.Get[bool](r.Context(), "user_is_admin")
+	user, _ := session.Get[*auth.User](r.Context(), "user")
 
 	var referer string
 	if refHeaderURL, err := url.Parse(r.Header.Get("Referer")); err == nil {
@@ -60,14 +57,13 @@ func NewGlobal(title string, r *http.Request) Global {
 	}
 
 	return Global{
-		Title:              title,
-		CSRFToken:          csrf.Token(r),
-		FlashMessage:       flashMessage,
-		CurrentURL:         r.URL,
-		SidebarClosed:      sidebarClosed,
-		CurrentUserIsAdmin: currentUserIsAdmin,
-		Version:            stuff.Version,
-		Referer:            referer,
+		Title:        title,
+		CSRFToken:    csrf.Token(r),
+		FlashMessage: flashMessage,
+		CurrentURL:   r.URL,
+		Version:      stuff.Version,
+		Referer:      referer,
+		User:         user,
 	}
 }
 

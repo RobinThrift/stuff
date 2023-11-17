@@ -68,6 +68,7 @@ type UserCtrl interface {
 	List(ctx context.Context, query control.ListUsersQuery) (*entities.ListPage[*auth.User], error)
 	Update(ctx context.Context, user *auth.User) error
 	Get(ctx context.Context, id int64) (*auth.User, error)
+	SetUserPreferences(ctx context.Context, user *auth.User) error
 }
 
 type AuthCtrl interface {

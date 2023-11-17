@@ -18,6 +18,20 @@ type User struct {
 
 	AuthRef string `form:"-"`
 
+	Preferences UserPreferences
+
 	CreatedAt time.Time `form:"-"`
 	UpdatedAt time.Time `form:"-"`
+}
+
+type UserPreferences struct {
+	SidebarClosedDesktop bool
+
+	ThemeName string
+	ThemeMode string
+
+	AssetListColumns []string
+	AssetListCompact bool
+
+	UserListCompact bool
 }

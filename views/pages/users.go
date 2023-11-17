@@ -9,13 +9,10 @@ import (
 )
 
 type UsersListPage struct {
-	Users   *views.Pagination[*auth.User]
-	Compact bool
+	Users *views.Pagination[*auth.User]
 }
 
 func (p *UsersListPage) Render(w http.ResponseWriter, r *http.Request) error {
-	p.Compact, _ = session.Get[bool](r.Context(), "users_lists_compact")
-
 	return views.Render(w, "users_list_page", views.Model[*UsersListPage]{
 		Global: views.NewGlobal("Users", r),
 		Data:   p,

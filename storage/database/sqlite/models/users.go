@@ -50,11 +50,12 @@ type UsersStmt = bob.QueryStmt[*User, UserSlice]
 
 // userR is where relationships are stored.
 type userR struct {
-	CreatedByAssetFiles     AssetFileSlice     // fk_asset_files_0
-	CreatedByAssetParts     AssetPartSlice     // fk_asset_parts_0
-	CreatedByAssetPurchases AssetPurchaseSlice // fk_asset_purchases_0
-	CreatedByAssets         AssetSlice         // fk_assets_0
-	CheckedOutToAssets      AssetSlice         // fk_assets_1
+	CreatedByAssetFiles     AssetFileSlice      // fk_asset_files_0
+	CreatedByAssetParts     AssetPartSlice      // fk_asset_parts_0
+	CreatedByAssetPurchases AssetPurchaseSlice  // fk_asset_purchases_0
+	CreatedByAssets         AssetSlice          // fk_assets_0
+	CheckedOutToAssets      AssetSlice          // fk_assets_1
+	UserPreferences         UserPreferenceSlice // fk_user_preferences_0
 }
 
 // UserSetter is used for insert/upsert/update operations
@@ -200,6 +201,7 @@ type userRelationshipJoins[Q dialect.Joinable] struct {
 	CreatedByAssetPurchases bob.Mod[Q]
 	CreatedByAssets         bob.Mod[Q]
 	CheckedOutToAssets      bob.Mod[Q]
+	UserPreferences         bob.Mod[Q]
 }
 
 func builduserRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) userRelationshipJoins[Q] {
@@ -209,6 +211,7 @@ func builduserRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ str
 		CreatedByAssetPurchases: usersJoinCreatedByAssetPurchases[Q](ctx, typ),
 		CreatedByAssets:         usersJoinCreatedByAssets[Q](ctx, typ),
 		CheckedOutToAssets:      usersJoinCheckedOutToAssets[Q](ctx, typ),
+		UserPreferences:         usersJoinUserPreferences[Q](ctx, typ),
 	}
 }
 
@@ -390,6 +393,13 @@ func usersJoinCheckedOutToAssets[Q dialect.Joinable](ctx context.Context, typ st
 		),
 	}
 }
+func usersJoinUserPreferences[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
+	return mods.QueryMods[Q]{
+		dialect.Join[Q](typ, UserPreferences.Name(ctx)).On(
+			UserPreferenceColumns.UserID.EQ(UserColumns.ID),
+		),
+	}
+}
 
 // CreatedByAssetFiles starts a query for related objects on asset_files
 func (o *User) CreatedByAssetFiles(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) AssetFilesQuery {
@@ -481,6 +491,24 @@ func (os UserSlice) CheckedOutToAssets(ctx context.Context, exec bob.Executor, m
 	)...)
 }
 
+// UserPreferences starts a query for related objects on user_preferences
+func (o *User) UserPreferences(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) UserPreferencesQuery {
+	return UserPreferences.Query(ctx, exec, append(mods,
+		sm.Where(UserPreferenceColumns.UserID.EQ(sqlite.Arg(o.ID))),
+	)...)
+}
+
+func (os UserSlice) UserPreferences(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) UserPreferencesQuery {
+	PKArgs := make([]bob.Expression, len(os))
+	for i, o := range os {
+		PKArgs[i] = sqlite.ArgGroup(o.ID)
+	}
+
+	return UserPreferences.Query(ctx, exec, append(mods,
+		sm.Where(sqlite.Group(UserPreferenceColumns.UserID).In(PKArgs...)),
+	)...)
+}
+
 func (o *User) Preload(name string, retrieved any) error {
 	if o == nil {
 		return nil
@@ -530,6 +558,15 @@ func (o *User) Preload(name string, retrieved any) error {
 		}
 
 		o.R.CheckedOutToAssets = rels
+
+		return nil
+	case "UserPreferences":
+		rels, ok := retrieved.(UserPreferenceSlice)
+		if !ok {
+			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.UserPreferences = rels
 
 		return nil
 	default:
@@ -867,6 +904,72 @@ func (os UserSlice) LoadUserCheckedOutToAssets(ctx context.Context, exec bob.Exe
 	return nil
 }
 
+func ThenLoadUserUserPreferences(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
+	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
+		loader, isLoader := retrieved.(interface {
+			LoadUserUserPreferences(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+		})
+		if !isLoader {
+			return fmt.Errorf("object %T cannot load UserUserPreferences", retrieved)
+		}
+
+		err := loader.LoadUserUserPreferences(ctx, exec, queryMods...)
+
+		// Don't cause an issue due to missing relationships
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil
+		}
+
+		return err
+	})
+}
+
+// LoadUserUserPreferences loads the user's UserPreferences into the .R struct
+func (o *User) LoadUserUserPreferences(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.UserPreferences = nil
+
+	related, err := o.UserPreferences(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	o.R.UserPreferences = related
+	return nil
+}
+
+// LoadUserUserPreferences loads the user's UserPreferences into the .R struct
+func (os UserSlice) LoadUserUserPreferences(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	userPreferences, err := os.UserPreferences(ctx, exec, mods...).All()
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.UserPreferences = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range userPreferences {
+			if o.ID != rel.UserID {
+				continue
+			}
+
+			o.R.UserPreferences = append(o.R.UserPreferences, rel)
+		}
+	}
+
+	return nil
+}
+
 func insertUserCreatedByAssetFiles0(ctx context.Context, exec bob.Executor, assetFiles1 []*AssetFileSetter, user0 *User) (AssetFileSlice, error) {
 	for _, assetFile1 := range assetFiles1 {
 		assetFile1.CreatedBy = omit.From(user0.ID)
@@ -1158,6 +1261,65 @@ func (user0 *User) AttachCheckedOutToAssets(ctx context.Context, exec bob.Execut
 	}
 
 	user0.R.CheckedOutToAssets = append(user0.R.CheckedOutToAssets, asset1...)
+
+	return nil
+}
+
+func insertUserUserPreferences0(ctx context.Context, exec bob.Executor, userPreferences1 []*UserPreferenceSetter, user0 *User) (UserPreferenceSlice, error) {
+	for _, userPreference1 := range userPreferences1 {
+		userPreference1.UserID = omit.From(user0.ID)
+	}
+
+	ret, err := UserPreferences.InsertMany(ctx, exec, userPreferences1...)
+	if err != nil {
+		return ret, fmt.Errorf("insertUserUserPreferences0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachUserUserPreferences0(ctx context.Context, exec bob.Executor, userPreferences1 UserPreferenceSlice, user0 *User) error {
+	setter := &UserPreferenceSetter{
+		UserID: omit.From(user0.ID),
+	}
+
+	err := UserPreferences.Update(ctx, exec, setter, userPreferences1...)
+	if err != nil {
+		return fmt.Errorf("attachUserUserPreferences0: %w", err)
+	}
+
+	return nil
+}
+
+func (user0 *User) InsertUserPreferences(ctx context.Context, exec bob.Executor, related ...*UserPreferenceSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	userPreference1, err := insertUserUserPreferences0(ctx, exec, related, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.UserPreferences = append(user0.R.UserPreferences, userPreference1...)
+
+	return nil
+}
+
+func (user0 *User) AttachUserPreferences(ctx context.Context, exec bob.Executor, related ...*UserPreference) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	userPreference1 := UserPreferenceSlice(related)
+
+	err = attachUserUserPreferences0(ctx, exec, userPreference1, user0)
+	if err != nil {
+		return err
+	}
+
+	user0.R.UserPreferences = append(user0.R.UserPreferences, userPreference1...)
 
 	return nil
 }

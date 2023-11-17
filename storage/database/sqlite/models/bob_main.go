@@ -19,6 +19,7 @@ var TableNames = struct {
 	LocalAuthUsers  string
 	Sessions        string
 	Tags            string
+	UserPreferences string
 	Users           string
 	Categories      string
 	CustomAttrNames string
@@ -36,6 +37,7 @@ var TableNames = struct {
 	LocalAuthUsers:  "local_auth_users",
 	Sessions:        "sessions",
 	Tags:            "tags",
+	UserPreferences: "user_preferences",
 	Users:           "users",
 	Categories:      "categories",
 	CustomAttrNames: "custom_attr_names",
@@ -55,6 +57,7 @@ var ColumnNames = struct {
 	LocalAuthUsers  localAuthUserColumnNames
 	Sessions        sessionColumnNames
 	Tags            tagColumnNames
+	UserPreferences userPreferenceColumnNames
 	Users           userColumnNames
 	Categories      categoryColumnNames
 	CustomAttrNames customAttrNameColumnNames
@@ -166,6 +169,14 @@ var ColumnNames = struct {
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
 	},
+	UserPreferences: userPreferenceColumnNames{
+		ID:        "id",
+		UserID:    "user_id",
+		Key:       "key",
+		Value:     "value",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
+	},
 	Users: userColumnNames{
 		ID:          "id",
 		Username:    "username",
@@ -215,6 +226,7 @@ func Where[Q sqlite.Filterable]() struct {
 	LocalAuthUsers  localAuthUserWhere[Q]
 	Sessions        sessionWhere[Q]
 	Tags            tagWhere[Q]
+	UserPreferences userPreferenceWhere[Q]
 	Users           userWhere[Q]
 	Categories      categoryWhere[Q]
 	CustomAttrNames customAttrNameWhere[Q]
@@ -233,6 +245,7 @@ func Where[Q sqlite.Filterable]() struct {
 		LocalAuthUsers  localAuthUserWhere[Q]
 		Sessions        sessionWhere[Q]
 		Tags            tagWhere[Q]
+		UserPreferences userPreferenceWhere[Q]
 		Users           userWhere[Q]
 		Categories      categoryWhere[Q]
 		CustomAttrNames customAttrNameWhere[Q]
@@ -250,6 +263,7 @@ func Where[Q sqlite.Filterable]() struct {
 		LocalAuthUsers:  LocalAuthUserWhere[Q](),
 		Sessions:        SessionWhere[Q](),
 		Tags:            TagWhere[Q](),
+		UserPreferences: UserPreferenceWhere[Q](),
 		Users:           UserWhere[Q](),
 		Categories:      CategoryWhere[Q](),
 		CustomAttrNames: CustomAttrNameWhere[Q](),
@@ -273,21 +287,23 @@ type joinSet[Q any] struct {
 }
 
 type joins[Q dialect.Joinable] struct {
-	AssetFiles     joinSet[assetFileRelationshipJoins[Q]]
-	AssetParts     joinSet[assetPartRelationshipJoins[Q]]
-	AssetPurchases joinSet[assetPurchaseRelationshipJoins[Q]]
-	Assets         joinSet[assetRelationshipJoins[Q]]
-	Tags           joinSet[tagRelationshipJoins[Q]]
-	Users          joinSet[userRelationshipJoins[Q]]
+	AssetFiles      joinSet[assetFileRelationshipJoins[Q]]
+	AssetParts      joinSet[assetPartRelationshipJoins[Q]]
+	AssetPurchases  joinSet[assetPurchaseRelationshipJoins[Q]]
+	Assets          joinSet[assetRelationshipJoins[Q]]
+	Tags            joinSet[tagRelationshipJoins[Q]]
+	UserPreferences joinSet[userPreferenceRelationshipJoins[Q]]
+	Users           joinSet[userRelationshipJoins[Q]]
 }
 
 func getJoins[Q dialect.Joinable](ctx context.Context) joins[Q] {
 	return joins[Q]{
-		AssetFiles:     assetFilesJoin[Q](ctx),
-		AssetParts:     assetPartsJoin[Q](ctx),
-		AssetPurchases: assetPurchasesJoin[Q](ctx),
-		Assets:         assetsJoin[Q](ctx),
-		Tags:           tagsJoin[Q](ctx),
-		Users:          usersJoin[Q](ctx),
+		AssetFiles:      assetFilesJoin[Q](ctx),
+		AssetParts:      assetPartsJoin[Q](ctx),
+		AssetPurchases:  assetPurchasesJoin[Q](ctx),
+		Assets:          assetsJoin[Q](ctx),
+		Tags:            tagsJoin[Q](ctx),
+		UserPreferences: userPreferencesJoin[Q](ctx),
+		Users:           usersJoin[Q](ctx),
 	}
 }
