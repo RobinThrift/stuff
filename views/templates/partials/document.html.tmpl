@@ -1,12 +1,14 @@
 {{ define "document_head" }}
 {{- $class := "" -}}
 
-{{- if ne $.Global.User.Preferences.ThemeName "default" -}}
-{{- $class = $.Global.User.Preferences.ThemeName  -}}
+{{- with $.Global.User -}}
+{{- if ne .Preferences.ThemeName "default" -}}
+{{- $class = .Preferences.ThemeName  -}}
 {{- end -}}
 
-{{- if ne $.Global.User.Preferences.ThemeMode "" -}}
-{{- $class = concat $class " " $.Global.User.Preferences.ThemeMode  -}}
+{{- if ne .Preferences.ThemeMode "" -}}
+{{- $class = concat $class " " .Preferences.ThemeMode  -}}
+{{- end -}}
 {{- end -}}
 <!DOCTYPE html>
 <html lang="en" {{ if ne $class "" -}} class="{{ $class }}" {{- end }}>
