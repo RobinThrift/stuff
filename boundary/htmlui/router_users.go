@@ -373,7 +373,6 @@ func (rt *Router) usersSettingsSubmitHandler(w http.ResponseWriter, r *http.Requ
 		user.Preferences.UserListCompact = *payload.UserListCompact
 	}
 
-	fmt.Printf("user %#v\n", user.Preferences)
 	err = rt.users.SetUserPreferences(r.Context(), user)
 	if err != nil {
 		slog.ErrorContext(r.Context(), "error setting user preferences", "error", err)
