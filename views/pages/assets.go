@@ -45,6 +45,7 @@ type AssetEditPage struct {
 	ValidationErrs   map[string]string
 	DefaultCurrency  string
 	DecimalSeparator string
+	Referer          string
 }
 
 func (m *AssetEditPage) Render(w http.ResponseWriter, r *http.Request) error {

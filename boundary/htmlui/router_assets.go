@@ -254,7 +254,12 @@ func (rt *Router) assetsEditSubmitHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	var err error
-	page := &pages.AssetEditPage{ValidationErrs: map[string]string{}, DecimalSeparator: rt.config.DecimalSeparator, DefaultCurrency: rt.config.DefaultCurrency}
+	page := &pages.AssetEditPage{
+		ValidationErrs:   map[string]string{},
+		DecimalSeparator: rt.config.DecimalSeparator,
+		DefaultCurrency:  rt.config.DefaultCurrency,
+		Referer:          r.PostForm.Get("referer"),
+	}
 
 	query := getAssetQuery(params.TagOrID)
 	query.IncludeParts = true
@@ -322,7 +327,12 @@ func (rt *Router) assetsEditSubmitHandler(w http.ResponseWriter, r *http.Request
 
 	views.SetFlashMessage(r.Context(), views.FlashMessageSuccess, fmt.Sprintf("Asset '%s' updated", updated.Name))
 
-	http.Redirect(w, r, fmt.Sprintf("/assets/%v", updated.ID), http.StatusFound)
+	if page.Referer != "" {
+		http.Redirect(w, r, page.Referer, http.StatusFound)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/assets/%v", updated.ID), http.StatusFound)
+	}
+
 	return nil
 }
 
