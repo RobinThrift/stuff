@@ -39,10 +39,11 @@ func (rt *Router) labelsSubmitHandler(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	if page.NumColumns == 0 && page.NumRows == 0 && page.Width == 0 && page.Height == 0 {
-		page.ValidationErrs["page_cols"] = "must set either Number of Columns/Rows or Label Width/Height"
-		page.ValidationErrs["page_rows"] = "must set either Number of Columns/Rows or Label Width/Height"
-		page.ValidationErrs["label_width"] = "must set either Number of Columns/Rows or Label Width/Height"
-		page.ValidationErrs["label_height"] = "must set either Number of Columns/Rows or Label Width/Height"
+		errValidation := "must set either Number of Columns/Rows or Label Width/Height"
+		page.ValidationErrs["page_cols"] = errValidation
+		page.ValidationErrs["page_rows"] = errValidation
+		page.ValidationErrs["label_width"] = errValidation
+		page.ValidationErrs["label_height"] = errValidation
 		return page.Render(w, r)
 	}
 
