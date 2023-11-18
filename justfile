@@ -63,7 +63,7 @@ _build-go:
     go build -ldflags="{{go_ldflgas}}" {{ go_build_flags }} -o build/stuff ./bin/stuff
 
 build-styles: _npm-install
-    postcss -c frontend/postcss.config.js ./frontend/src/styles.css -o ./frontend/build/styles.css --no-map
+    NODE_ENV=production postcss -c frontend/postcss.config.js ./frontend/src/styles.css -o ./frontend/build/styles.css --no-map
 
 build-js: _npm-install
     cd frontend && esbuild src/index.ts --format=esm --target=es2020 --minify --bundle --outfile=build/bundle.min.js
