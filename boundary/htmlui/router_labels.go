@@ -33,7 +33,10 @@ func (rt *Router) labelsSubmitHandler(w http.ResponseWriter, r *http.Request, pa
 
 	err = rt.forms.Decode(&page, r.PostForm)
 	if err != nil {
-		return err
+		slog.ErrorContext(r.Context(), "error decoding label creation form", "error", err)
+		page.ValidationErrs["general"] = err.Error()
+		return page.Render(w, r)
+	}
 	}
 
 	query := control.GenerateLabelSheetQuery{
