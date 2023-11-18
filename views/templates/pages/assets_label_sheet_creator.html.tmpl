@@ -19,13 +19,7 @@
 
 	<input type="hidden" name="stuff.csrf.token" value="{{ $.Global.CSRFToken }}" />
 
-	<div class="flex items-center mb-5">
-		<div class="flex-1 flex flex-col items-start">
-			<button type="submit" class="btn btn-primary">
-				Create
-			</button>
-		</div>
-
+	<div class="flex items-center my-5">
 		<div class="flex items-center">
 			<label for="template" class="label font-bold mb-0 me-2">Template</label>
 			<select name="template" id="template" class="input w-full" x-on:input="setTemplate" x-ref="select">
@@ -36,6 +30,12 @@
 						</option>
 					{{ end }}
 			</select>
+		</div>
+
+		<div class="flex-1 flex flex-col items-end">
+			<button type="submit" class="btn btn-primary text-lg">
+				Create
+			</button>
 		</div>
 	</div>
 
