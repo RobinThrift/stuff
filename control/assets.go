@@ -82,6 +82,8 @@ type ListAssetsQuery struct {
 	OrderDir string
 
 	AssetType entities.AssetType
+
+	IncludeParts bool
 }
 
 func (ac *AssetControl) List(ctx context.Context, query ListAssetsQuery) (*entities.ListPage[*entities.Asset], error) {
@@ -95,6 +97,7 @@ func (ac *AssetControl) List(ctx context.Context, query ListAssetsQuery) (*entit
 			OrderBy:      query.OrderBy,
 			OrderDir:     query.OrderDir,
 			AssetType:    string(query.AssetType),
+			IncludeParts: query.IncludeParts,
 		})
 	})
 }

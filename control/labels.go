@@ -22,7 +22,7 @@ type GenerateLabelSheetQuery struct {
 }
 
 func (lc *LabelController) GenerateLabelSheet(ctx context.Context, query GenerateLabelSheetQuery) ([]byte, error) {
-	assets, err := lc.assets.List(ctx, ListAssetsQuery{IDs: query.IDs})
+	assets, err := lc.assets.List(ctx, ListAssetsQuery{IDs: query.IDs, IncludeParts: true})
 	if err != nil {
 		return nil, err
 	}

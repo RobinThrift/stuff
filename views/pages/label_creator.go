@@ -11,7 +11,7 @@ import (
 type LabelSheetCreatorPage struct {
 	Template string `form:"template"`
 
-	SelectedAssetIDs []int64 `form:"-"`
+	SelectedAssetIDs []int64 `form:"selected_asset_ids"`
 
 	PageSize   string `form:"page_size"`
 	SkipLabels int    `form:"skip_labels"`
