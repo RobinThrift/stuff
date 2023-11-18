@@ -190,7 +190,6 @@ func (*UserRepo) Delete(ctx context.Context, exec bob.Executor, id int64) error 
 }
 
 func (*UserRepo) UpsertPreferences(ctx context.Context, exec bob.Executor, user *auth.User) error {
-	// exec = bob.Debug(exec)
 	inserts := make([]bob.Mod[*dialect.InsertQuery], 0, 8)
 
 	inserts = append(

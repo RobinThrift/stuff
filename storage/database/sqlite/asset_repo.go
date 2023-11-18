@@ -80,7 +80,6 @@ func (ar *AssetRepo) Get(ctx context.Context, exec bob.Executor, query database.
 }
 
 func (ar *AssetRepo) List(ctx context.Context, exec bob.Executor, query database.ListAssetsQuery) (*entities.ListPage[*entities.Asset], error) {
-	exec = bob.Debug(exec)
 	var err error
 	var assets models.AssetSlice
 	var count int64
