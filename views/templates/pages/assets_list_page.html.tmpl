@@ -147,8 +147,8 @@
 				>
 					<a href='{{ orderURL $.Global.CurrentURL "tag" }}'>
 						Tag
-						<x-icon icon="asc" class="table-asc-icon h-6 w-6" />
-						<x-icon icon="desc" class="table-desc-icon h-6 w-6" />
+						<x-icon icon="asc" class="table-asc-icon" />
+						<x-icon icon="desc" class="table-desc-icon" />
 					</a>
 				</th>
 				<th class="w-20" x-show="columns.Image" {{ if not $.Data.Columns.Image -}} x-cloak {{- end}}>Image</th>
@@ -162,8 +162,8 @@
 				>
 					<a href='{{ orderURL $.Global.CurrentURL "name" }}'>
 						Name
-						<x-icon icon="asc" class="table-asc-icon h-6 w-6" />
-						<x-icon icon="desc" class="table-desc-icon h-6 w-6" />
+						<x-icon icon="asc" class="table-asc-icon" />
+						<x-icon icon="desc" class="table-desc-icon" />
 					</a>
 				</th>
 				<th x-show="columns.Type" {{ if not $.Data.Columns.Type -}} x-cloak {{- end}}>Type</th>
