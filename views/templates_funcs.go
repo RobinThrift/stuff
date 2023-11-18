@@ -142,6 +142,21 @@ var templateFuncs = template.FuncMap{
 		return r, nil
 	},
 
+	"isActiveURL": func(current *url.URL, path string, paramValues ...string) bool {
+		if current.Path != path {
+			return false
+		}
+
+		q := current.Query()
+		for i := 0; i < len(paramValues); i += 2 {
+			if q.Get(paramValues[i]) != paramValues[i+1] {
+				return false
+			}
+		}
+
+		return true
+	},
+
 	"getQueryParam": func(u *url.URL, name string) string {
 		return u.Query().Get(name)
 	},

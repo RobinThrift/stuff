@@ -80,16 +80,34 @@
 			<li>
 				<a
 					href="/assets"
-					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/assets" }} active {{ end }}"
+					class="sidebar-link {{ if isActiveURL $.Global.CurrentURL "/assets" "type" "" }} active {{ end }}"
 				>
 					<x-icon icon="package" /> <span class="sidebar-desktop-closed-hide">Assets</span>
+				</a>
+			</li>
+
+			<li>
+				<a
+					href="/assets?type=component"
+					class="sidebar-link {{ if isActiveURL $.Global.CurrentURL "/assets" "type" "component" }} active {{ end }}"
+				>
+					<x-icon icon="stack-simple" /> <span class="sidebar-desktop-closed-hide">Components</span>
+				</a>
+			</li>
+
+			<li>
+				<a
+					href="/assets?type=consumable"
+					class="sidebar-link {{ if isActiveURL $.Global.CurrentURL "/assets" "type" "consumable" }} active {{ end }}"
+				>
+					<x-icon icon="receipt" /> <span class="sidebar-desktop-closed-hide">Consumables</span>
 				</a>
 			</li>
 
 			<li class="mt-1">
 				<a
 					href="/tags"
-					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/tags" }} active {{ end }}"
+					class="sidebar-link {{ if isActiveURL $.Global.CurrentURL "/tags" }} active {{ end }}"
 				>
 					<x-icon icon="tag" /> <span class="sidebar-desktop-closed-hide">Tags</span>
 				</a>
@@ -99,7 +117,7 @@
 			<li class="mt-1">
 				<a
 					href="/users"
-					class="sidebar-link {{ if eq $.Global.CurrentURL.Path "/users" }} active {{ end }}"
+					class="sidebar-link {{ if isActiveURL $.Global.CurrentURL "/users" }} active {{ end }}"
 				>
 					<x-icon icon="user" /> <span class="sidebar-desktop-closed-hide">Users</span>
 				</a>
