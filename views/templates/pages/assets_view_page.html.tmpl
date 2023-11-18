@@ -131,13 +131,14 @@
 		<div>
 			<dt class="block text-neutral-400 font-semibold">Warranty Until</dt>
 			<dd class="sm:col-span-2">
-				<date>
-					{{ if not .WarrantyUntil.IsZero }}
-						{{ .WarrantyUntil.Format "2006-01-02" }}
-					{{ else }}
-					-
-					{{ end }}
-				</date>
+				{{ if not .WarrantyUntil.IsZero }}
+				{{ $warrantyUntil := .WarrantyUntil.Format "2006-01-02" }}
+				<time datetime="{{ $warrantyUntil }}">
+					{{- $warrantyUntil -}}
+				</time>
+				{{ else }}
+				-
+				{{ end }}
 			</dd>
 		</div>
 		{{ end }}
@@ -218,13 +219,13 @@
 
 			<div>
 				<span class="block text-neutral-400 font-semibold">Purchase Date</span>
-				<date>
-					{{ if not $purchase.Date.IsZero }}
-						{{ $purchase.Date.Format "2006-01-02" }}
-					{{ else }}
-					-
-					{{ end }}
-				</date>
+				{{ if not $purchase.Date.IsZero }}
+				<time datetime="{{ $purchase.Date.Format "2006-01-02" }}">
+					{{ $purchase.Date.Format "2006-01-02" }}
+				</time>
+				{{ else }}
+				-
+				{{ end }}
 			</div>
 		</div>
 
@@ -392,10 +393,10 @@
 					<span class="lg:hidden text-content-lighter font-medium">Size:</span>
 					{{ .SizeBytes }}
 				</div>
-				<date class="block lg:w-64 lg:me-5">
+				<time datetime="{{ .CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}" class="block lg:w-64 lg:me-5">
 					<span class="lg:hidden text-content-lighter font-medium">Created At:</span>
 					{{ .CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}
-				</date>
+				</time>
 				<div class="lg:w-24 flex lg:justify-end lg:static absolute top-3 right-5">
 					<x-dropdown-button
 						button-class="max-w-min btn-neutral"
