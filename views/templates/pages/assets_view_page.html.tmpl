@@ -297,7 +297,7 @@
 	</h3>
 
 	<div x-show="open" class="w-full card overflow-auto">
-		<table class="min-w-full">
+		<table class="w-screen md:w-full">
 			<thead class="thead">
 				<tr>
 					<th class="!border-t-0">Tag</th>
@@ -376,7 +376,7 @@
 
 
 		<ul class="w-full">
-			<li class="w-full py-2 flex items-center content-inset-x border-b border-border-default">
+			<li class="hidden lg:flex w-full py-2 items-center content-inset-x border-b border-border-default">
 				<div class="flex-1 flex me-5 text-content-lighter font-medium"><span class="w-6 h-6 me-2"></span>Name</div>
 				<div class="w-32 me-5 text-content-lighter font-medium">Size</div>
 				<div class="w-64 me-5 text-content-lighter font-medium">Created At</div>
@@ -384,11 +384,19 @@
 			</li>
 
 			{{ range .Files }}
-			<li class="w-full flex items-center py-2 hover:bg-background-hover content-inset-x">
-				<a href="{{ .PublicPath }}" class="flex-1 flex me-5"><x-icon class="w-6 h-6 me-2" icon="file" /> {{ .Name }}</a>
-				<div class="w-32 me-5">{{ .SizeBytes }}</div>
-				<date class="block w-64 me-5">{{ .CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}</date>
-				<div class="w-24 flex justify-end">
+			<li class="w-full relative flex flex-col lg:flex-row lg:items-center py-2 hover:bg-background-hover content-inset-x">
+				<a href="{{ .PublicPath }}" class="flex-1 flex me-16 lg:me-5 font-bold lg:font-normal">
+					<x-icon class="hidden lg:block w-6 h-6 me-2" icon="file" /> {{ .Name }}
+				</a>
+				<div class="lg:w-32 lg:me-5">
+					<span class="lg:hidden text-content-lighter font-medium">Size:</span>
+					{{ .SizeBytes }}
+				</div>
+				<date class="block lg:w-64 lg:me-5">
+					<span class="lg:hidden text-content-lighter font-medium">Created At:</span>
+					{{ .CreatedAt.Format "2006-01-02T15:04:05Z07:00" }}
+				</date>
+				<div class="lg:w-24 flex lg:justify-end lg:static absolute top-3 right-5">
 					<x-dropdown-button
 						button-class="max-w-min btn-neutral"
 						icon-end="dots-three-vertical"
