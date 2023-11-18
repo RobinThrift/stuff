@@ -54,7 +54,7 @@
     }
 
     .dropdown-content {
-        @apply absolute end-0 z-10 mt-1 min-w-max bg-background-default rounded shadow-md border border-border-light;
+        @apply absolute end-0 z-50 mt-1 min-w-max bg-background-default rounded shadow-md border border-border-light;
     }
 
     .dropdown-items {
