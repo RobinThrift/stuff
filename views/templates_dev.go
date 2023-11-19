@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sync"
 )
 
 var templateDir = path.Join("views", "templates")
@@ -22,7 +23,12 @@ var pagesDir = path.Join(templateDir, "pages")
 
 var templateFS = os.DirFS(".")
 
+var execTemplateMutex sync.Mutex
+
 func execTemplate(w io.Writer, name string, data any) error {
+	execTemplateMutex.Lock()
+	defer execTemplateMutex.Unlock()
+
 	var templates *template.Template
 	cfs := &componentFS{fs: templateFS}
 
