@@ -161,15 +161,3 @@ func (fr *FileRepo) Delete(ctx context.Context, exec bob.Executor, ids []int64) 
 
 	return nil
 }
-
-// func (ar *RepoSQLite) FileExists(ctx context.Context, exec bob.Executor, hash []byte) (bool, error) {
-// 	file, err := models.AssetFiles.Query(ctx, exec, models.SelectWhere.AssetFiles.Sha256.EQ(hash)).One()
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			return false, nil
-// 		}
-// 		return false, fmt.Errorf("error getting asset file: %w", err)
-// 	}
-//
-// 	return file != nil, nil
-// }
