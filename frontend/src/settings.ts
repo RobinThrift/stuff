@@ -1,20 +1,9 @@
 import type _Alpine from "alpinejs"
+import { API } from "./api"
 
 export function plugin(Alpine: typeof _Alpine) {
+    let api: API = new API({ baseURL: `${location.origin}` })
     Alpine.magic("setting", () => (value: Record<string, unknown>) => {
-        let csrf =
-            document
-                .querySelector(`meta[name="csrf-token"]`)
-                ?.getAttribute("content") ?? ""
-
-        fetch("/users/settings", {
-            method: "post",
-            credentials: "same-origin",
-            headers: {
-                "X-CSRF-Token": csrf,
-                "Content-Type": "application/json; charset=utf-8",
-            },
-            body: JSON.stringify(value),
-        }).catch(console.error)
+        api.setSettings(value).catch(console.error)
     })
 }
