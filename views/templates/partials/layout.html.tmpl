@@ -164,7 +164,7 @@
 	<select
 		class="input input-sm me-3"
 		name="theme" id="theme"
-		x-on:input="$store.theme.setTheme($event.target.value); $setting({ theme_name: $event.target.value })"
+		x-on:input="$store.theme.setTheme($event.target.value);"
 		x-bind:value="$store.theme.name"
 	>
 		<option value="default" {{ if or (eq $.Global.User.Preferences.ThemeName "") (eq $.Global.User.Preferences.ThemeName "default") -}} selected {{- end }}>Default</option>
@@ -174,7 +174,7 @@
 	<select
 		class="input input-sm"
 		name="theme_mode" id="theme_mode"
-		x-on:input="$store.theme.setMode($event.target.value); $setting({ theme_mode: $event.target.value })"
+		x-on:input="$store.theme.setMode($event.target.value);"
 		x-bind:value="$store.theme.mode"
 	>
 		<option value="system" {{ if or (eq $.Global.User.Preferences.ThemeMode "") (eq $.Global.User.Preferences.ThemeMode "system") -}} selected {{- end }}>System</option>
