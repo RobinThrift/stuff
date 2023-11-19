@@ -33,13 +33,19 @@ func logReqMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func sessionMiddleware(sessionManager *scs.SessionManager) func(next http.Handler) http.Handler {
+func sessionMiddleware(sessionManager *scs.SessionManager, skipFor []string) func(next http.Handler) http.Handler {
 	gob.Register(&auth.User{})
-	gob.Register(map[string]bool{})
 	gob.Register(views.FlashMessage{})
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			for _, s := range skipFor {
+				if strings.HasPrefix(r.URL.Path, s) {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
 			ctx := session.CtxWithSessionManager(r.Context(), sessionManager)
 			sessionManager.LoadAndSave(next).ServeHTTP(w, r.WithContext(ctx))
 		})

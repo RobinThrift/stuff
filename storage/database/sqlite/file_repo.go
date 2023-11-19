@@ -32,7 +32,7 @@ func (fr *FileRepo) Create(ctx context.Context, exec bob.Executor, file *entitie
 		PublicPath: omit.From(file.PublicPath),
 	})
 	if err != nil {
-		return 0, fmt.Errorf("%w: %w", ErrCreatingFile, unwapSQLiteError(err))
+		return 0, fmt.Errorf("%w: %w", ErrCreatingFile, err)
 	}
 	return inserted.ID, nil
 }

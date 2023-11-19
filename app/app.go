@@ -138,6 +138,10 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 	sm.Cookie.HttpOnly = true
 	sm.Cookie.Persist = true
 	sm.Cookie.SameSite = http.SameSiteStrictMode
+	sm.ErrorFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+		slog.ErrorContext(r.Context(), "session storage error", "error", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 	srv, err := server.NewServer(config.Addr, config.UseSecureCookies, sm)
 	if err != nil {

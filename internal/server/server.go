@@ -29,7 +29,7 @@ func NewServer(addr string, useSecureCookies bool, sm *scs.SessionManager) (*Ser
 	mux.Use(
 		requestIDMiddleware,
 		logReqMiddleware,
-		sessionMiddleware(sm),
+		sessionMiddleware(sm, []string{"/static"}),
 		csrfMiddleware,
 		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/"}),
 	)

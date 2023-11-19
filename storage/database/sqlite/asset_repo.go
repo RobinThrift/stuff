@@ -114,19 +114,19 @@ func (ar *AssetRepo) Create(ctx context.Context, exec bob.Executor, asset *entit
 
 	inserted, err := models.Assets.Insert(ctx, exec, setter)
 	if err != nil {
-		return fmt.Errorf("%w: %w", ErrCreatingAsset, unwapSQLiteError(err))
+		return fmt.Errorf("%w: %w", ErrCreatingAsset, err)
 	}
 
 	err = createParts(ctx, exec, inserted.ID, asset.Parts)
 	if err != nil {
-		return fmt.Errorf("%w: error creating parts: %w", ErrCreatingAsset, unwapSQLiteError(err))
+		return fmt.Errorf("%w: error creating parts: %w", ErrCreatingAsset, err)
 	}
 
 	asset.ID = inserted.ID
 
 	err = createPurchases(ctx, exec, asset, asset.Purchases)
 	if err != nil {
-		return fmt.Errorf("%w: error creating purchases: %w", ErrCreatingAsset, unwapSQLiteError(err))
+		return fmt.Errorf("%w: error creating purchases: %w", ErrCreatingAsset, err)
 	}
 	return nil
 }
@@ -231,7 +231,7 @@ func listAssets(ctx context.Context, exec bob.Executor, query database.ListAsset
 
 	assets, err := models.Assets.Query(ctx, exec, qmods...).All()
 	if err != nil {
-		return nil, 0, fmt.Errorf("error getting assets: %w", unwapSQLiteError(err))
+		return nil, 0, fmt.Errorf("error getting assets: %w", err)
 	}
 
 	return assets, count, nil

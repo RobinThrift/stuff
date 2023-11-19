@@ -1,5 +1,6 @@
 version        := env_var_or_default("VERSION", "dev")
 go_ldflgas     := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/RobinThrift/stuff.Version=" + version + "'"
+go_tags        := env_var_or_default("GO_TAGS", "")
 go_build_flags := env_var_or_default("GO_BUILD_FLAGS", "")
 oci_repo       := env_var_or_default("OCI_REPO", "ghcr.io/robinthrift/stuff")
 
@@ -28,11 +29,11 @@ lint: _npm-install
 
 test *flags="-failfast -v -timeout 5m":
     @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
-    go test {{ flags }} ./...
+    go test -tags sqlite_fts5 {{ flags }} ./...
 
 run: build-js build-icons _fonts
     mkdir -p .run
-    go run -tags dev ./bin/stuff
+    go run -tags dev,sqlite_fts5 ./bin/stuff
 
 
 watch: _npm-install _fonts
@@ -43,7 +44,7 @@ _watch-go:
     wgo \
         -file '.*\.go' \
         -xfile '.*_test\.go' \
-        go run -tags dev ./bin/stuff
+        go run -tags dev,sqlite_fts5 ./bin/stuff
 
 _watch-styles:
     postcss ./frontend/src/styles.css -o ./frontend/build/styles.css --watch
@@ -60,7 +61,7 @@ build: build-js build-js build-styles build-icons _fonts
     just _build-go
 
 _build-go:
-    go build -ldflags="{{go_ldflgas}}" {{ go_build_flags }} -o build/stuff ./bin/stuff
+    go build -tags {{go_tags}}sqlite_fts5 -ldflags="{{go_ldflgas}}" {{ go_build_flags }} -o build/stuff ./bin/stuff
 
 build-styles: _npm-install
     NODE_ENV=production postcss -c frontend/postcss.config.js ./frontend/src/styles.css -o ./frontend/build/styles.css --no-map

@@ -62,7 +62,7 @@ func (*TagRepo) List(ctx context.Context, exec bob.Executor, query database.List
 
 	tags, err := models.Tags.Query(ctx, exec, qmods...).All()
 	if err != nil {
-		return nil, fmt.Errorf("error getting tags: %w", unwapSQLiteError(err))
+		return nil, fmt.Errorf("error getting tags: %w", err)
 	}
 
 	numPages, pageSize := calcNumPages(query.PageSize, count)

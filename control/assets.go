@@ -119,7 +119,19 @@ func (ac *AssetControl) Create(ctx context.Context, cmd CreateAssetCmd) (*entiti
 
 func (ac *AssetControl) create(ctx context.Context, exec bob.Executor, cmd CreateAssetCmd) (*entities.Asset, error) {
 	var err error
+
+	_, err = ac.tags.CreateIfNotExists(ctx, cmd.Asset.Tag)
+	if err != nil {
+		return nil, err
+	}
+
+	err = ac.repo.Create(ctx, exec, cmd.Asset)
+	if err != nil {
+		return nil, err
+	}
+
 	if cmd.Image != nil {
+		cmd.Image.AssetID = cmd.Asset.ID
 		cmd.Image.Name = cmd.Asset.Tag + "_image" + path.Ext(cmd.Image.Name)
 		cmd.Image, err = ac.files.WriteFile(ctx, cmd.Image)
 		if err != nil {
@@ -130,12 +142,7 @@ func (ac *AssetControl) create(ctx context.Context, exec bob.Executor, cmd Creat
 		cmd.Asset.ThumbnailURL = cmd.Image.PublicPath
 	}
 
-	_, err = ac.tags.CreateIfNotExists(ctx, cmd.Asset.Tag)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ac.repo.Create(ctx, exec, cmd.Asset)
+	err = ac.repo.Update(ctx, exec, cmd.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -160,6 +167,7 @@ func (ac *AssetControl) update(ctx context.Context, exec bob.Executor, cmd Updat
 
 	var err error
 	if cmd.Image != nil {
+		cmd.Image.AssetID = cmd.Asset.ID
 		cmd.Image.Name = cmd.Asset.Tag + "_image" + path.Ext(cmd.Image.Name)
 		cmd.Image, err = ac.files.WriteFile(ctx, cmd.Image)
 		if err != nil {

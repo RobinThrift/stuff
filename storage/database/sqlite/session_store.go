@@ -51,9 +51,7 @@ func (s *SQLiteSessionStore) Delete(token string) error {
 }
 
 func (s *SQLiteSessionStore) FindCtx(ctx context.Context, token string) ([]byte, bool, error) {
-	sess, err := database.InTransaction(ctx, s.db, func(ctx context.Context, tx database.Executor) (*models.Session, error) {
-		return models.Sessions.Query(ctx, tx, models.SelectWhere.Sessions.Token.EQ(token)).One()
-	})
+	sess, err := models.Sessions.Query(ctx, s.db, models.SelectWhere.Sessions.Token.EQ(token)).One()
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

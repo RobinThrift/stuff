@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -13,7 +12,8 @@ import (
 	bobsqlite "github.com/stephenafamo/bob/dialect/sqlite"
 	"github.com/stephenafamo/bob/dialect/sqlite/dialect"
 	"github.com/stephenafamo/bob/mods"
-	sqlite "modernc.org/sqlite"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //go:embed migrations/*.sql
@@ -30,12 +30,12 @@ func NewSQLiteDB(config *Config) (*sql.DB, error) {
 
 	journalMode := ""
 	if config.EnableWAL {
-		journalMode = "&_pragma=journal_mode(wal)"
+		journalMode = "&_journal_mode=wal"
 	}
 
-	connStr := fmt.Sprintf("%s?&_pragma=busy_timeout(%d)&_pragma=foreign_keys(1)&_txlock=immediate%s", config.File, config.Timeout.Milliseconds(), journalMode)
+	connStr := fmt.Sprintf("%s?mode=rwc&cache=shared&_busy_timeout=%d&_foreign_keys=1&_txlock=immediate%s", config.File, config.Timeout.Milliseconds(), journalMode)
 
-	return sql.Open("sqlite", connStr)
+	return sql.Open("sqlite3", connStr)
 }
 
 func RunMigrations(ctx context.Context, db *sql.DB) error {
@@ -56,17 +56,6 @@ func RunMigrations(ctx context.Context, db *sql.DB) error {
 
 	slog.InfoContext(ctx, "successfully ran migrations")
 	return nil
-}
-
-func unwapSQLiteError(err error) error {
-	var sqliteErr *sqlite.Error
-	if errors.As(err, &sqliteErr) {
-		if codeStr, ok := sqlite.ErrorCodeString[sqliteErr.Code()]; ok {
-			return fmt.Errorf("%s: %s", codeStr, sqliteErr.Error())
-		}
-	}
-
-	return err
 }
 
 func orderByClause(table string, column string, dir string) mods.OrderBy[*dialect.SelectQuery] {

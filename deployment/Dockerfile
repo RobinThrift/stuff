@@ -1,3 +1,5 @@
+FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
+
 FROM --platform=$BUILDPLATFORM node:20-alpine3.18 as frontend
 
 RUN apk update && apk upgrade && apk add --no-cache just curl
@@ -10,21 +12,26 @@ RUN just build-js build-js build-styles build-icons _fonts
 
 FROM --platform=$BUILDPLATFORM golang:1.21.2-alpine3.18 as builder
 
-RUN apk update && apk upgrade && apk add --no-cache just
+COPY --from=xx / /
+
+RUN apk update && apk upgrade && apk add --no-cache just clang lld
+
+ARG TARGETPLATFORM
+RUN xx-apk add musl-dev gcc
 
 COPY . /stuff
 COPY --from=frontend /stuff/frontend/build /stuff/frontend/build
 
 WORKDIR /stuff
 
-ARG TARGETOS TARGETARCH
 ARG VERSION
+RUN xx-go --wrap
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
-    GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 \
-    GO_LDFLGAS="-s -w" GO_BUILD_FLAGS="-trimpath" \
+    CGO_ENABLED=1 GO_LDFLGAS="-linkmode=external -extldflags=-static -s -w" GO_BUILD_FLAGS="-trimpath" GO_TAGS="linux," \
 	VERSION=$VERSION \
-    just _build-go
+    just _build-go && \
+	xx-verify --static /stuff/build/stuff
 
 # Create a nonroot user to copy
 RUN echo "nobody:*:65534:65534:nobody:/_nonexistent:/bin/false" > /etc/passwd.nonroot

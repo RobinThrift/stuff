@@ -206,6 +206,10 @@ func (rt *Router) assetsNewSubmitHandler(w http.ResponseWriter, r *http.Request,
 		return page.Render(w, r)
 	}
 
+	if img != nil {
+		img.CreatedBy = user.ID
+	}
+
 	page.Asset.MetaInfo.CreatedBy = user.ID
 
 	created, err := rt.assets.Create(r.Context(), control.CreateAssetCmd{Asset: page.Asset, Image: img})
@@ -312,6 +316,10 @@ func (rt *Router) assetsEditSubmitHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		page.ValidationErrs["general"] = err.Error()
 		return page.Render(w, r)
+	}
+
+	if image != nil {
+		image.CreatedBy = user.ID
 	}
 
 	for i := range page.Asset.Parts {

@@ -36,20 +36,20 @@ func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Conte
 		return fmt.Errorf("error beginning transaction: %w", err)
 	}
 
-	_, err = tx.ExecContext(ctx, "PRAGMA defer_foreign_keys = 1")
+	ctx = ctxWithTx(ctx, tx)
+
+	var exec Executor = tx
+	if db.EnableDebugLogging {
+		exec = bob.Debug(tx)
+	}
+
+	_, err = exec.ExecContext(ctx, "PRAGMA defer_foreign_keys = 1")
 	if err != nil {
 		err = fmt.Errorf("error setting foreign key check to deferred: %w", err)
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("error rolling back: %w. original error: %v", rbErr, err)
 		}
 		return err
-	}
-
-	ctx = ctxWithTx(ctx, tx)
-
-	var exec Executor = tx
-	if db.EnableDebugLogging {
-		exec = bob.Debug(tx)
 	}
 
 	if err := fn(ctx, exec); err != nil {
