@@ -75,7 +75,11 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 
 	slog.InfoContext(ctx, "starting stuff service", "version", stuff.Version)
 
-	db, err := sqlite.NewSQLiteDB(config.Database.Path)
+	db, err := sqlite.NewSQLiteDB(&sqlite.SQLiteConfig{
+		File:      config.Database.Path,
+		EnableWAL: config.Database.EnableWAL,
+		Timeout:   config.Database.Timeout,
+	})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -129,7 +133,7 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 	}
 
 	sm := scs.New()
-	sm.Store = sqlite.NewSQLiteSessionStore(database.DB) //nolint:contextcheck // false positive IMO
+	sm.Store = sqlite.NewSQLiteSessionStore(database) //nolint:contextcheck // false positive IMO
 	sm.Lifetime = 24 * time.Hour
 	sm.Cookie.HttpOnly = true
 	sm.Cookie.Persist = true

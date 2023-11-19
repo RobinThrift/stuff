@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/pressly/goose/v3"
 	bobsqlite "github.com/stephenafamo/bob/dialect/sqlite"
@@ -18,9 +19,23 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-func NewSQLiteDB(path string) (*sql.DB, error) {
-	slog.Info("opening SQLite database at " + path)
-	return sql.Open("sqlite", path)
+type SQLiteConfig struct {
+	File      string
+	Timeout   time.Duration
+	EnableWAL bool
+}
+
+func NewSQLiteDB(config *SQLiteConfig) (*sql.DB, error) {
+	slog.Info("opening SQLite database at " + config.File)
+
+	journalMode := ""
+	if config.EnableWAL {
+		journalMode = "&_pragma=journal_mode(wal)"
+	}
+
+	connStr := fmt.Sprintf("%s?&_pragma=busy_timeout(%d)&_pragma=foreign_keys(1)&_pragma=defer_foreign_keys(1)&_txlock=immediate%s", config.File, config.Timeout.Milliseconds(), journalMode)
+
+	return sql.Open("sqlite", connStr)
 }
 
 func RunMigrations(ctx context.Context, db *sql.DB) error {

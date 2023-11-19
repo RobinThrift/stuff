@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -29,7 +30,9 @@ type Config struct {
 }
 
 type Database struct {
-	Path string `json:"path"`
+	Path      string        `json:"path"`
+	Timeout   time.Duration `json:"timeout"`
+	EnableWAL bool          `json:"enableWAL"`
 }
 
 type Auth struct {
@@ -68,7 +71,9 @@ func NewConfigFromEnv() (*Config, error) {
 		UseSecureCookies: getEnvBoolDefault("STUFF_USE_SECURE_COOKIES", true),
 
 		Database: Database{
-			Path: getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),
+			Path:      getEnvDefault("STUFF_DATABASE_PATH", "stuff.db"),
+			EnableWAL: getEnvBoolDefault("STUFF_DATABASE_ENABLE_WAL", false),
+			Timeout:   getEnvDurationDefault("STUFF_DATABASE_TIMEOUT", time.Millisecond*500),
 		},
 
 		FileDir: getEnvDefault("STUFF_FILE_DIR", "files"),
@@ -133,4 +138,18 @@ func getEnvBoolDefault(key string, d bool) bool {
 	}
 
 	return b
+}
+
+func getEnvDurationDefault(key string, d time.Duration) time.Duration {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		return d
+	}
+
+	p, err := time.ParseDuration(v)
+	if err != nil {
+		return d
+	}
+
+	return p
 }
