@@ -16,6 +16,7 @@ import (
 )
 
 var ErrFileNotFound = errors.New("file not found")
+var ErrCreatingFile = errors.New("error creating file")
 
 type FileRepo struct{}
 
@@ -30,7 +31,10 @@ func (fr *FileRepo) Create(ctx context.Context, exec bob.Executor, file *entitie
 		FullPath:   omit.From(file.FullPath),
 		PublicPath: omit.From(file.PublicPath),
 	})
-	return inserted.ID, err
+	if err != nil {
+		return 0, fmt.Errorf("%w: %w", ErrCreatingFile, unwapSQLiteError(err))
+	}
+	return inserted.ID, nil
 }
 
 func (fr *FileRepo) Get(ctx context.Context, exec bob.Executor, id int64) (*entities.File, error) {
