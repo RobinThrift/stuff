@@ -29,7 +29,7 @@ type ListModelsQuery struct {
 }
 
 func (cc *ModelCtrl) List(ctx context.Context, query ListModelsQuery) (*entities.ListPage[*entities.Model], error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Model], error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Model], error) {
 		return cc.repo.List(ctx, tx, database.ListModelsQuery(query))
 	})
 }

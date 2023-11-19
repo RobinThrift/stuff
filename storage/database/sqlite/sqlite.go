@@ -19,13 +19,13 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-type SQLiteConfig struct {
+type Config struct {
 	File      string
 	Timeout   time.Duration
 	EnableWAL bool
 }
 
-func NewSQLiteDB(config *SQLiteConfig) (*sql.DB, error) {
+func NewSQLiteDB(config *Config) (*sql.DB, error) {
 	slog.Info("opening SQLite database at " + config.File)
 
 	journalMode := ""
@@ -33,7 +33,7 @@ func NewSQLiteDB(config *SQLiteConfig) (*sql.DB, error) {
 		journalMode = "&_pragma=journal_mode(wal)"
 	}
 
-	connStr := fmt.Sprintf("%s?&_pragma=busy_timeout(%d)&_pragma=foreign_keys(1)&_pragma=defer_foreign_keys(1)&_txlock=immediate%s", config.File, config.Timeout.Milliseconds(), journalMode)
+	connStr := fmt.Sprintf("%s?&_pragma=busy_timeout(%d)&_pragma=foreign_keys(1)&_txlock=immediate%s", config.File, config.Timeout.Milliseconds(), journalMode)
 
 	return sql.Open("sqlite", connStr)
 }
@@ -58,14 +58,15 @@ func RunMigrations(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func wrapSqliteErr(err error) error {
+func unwapSQLiteError(err error) error {
 	var sqliteErr *sqlite.Error
 	if errors.As(err, &sqliteErr) {
-		return fmt.Errorf("%s: %s", sqlite.ErrorCodeString[sqliteErr.Code()], sqliteErr.Error())
+		if codeStr, ok := sqlite.ErrorCodeString[sqliteErr.Code()]; ok {
+			return fmt.Errorf("%s: %s", codeStr, sqliteErr.Error())
+		}
 	}
 
 	return err
-
 }
 
 func orderByClause(table string, column string, dir string) mods.OrderBy[*dialect.SelectQuery] {

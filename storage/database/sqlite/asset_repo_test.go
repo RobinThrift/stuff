@@ -74,7 +74,7 @@ func TestAssetRepo_CRUD(t *testing.T) {
 }
 
 func newTestAssetRepo(t *testing.T) (*AssetRepo, bob.Executor) {
-	db, err := NewSQLiteDB(":memory:")
+	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,6 +87,11 @@ func newTestAssetRepo(t *testing.T) (*AssetRepo, bob.Executor) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	_, err = db.ExecContext(ctx, "PRAGMA foreign_keys = 0")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = RunMigrations(ctx, db)
 	if err != nil {

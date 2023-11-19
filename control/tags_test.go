@@ -3,6 +3,7 @@ package control
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/RobinThrift/stuff/storage/database"
 	"github.com/RobinThrift/stuff/storage/database/sqlite"
@@ -111,7 +112,7 @@ func TestTagControl_CRUD(t *testing.T) {
 }
 
 func newTestTagControl(t *testing.T, algorithm string) *TagControl {
-	db, err := sqlite.NewSQLiteDB(":memory:")
+	db, err := sqlite.NewSQLiteDB(&sqlite.Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}

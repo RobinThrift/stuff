@@ -75,7 +75,7 @@ func setup(ctx context.Context) (func(context.Context) error, func(context.Conte
 
 	slog.InfoContext(ctx, "starting stuff service", "version", stuff.Version)
 
-	db, err := sqlite.NewSQLiteDB(&sqlite.SQLiteConfig{
+	db, err := sqlite.NewSQLiteDB(&sqlite.Config{
 		File:      config.Database.Path,
 		EnableWAL: config.Database.EnableWAL,
 		Timeout:   config.Database.Timeout,

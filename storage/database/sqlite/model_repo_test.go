@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/storage/database"
@@ -51,7 +52,7 @@ func TestModelRepoList(t *testing.T) {
 }
 
 func newTestModelRepo(t *testing.T) (*ModelRepo, bob.Executor) {
-	db, err := NewSQLiteDB(":memory:")
+	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +65,11 @@ func newTestModelRepo(t *testing.T) (*ModelRepo, bob.Executor) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	_, err = db.ExecContext(ctx, "PRAGMA foreign_keys = 0")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = RunMigrations(ctx, db)
 	if err != nil {

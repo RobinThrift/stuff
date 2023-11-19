@@ -28,7 +28,7 @@ type ListCustomAttrsQuery struct {
 }
 
 func (cac *CustomAttrCtrl) List(ctx context.Context, query ListCustomAttrsQuery) (*entities.ListPage[*entities.CustomAttr], error) {
-	return database.InTransaction(ctx, cac.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.CustomAttr], error) {
+	return database.InTransaction(ctx, cac.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.CustomAttr], error) {
 		return cac.repo.List(ctx, tx, database.ListCustomAttrsQuery{
 			Search:   query.Search,
 			Page:     query.Page,

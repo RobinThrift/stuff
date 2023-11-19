@@ -71,7 +71,7 @@ type AssetsStmt = bob.QueryStmt[*Asset, AssetSlice]
 // assetR is where relationships are stored.
 type assetR struct {
 	AssetFiles          AssetFileSlice     // fk_asset_files_1
-	AssetParts          AssetPartSlice     // fk_asset_parts_2
+	AssetParts          AssetPartSlice     // fk_asset_parts_1
 	AssetPurchases      AssetPurchaseSlice // fk_asset_purchases_1
 	CreatedByUser       *User              // fk_assets_0
 	CheckedOutToUser    *User              // fk_assets_1

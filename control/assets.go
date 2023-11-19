@@ -48,7 +48,7 @@ type GetAssetQuery struct {
 }
 
 func (ac *AssetControl) Get(ctx context.Context, query GetAssetQuery) (*entities.Asset, error) {
-	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx bob.Tx) (*entities.Asset, error) {
+	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx database.Executor) (*entities.Asset, error) {
 		asset, err := ac.repo.Get(ctx, tx, database.GetAssetQuery{
 			ID:               query.ID,
 			Tag:              query.Tag,
@@ -87,7 +87,7 @@ type ListAssetsQuery struct {
 }
 
 func (ac *AssetControl) List(ctx context.Context, query ListAssetsQuery) (*entities.ListPage[*entities.Asset], error) {
-	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Asset], error) {
+	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Asset], error) {
 		return ac.repo.List(ctx, tx, database.ListAssetsQuery{
 			SearchRaw:    query.SearchRaw,
 			SearchFields: query.SearchFields,
@@ -112,7 +112,7 @@ func (ac *AssetControl) Create(ctx context.Context, cmd CreateAssetCmd) (*entiti
 		return nil, ErrAssetMissingTag
 	}
 
-	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx bob.Tx) (*entities.Asset, error) {
+	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx database.Executor) (*entities.Asset, error) {
 		return ac.create(ctx, tx, cmd)
 	})
 }
@@ -149,7 +149,7 @@ type UpdateAssetCmd struct {
 }
 
 func (ac *AssetControl) Update(ctx context.Context, cmd UpdateAssetCmd) (*entities.Asset, error) {
-	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx bob.Tx) (*entities.Asset, error) {
+	return database.InTransaction(ctx, ac.db, func(ctx context.Context, tx database.Executor) (*entities.Asset, error) {
 		return ac.update(ctx, tx, cmd)
 	})
 }
@@ -193,7 +193,7 @@ func (ac *AssetControl) update(ctx context.Context, exec bob.Executor, cmd Updat
 }
 
 func (ac *AssetControl) Delete(ctx context.Context, asset *entities.Asset) error {
-	return ac.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return ac.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return ac.delete(ctx, tx, asset)
 	})
 }

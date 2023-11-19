@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/storage/database"
@@ -98,7 +99,7 @@ func newTestFile(t *testing.T, i int, assetID int64) *entities.File {
 }
 
 func newTestFileRepo(t *testing.T) (*FileRepo, bob.Executor) {
-	db, err := NewSQLiteDB(":memory:")
+	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,6 +112,11 @@ func newTestFileRepo(t *testing.T) (*FileRepo, bob.Executor) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	_, err = db.ExecContext(ctx, "PRAGMA foreign_keys = 0")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = RunMigrations(ctx, db)
 	if err != nil {

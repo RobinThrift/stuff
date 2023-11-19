@@ -56,8 +56,7 @@ type AssetPartsStmt = bob.QueryStmt[*AssetPart, AssetPartSlice]
 // assetPartR is where relationships are stored.
 type assetPartR struct {
 	CreatedByUser *User  // fk_asset_parts_0
-	Tag           *Tag   // fk_asset_parts_1
-	Asset         *Asset // fk_asset_parts_2
+	Asset         *Asset // fk_asset_parts_1
 }
 
 // AssetPartSetter is used for insert/upsert/update operations
@@ -247,14 +246,12 @@ type assetPartColumnNames struct {
 
 type assetPartRelationshipJoins[Q dialect.Joinable] struct {
 	CreatedByUser bob.Mod[Q]
-	Tag           bob.Mod[Q]
 	Asset         bob.Mod[Q]
 }
 
 func buildassetPartRelationshipJoins[Q dialect.Joinable](ctx context.Context, typ string) assetPartRelationshipJoins[Q] {
 	return assetPartRelationshipJoins[Q]{
 		CreatedByUser: assetPartsJoinCreatedByUser[Q](ctx, typ),
-		Tag:           assetPartsJoinTag[Q](ctx, typ),
 		Asset:         assetPartsJoinAsset[Q](ctx, typ),
 	}
 }
@@ -421,13 +418,6 @@ func assetPartsJoinCreatedByUser[Q dialect.Joinable](ctx context.Context, typ st
 		),
 	}
 }
-func assetPartsJoinTag[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
-	return mods.QueryMods[Q]{
-		dialect.Join[Q](typ, Tags.Name(ctx)).On(
-			TagColumns.Tag.EQ(AssetPartColumns.Tag),
-		),
-	}
-}
 func assetPartsJoinAsset[Q dialect.Joinable](ctx context.Context, typ string) bob.Mod[Q] {
 	return mods.QueryMods[Q]{
 		dialect.Join[Q](typ, Assets.Name(ctx)).On(
@@ -451,24 +441,6 @@ func (os AssetPartSlice) CreatedByUser(ctx context.Context, exec bob.Executor, m
 
 	return Users.Query(ctx, exec, append(mods,
 		sm.Where(sqlite.Group(UserColumns.ID).In(PKArgs...)),
-	)...)
-}
-
-// Tag starts a query for related objects on tags
-func (o *AssetPart) RelatedTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
-	return Tags.Query(ctx, exec, append(mods,
-		sm.Where(TagColumns.Tag.EQ(sqlite.Arg(o.Tag))),
-	)...)
-}
-
-func (os AssetPartSlice) RelatedTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) TagsQuery {
-	PKArgs := make([]bob.Expression, len(os))
-	for i, o := range os {
-		PKArgs[i] = sqlite.ArgGroup(o.Tag)
-	}
-
-	return Tags.Query(ctx, exec, append(mods,
-		sm.Where(sqlite.Group(TagColumns.Tag).In(PKArgs...)),
 	)...)
 }
 
@@ -503,15 +475,6 @@ func (o *AssetPart) Preload(name string, retrieved any) error {
 		}
 
 		o.R.CreatedByUser = rel
-
-		return nil
-	case "Tag":
-		rel, ok := retrieved.(*Tag)
-		if !ok {
-			return fmt.Errorf("assetPart cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.Tag = rel
 
 		return nil
 	case "Asset":
@@ -605,90 +568,6 @@ func (os AssetPartSlice) LoadAssetPartCreatedByUser(ctx context.Context, exec bo
 			}
 
 			o.R.CreatedByUser = rel
-			break
-		}
-	}
-
-	return nil
-}
-
-func PreloadAssetPartTag(opts ...sqlite.PreloadOption) sqlite.Preloader {
-	return sqlite.Preload[*Tag, TagSlice](orm.Relationship{
-		Name: "Tag",
-		Sides: []orm.RelSide{
-			{
-				From: "asset_parts",
-				To:   TableNames.Tags,
-				ToExpr: func(ctx context.Context) bob.Expression {
-					return Tags.Name(ctx)
-				},
-				FromColumns: []string{
-					ColumnNames.AssetParts.Tag,
-				},
-				ToColumns: []string{
-					ColumnNames.Tags.Tag,
-				},
-			},
-		},
-	}, Tags.Columns().Names(), opts...)
-}
-
-func ThenLoadAssetPartTag(queryMods ...bob.Mod[*dialect.SelectQuery]) sqlite.Loader {
-	return sqlite.Loader(func(ctx context.Context, exec bob.Executor, retrieved any) error {
-		loader, isLoader := retrieved.(interface {
-			LoadAssetPartTag(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-		})
-		if !isLoader {
-			return fmt.Errorf("object %T cannot load AssetPartTag", retrieved)
-		}
-
-		err := loader.LoadAssetPartTag(ctx, exec, queryMods...)
-
-		// Don't cause an issue due to missing relationships
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil
-		}
-
-		return err
-	})
-}
-
-// LoadAssetPartTag loads the assetPart's Tag into the .R struct
-func (o *AssetPart) LoadAssetPartTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.Tag = nil
-
-	related, err := o.RelatedTag(ctx, exec, mods...).One()
-	if err != nil {
-		return err
-	}
-
-	o.R.Tag = related
-	return nil
-}
-
-// LoadAssetPartTag loads the assetPart's Tag into the .R struct
-func (os AssetPartSlice) LoadAssetPartTag(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	tags, err := os.RelatedTag(ctx, exec, mods...).All()
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		for _, rel := range tags {
-			if o.Tag != rel.Tag {
-				continue
-			}
-
-			o.R.Tag = rel
 			break
 		}
 	}
@@ -818,48 +697,6 @@ func (assetPart0 *AssetPart) AttachCreatedByUser(ctx context.Context, exec bob.E
 	}
 
 	assetPart0.R.CreatedByUser = user1
-
-	return nil
-}
-
-func attachAssetPartTag0(ctx context.Context, exec bob.Executor, assetPart0 *AssetPart, tag1 *Tag) error {
-	setter := &AssetPartSetter{
-		Tag: omit.From(tag1.Tag),
-	}
-
-	err := AssetParts.Update(ctx, exec, setter, assetPart0)
-	if err != nil {
-		return fmt.Errorf("attachAssetPartTag0: %w", err)
-	}
-
-	return nil
-}
-
-func (assetPart0 *AssetPart) InsertTag(ctx context.Context, exec bob.Executor, related *TagSetter) error {
-	tag1, err := Tags.Insert(ctx, exec, related)
-	if err != nil {
-		return fmt.Errorf("inserting related objects: %w", err)
-	}
-
-	err = attachAssetPartTag0(ctx, exec, assetPart0, tag1)
-	if err != nil {
-		return err
-	}
-
-	assetPart0.R.Tag = tag1
-
-	return nil
-}
-
-func (assetPart0 *AssetPart) AttachTag(ctx context.Context, exec bob.Executor, tag1 *Tag) error {
-	var err error
-
-	err = attachAssetPartTag0(ctx, exec, assetPart0, tag1)
-	if err != nil {
-		return err
-	}
-
-	assetPart0.R.Tag = tag1
 
 	return nil
 }

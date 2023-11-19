@@ -7,7 +7,6 @@ import (
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/control"
 	"github.com/RobinThrift/stuff/storage/database"
-	"github.com/stephenafamo/bob"
 )
 
 type InitJob struct {
@@ -27,7 +26,7 @@ func NewInitJob(config InitJobConfig, db *database.Database, auth *control.AuthC
 }
 
 func (ij *InitJob) Run(ctx context.Context) error {
-	return ij.db.InTransaction(ctx, func(ctx context.Context, _ bob.Tx) error {
+	return ij.db.InTransaction(ctx, func(ctx context.Context, _ database.Executor) error {
 		user, err := ij.users.GetByUsername(ctx, ij.config.Username)
 		if err != nil {
 			if !errors.Is(err, control.ErrUserNotFound) {

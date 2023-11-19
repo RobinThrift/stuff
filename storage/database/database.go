@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/stephenafamo/bob"
+	"github.com/stephenafamo/scan"
 )
 
 const OrderASC = "ASC"
@@ -12,11 +14,21 @@ const OrderDESC = "DESC"
 
 type Database struct {
 	bob.DB
+	EnableDebugLogging bool
 }
 
-func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Context, tx bob.Tx) error) error {
+type Executor interface {
+	scan.Queryer
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}
+
+func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Context, tx Executor) error) error {
 	if tx, ok := txFromCtx(ctx); ok {
-		return fn(ctx, tx)
+		var exec Executor = tx
+		if db.EnableDebugLogging {
+			exec = bob.Debug(tx)
+		}
+		return fn(ctx, exec)
 	}
 
 	tx, err := db.BeginTx(ctx, nil)
@@ -24,9 +36,23 @@ func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Conte
 		return fmt.Errorf("error beginning transaction: %w", err)
 	}
 
+	_, err = tx.ExecContext(ctx, "PRAGMA defer_foreign_keys = 1")
+	if err != nil {
+		err = fmt.Errorf("error setting foreign key check to deferred: %w", err)
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("error rolling back: %w. original error: %v", rbErr, err)
+		}
+		return err
+	}
+
 	ctx = ctxWithTx(ctx, tx)
 
-	if err := fn(ctx, tx); err != nil {
+	var exec Executor = tx
+	if db.EnableDebugLogging {
+		exec = bob.Debug(tx)
+	}
+
+	if err := fn(ctx, exec); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("error rolling back: %w. original error: %v", rbErr, err)
 		}
@@ -40,9 +66,9 @@ func (db *Database) InTransaction(ctx context.Context, fn func(ctx context.Conte
 	return nil
 }
 
-func InTransaction[R any](ctx context.Context, db *Database, fn func(ctx context.Context, tx bob.Tx) (R, error)) (R, error) {
+func InTransaction[R any](ctx context.Context, db *Database, fn func(ctx context.Context, tx Executor) (R, error)) (R, error) {
 	var result R
-	err := db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	err := db.InTransaction(ctx, func(ctx context.Context, tx Executor) error {
 		r, err := fn(ctx, tx)
 		if err != nil {
 			return err

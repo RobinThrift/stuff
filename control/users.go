@@ -37,7 +37,7 @@ func NewUserCtrl(db *database.Database, repo UserRepo) *UserControl {
 }
 
 func (cc *UserControl) Get(ctx context.Context, id int64) (*auth.User, error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*auth.User, error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*auth.User, error) {
 		user, err := cc.repo.Get(ctx, tx, id)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrUserNotFound) {
@@ -51,7 +51,7 @@ func (cc *UserControl) Get(ctx context.Context, id int64) (*auth.User, error) {
 }
 
 func (cc *UserControl) GetByUsername(ctx context.Context, username string) (*auth.User, error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*auth.User, error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*auth.User, error) {
 		user, err := cc.repo.GetByUsername(ctx, tx, username)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrUserNotFound) {
@@ -65,7 +65,7 @@ func (cc *UserControl) GetByUsername(ctx context.Context, username string) (*aut
 }
 
 func (cc *UserControl) GetByRef(ctx context.Context, ref string) (*auth.User, error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*auth.User, error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*auth.User, error) {
 		user, err := cc.repo.GetByRef(ctx, tx, ref)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrUserNotFound) {
@@ -87,37 +87,37 @@ type ListUsersQuery struct {
 }
 
 func (cc *UserControl) List(ctx context.Context, query ListUsersQuery) (*entities.ListPage[*auth.User], error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*auth.User], error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*auth.User], error) {
 		return cc.repo.List(ctx, tx, database.ListUsersQuery(query))
 	})
 }
 
 func (cc *UserControl) Create(ctx context.Context, user *auth.User) error {
-	return cc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return cc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return cc.repo.Create(ctx, tx, user)
 	})
 }
 
 func (cc *UserControl) Update(ctx context.Context, user *auth.User) error {
-	return cc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return cc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return cc.repo.Update(ctx, tx, user)
 	})
 }
 
 func (cc *UserControl) Delete(ctx context.Context, id int64) error {
-	return cc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return cc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return cc.repo.Delete(ctx, tx, id)
 	})
 }
 
 func (cc *UserControl) CountAdmins(ctx context.Context) (int64, error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (int64, error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (int64, error) {
 		return cc.repo.CountAdmins(ctx, tx)
 	})
 }
 
 func (cc *UserControl) SetUserPreferences(ctx context.Context, user *auth.User) error {
-	return cc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return cc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return cc.repo.UpsertPreferences(ctx, tx, user)
 	})
 }

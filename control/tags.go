@@ -50,13 +50,13 @@ type ListTagsQuery struct {
 }
 
 func (tc *TagControl) List(ctx context.Context, query ListTagsQuery) (*entities.ListPage[*entities.Tag], error) {
-	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Tag], error) {
+	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Tag], error) {
 		return tc.repo.List(ctx, tx, database.ListTagsQuery(query))
 	})
 }
 
 func (tc *TagControl) GetNext(ctx context.Context) (string, error) {
-	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx bob.Tx) (string, error) {
+	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx database.Executor) (string, error) {
 		unused, err := tc.repo.GetUnused(ctx, tx)
 		if err != nil {
 			return "", err
@@ -82,7 +82,7 @@ func (tc *TagControl) GetNext(ctx context.Context) (string, error) {
 }
 
 func (tc *TagControl) Get(ctx context.Context, tag string) (*entities.Tag, error) {
-	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx bob.Tx) (*entities.Tag, error) {
+	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx database.Executor) (*entities.Tag, error) {
 		tag, err := tc.repo.Get(ctx, tx, tag)
 		if err != nil {
 			if !errors.Is(err, entities.ErrTagNotFound) {
@@ -99,7 +99,7 @@ func (tc *TagControl) CreateIfNotExists(ctx context.Context, tag string) (*entit
 		return nil, fmt.Errorf("%w: '%s'", ErrInvalidTag, tag)
 	}
 
-	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx bob.Tx) (*entities.Tag, error) {
+	return database.InTransaction(ctx, tc.db, func(ctx context.Context, tx database.Executor) (*entities.Tag, error) {
 		found, err := tc.repo.Get(ctx, tx, tag)
 		if err != nil {
 			if !errors.Is(err, entities.ErrTagNotFound) {
@@ -143,19 +143,19 @@ func (tc *TagControl) CreateIfNotExists(ctx context.Context, tag string) (*entit
 }
 
 func (tc *TagControl) MarkTagUnused(ctx context.Context, tag string) error {
-	return tc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return tc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return tc.repo.MarkTagUnused(ctx, tx, tag)
 	})
 }
 
 func (tc *TagControl) Delete(ctx context.Context, tag string) error {
-	return tc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return tc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return tc.repo.Delete(ctx, tx, tag)
 	})
 }
 
 func (tc *TagControl) generateSequential(ctx context.Context) (string, error) {
-	next, err := database.InTransaction(ctx, tc.db, func(ctx context.Context, tx bob.Tx) (int64, error) {
+	next, err := database.InTransaction(ctx, tc.db, func(ctx context.Context, tx database.Executor) (int64, error) {
 		return tc.repo.NextSequential(ctx, tx)
 	})
 	if err != nil {

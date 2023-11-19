@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/stephenafamo/bob"
@@ -74,7 +75,7 @@ func TestUserRepo_UpsertPreferences(t *testing.T) {
 }
 
 func newTestUserRepo(t *testing.T) (*UserRepo, bob.Executor) {
-	db, err := NewSQLiteDB(":memory:")
+	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -29,7 +29,7 @@ type ListSuppliersQuery struct {
 }
 
 func (cc *SupplierCtrl) List(ctx context.Context, query ListSuppliersQuery) (*entities.ListPage[*entities.Supplier], error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Supplier], error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Supplier], error) {
 		return cc.repo.List(ctx, tx, database.ListSuppliersQuery(query))
 	})
 }

@@ -1,10 +1,13 @@
 package htmlui
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
+	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/control"
+	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/RobinThrift/stuff/views/pages"
 )
 
@@ -16,6 +19,11 @@ func (rt *Router) importAssetsHandler(w http.ResponseWriter, r *http.Request, pa
 
 // [POST] /assets/import
 func (rt *Router) importAssetsSubmitHandler(w http.ResponseWriter, r *http.Request, params struct{}) error {
+	user, ok := session.Get[*auth.User](r.Context(), "user")
+	if !ok {
+		return errors.New("can't find user in session")
+	}
+
 	page := pages.ImportPage{ValidationErrs: map[string]string{}}
 
 	err := r.ParseMultipartForm(defaultMaxMemory)
@@ -29,6 +37,7 @@ func (rt *Router) importAssetsSubmitHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	page.ValidationErrs, err = rt.importer.Import(r, control.ImportCmd{
+		ImportUserID:     user.ID,
 		IgnoreDuplicates: page.IgnoreDuplicates,
 		Format:           page.Format,
 		SnipeITURL:       page.SnipeITURL,

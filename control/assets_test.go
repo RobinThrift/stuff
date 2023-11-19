@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/storage/blobs"
 	"github.com/RobinThrift/stuff/storage/database"
@@ -203,7 +204,7 @@ func randTime() time.Time {
 }
 
 func newTestAssetControl(t *testing.T) *AssetControl {
-	db, err := sqlite.NewSQLiteDB(":memory:")
+	db, err := sqlite.NewSQLiteDB(&sqlite.Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,6 +224,13 @@ func newTestAssetControl(t *testing.T) *AssetControl {
 	}
 
 	database := &database.Database{DB: bob.NewDB(db)}
+
+	userRepo := sqlite.UserRepo{}
+	err = userRepo.Create(ctx, database.DB, &auth.User{Username: "asset_test_user"})
+	err = sqlite.RunMigrations(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	return NewAssetControl(
 		database,

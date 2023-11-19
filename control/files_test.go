@@ -9,13 +9,16 @@ import (
 	"math/rand"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/storage/blobs"
 	"github.com/RobinThrift/stuff/storage/database"
 	"github.com/RobinThrift/stuff/storage/database/sqlite"
 	"github.com/stephenafamo/bob"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFileControl_CRUD(t *testing.T) {
@@ -25,38 +28,38 @@ func TestFileControl_CRUD(t *testing.T) {
 	fileCtrl := newTestFileControl(t)
 
 	for i := 0; i < 5; i++ {
-		f := newTestFile(t, i, 10)
+		f := newTestFile(t, i, 1)
 		_, err := fileCtrl.WriteFile(ctx, f)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		fileExitsts(t, f.FullPath)
 	}
 
 	for i := 5; i < 10; i++ {
-		f := newTestFile(t, i, 20)
+		f := newTestFile(t, i, 2)
 		_, err := fileCtrl.WriteFile(ctx, f)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		fileExitsts(t, f.FullPath)
 	}
 
-	list, err := fileCtrl.List(ctx, ListFilesQuery{AssetID: 10})
+	list, err := fileCtrl.List(ctx, ListFilesQuery{AssetID: 1})
 	assert.NoError(t, err)
 	assert.Len(t, list.Items, 5)
 
-	err = fileCtrl.DeleteAllForAsset(ctx, 10)
+	err = fileCtrl.DeleteAllForAsset(ctx, 1)
 	assert.NoError(t, err)
 
 	list, err = fileCtrl.List(ctx, ListFilesQuery{})
 	assert.NoError(t, err)
 	assert.Len(t, list.Items, 5)
 	for _, f := range list.Items {
-		assert.NotEqual(t, 10, f.AssetID)
+		assert.NotEqual(t, 1, f.AssetID)
 	}
 
-	fileWithDuplicateHash := newTestFile(t, 9, 10)
+	fileWithDuplicateHash := newTestFile(t, 9, 1)
 	_, err = fileCtrl.WriteFile(ctx, fileWithDuplicateHash)
 	assert.NoError(t, err)
 
-	err = fileCtrl.DeleteAllForAsset(ctx, 20)
+	err = fileCtrl.DeleteAllForAsset(ctx, 2)
 	assert.NoError(t, err)
 
 	list, err = fileCtrl.List(ctx, ListFilesQuery{})
@@ -88,7 +91,7 @@ func randFrom[T any](items []T) T {
 }
 
 func newTestFileControl(t *testing.T) *FileControl {
-	db, err := sqlite.NewSQLiteDB(":memory:")
+	db, err := sqlite.NewSQLiteDB(&sqlite.Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,6 +112,33 @@ func newTestFileControl(t *testing.T) *FileControl {
 
 	database := &database.Database{DB: bob.NewDB(db)}
 
+	userRepo := sqlite.UserRepo{}
+	err = userRepo.Create(ctx, database.DB, &auth.User{Username: "file_ctrl_test_user"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tags := []string{"file_ctrl_asset_test_tag_1", "file_ctrl_asset_test_tag_2"}
+	tagRepo := sqlite.TagRepo{}
+	assetRepo := sqlite.AssetRepo{}
+	for _, tag := range tags {
+		err = tagRepo.Create(ctx, database.DB, &entities.Tag{Tag: tag})
+		err = sqlite.RunMigrations(ctx, db)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = assetRepo.Create(ctx, database.DB, &entities.Asset{
+			Tag: tag, Name: "file_ctrl_test_asset",
+			Status:   entities.StatusInUse,
+			Type:     entities.AssetTypeAsset,
+			MetaInfo: entities.MetaInfo{CreatedBy: 1},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	return NewFileControl(
 		database,
 		&sqlite.FileRepo{},
@@ -120,6 +150,7 @@ func newTestFileControl(t *testing.T) *FileControl {
 }
 
 func fileExitsts(t *testing.T, path string) {
+	t.Helper()
 	_, err := os.Stat(path)
 	if err != nil {
 		t.Error(err)
@@ -127,6 +158,7 @@ func fileExitsts(t *testing.T, path string) {
 }
 
 func fileNotExitsts(t *testing.T, path string) {
+	t.Helper()
 	_, err := os.Stat(path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {

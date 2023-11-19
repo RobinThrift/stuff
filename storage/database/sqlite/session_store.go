@@ -13,7 +13,6 @@ import (
 	"github.com/RobinThrift/stuff/storage/database/sqlite/types"
 	"github.com/aarondl/opt/omit"
 	"github.com/alexedwards/scs/v2"
-	"github.com/stephenafamo/bob"
 )
 
 const cleanupInterval = time.Minute * 30
@@ -52,7 +51,7 @@ func (s *SQLiteSessionStore) Delete(token string) error {
 }
 
 func (s *SQLiteSessionStore) FindCtx(ctx context.Context, token string) ([]byte, bool, error) {
-	sess, err := database.InTransaction(ctx, s.db, func(ctx context.Context, tx bob.Tx) (*models.Session, error) {
+	sess, err := database.InTransaction(ctx, s.db, func(ctx context.Context, tx database.Executor) (*models.Session, error) {
 		return models.Sessions.Query(ctx, tx, models.SelectWhere.Sessions.Token.EQ(token)).One()
 	})
 
@@ -69,7 +68,7 @@ func (s *SQLiteSessionStore) FindCtx(ctx context.Context, token string) ([]byte,
 }
 
 func (s *SQLiteSessionStore) CommitCtx(ctx context.Context, token string, b []byte, expiry time.Time) error {
-	err := s.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	err := s.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		_, err := models.Sessions.Upsert(ctx, tx, true,
 			[]string{"token"},
 			[]string{"data", "expires_at"},
@@ -91,7 +90,7 @@ func (s *SQLiteSessionStore) CommitCtx(ctx context.Context, token string, b []by
 }
 
 func (s *SQLiteSessionStore) DeleteCtx(ctx context.Context, token string) error {
-	err := s.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	err := s.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		_, err := models.Sessions.DeleteQ(ctx, tx, models.DeleteWhere.Sessions.Token.EQ(token)).All()
 		return err
 	})
@@ -105,7 +104,7 @@ func (s *SQLiteSessionStore) DeleteCtx(ctx context.Context, token string) error 
 }
 
 func (s *SQLiteSessionStore) deleteExpired(ctx context.Context) error {
-	return s.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return s.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		_, err := models.Sessions.DeleteQ(ctx, tx, models.DeleteWhere.Sessions.ExpiresAt.LT(types.NewSQLiteDatetime(time.Now()))).All()
 		return err
 	})

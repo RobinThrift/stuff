@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/storage/database"
@@ -77,7 +78,7 @@ func TestTagRepo_NextSequential(t *testing.T) {
 }
 
 func newTestTagRepo(t *testing.T) (*TagRepo, bob.Executor) {
-	db, err := NewSQLiteDB(":memory:")
+	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
 		t.Fatal(err)
 	}

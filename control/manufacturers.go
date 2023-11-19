@@ -29,7 +29,7 @@ type ListManufacturersQuery struct {
 }
 
 func (cc *ManufactuerCtrl) List(ctx context.Context, query ListManufacturersQuery) (*entities.ListPage[*entities.Manufacturer], error) {
-	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Manufacturer], error) {
+	return database.InTransaction(ctx, cc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Manufacturer], error) {
 		return cc.repo.List(ctx, tx, database.ListManufacturersQuery{
 			Search:   query.Search,
 			Page:     query.Page,

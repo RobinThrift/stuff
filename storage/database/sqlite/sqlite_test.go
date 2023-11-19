@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +15,7 @@ func TestRunMigrations(t *testing.T) {
 
 	file := path.Join(t.TempDir(), t.Name()+".db")
 
-	db, err := NewSQLiteDB(file)
+	db, err := NewSQLiteDB(&Config{File: file, Timeout: time.Millisecond * 500})
 	assert.NoError(t, err)
 
 	err = RunMigrations(ctx, db)

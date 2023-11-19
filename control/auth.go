@@ -56,7 +56,7 @@ func (ac *AuthController) GetUserForCredentials(ctx context.Context, query GetUs
 		return nil, validationErrs, nil
 	}
 
-	user, err := database.InTransaction(ctx, ac.db, func(ctx context.Context, tx bob.Tx) (*auth.User, error) {
+	user, err := database.InTransaction(ctx, ac.db, func(ctx context.Context, tx database.Executor) (*auth.User, error) {
 		localUser, err := ac.localAuth.Get(ctx, tx, query.Username)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrLocalAuthUserNotFound) {
@@ -109,7 +109,7 @@ type CreateUserCmd struct {
 }
 
 func (ac *AuthController) CreateUser(ctx context.Context, cmd CreateUserCmd) error {
-	return ac.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return ac.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		if cmd.PlaintextPasswd == "" {
 			return errors.New("initial password cannot be empty")
 		}
@@ -221,7 +221,7 @@ func (ac *AuthController) ChangeUserCredentials(ctx context.Context, cmd ChangeU
 }
 
 func (ac *AuthController) ToggleAdmin(ctx context.Context, id int64) error {
-	return ac.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return ac.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		user, err := ac.users.Get(ctx, id)
 		if err != nil {
 			return err
@@ -257,7 +257,7 @@ func (ac *AuthController) ResetPassword(ctx context.Context, cmd ResetPasswordCm
 		return ErrPasswordEmpty
 	}
 
-	return ac.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return ac.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		user, err := ac.users.Get(ctx, cmd.UserID)
 		if err != nil {
 			return err
@@ -296,7 +296,7 @@ func (ac *AuthController) ResetPassword(ctx context.Context, cmd ResetPasswordCm
 }
 
 func (ac *AuthController) DeleteUser(ctx context.Context, userID int64) error {
-	return ac.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return ac.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		user, err := ac.users.Get(ctx, userID)
 		if err != nil {
 			return err

@@ -30,7 +30,7 @@ type ListLocationsQuery struct {
 }
 
 func (lc *LocationControl) ListLocations(ctx context.Context, query ListLocationsQuery) (*entities.ListPage[*entities.Location], error) {
-	return database.InTransaction(ctx, lc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.Location], error) {
+	return database.InTransaction(ctx, lc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.Location], error) {
 		return lc.locations.ListLocations(ctx, tx, database.ListLocationsQuery(query))
 	})
 }
@@ -42,7 +42,7 @@ type ListPositionCodesQuery struct {
 }
 
 func (lc *LocationControl) ListPositionCodes(ctx context.Context, query ListPositionCodesQuery) (*entities.ListPage[*entities.PositionCode], error) {
-	return database.InTransaction(ctx, lc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.PositionCode], error) {
+	return database.InTransaction(ctx, lc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.PositionCode], error) {
 		return lc.locations.ListPositionCodes(ctx, tx, database.ListPositionCodesQuery(query))
 	})
 }

@@ -15,7 +15,6 @@ import (
 	"github.com/RobinThrift/stuff/entities"
 	"github.com/RobinThrift/stuff/internal/importer"
 	"github.com/RobinThrift/stuff/storage/database"
-	"github.com/stephenafamo/bob"
 )
 
 type ImporterCtrl struct {
@@ -34,6 +33,7 @@ func NewImporterCtrl(config ImporterCtrlConfig, db *database.Database, assets *A
 }
 
 type ImportCmd struct {
+	ImportUserID     int64
 	IgnoreDuplicates bool
 	Format           string
 	SnipeITURL       string
@@ -60,8 +60,8 @@ func (ic *ImporterCtrl) Import(r *http.Request, cmd ImportCmd) (map[string]strin
 		return validationErrs, err
 	}
 
-	err = ic.db.InTransaction(r.Context(), func(ctx context.Context, tx bob.Tx) error {
-		return ic.createAssets(ctx, assets, cmd.IgnoreDuplicates)
+	err = ic.db.InTransaction(r.Context(), func(ctx context.Context, tx database.Executor) error {
+		return ic.createAssets(ctx, assets, cmd)
 	})
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (ic *ImporterCtrl) Import(r *http.Request, cmd ImportCmd) (map[string]strin
 	return validationErrs, nil
 }
 
-func (ic *ImporterCtrl) createAssets(ctx context.Context, assets []*entities.Asset, ignoreDuplicates bool) error {
+func (ic *ImporterCtrl) createAssets(ctx context.Context, assets []*entities.Asset, cmd ImportCmd) error {
 	for i := range assets {
 		tag, err := ic.tags.Get(ctx, assets[i].Tag)
 		if err != nil {
@@ -79,11 +79,11 @@ func (ic *ImporterCtrl) createAssets(ctx context.Context, assets []*entities.Ass
 			}
 		}
 
-		if tag != nil && tag.InUse && !ignoreDuplicates {
+		if tag != nil && tag.InUse && !cmd.IgnoreDuplicates {
 			return fmt.Errorf("asset with tag '%s' already exists", assets[i].Tag)
 		}
 
-		err = ic.createAsset(ctx, assets[i])
+		err = ic.createAsset(ctx, assets[i], cmd)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ func (ic *ImporterCtrl) createAssets(ctx context.Context, assets []*entities.Ass
 	return nil
 }
 
-func (ic *ImporterCtrl) createAsset(ctx context.Context, asset *entities.Asset) error {
+func (ic *ImporterCtrl) createAsset(ctx context.Context, asset *entities.Asset, cmd ImportCmd) error {
 	for j := range asset.Purchases {
 		if asset.Purchases[j].Amount != 0 && asset.Purchases[j].Currency == "" {
 			asset.Purchases[j].Currency = ic.config.DefaultCurrency
@@ -123,6 +123,8 @@ func (ic *ImporterCtrl) createAsset(ctx context.Context, asset *entities.Asset) 
 	} else {
 		asset.ImageURL = ""
 	}
+
+	asset.MetaInfo.CreatedBy = cmd.ImportUserID
 
 	_, err := ic.assets.Create(ctx, CreateAssetCmd{
 		Asset: asset,

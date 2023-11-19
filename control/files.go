@@ -43,7 +43,7 @@ func NewFileControl(db *database.Database, repo FileRepo, blobs FileBlobs) *File
 }
 
 func (fc *FileControl) Get(ctx context.Context, id int64) (*entities.File, error) {
-	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx bob.Tx) (*entities.File, error) {
+	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx database.Executor) (*entities.File, error) {
 		file, err := fc.repo.Get(ctx, tx, id)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrFileNotFound) {
@@ -62,7 +62,7 @@ type ListFilesQuery struct {
 }
 
 func (fc *FileControl) List(ctx context.Context, query ListFilesQuery) (*entities.ListPage[*entities.File], error) {
-	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx bob.Tx) (*entities.ListPage[*entities.File], error) {
+	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx database.Executor) (*entities.ListPage[*entities.File], error) {
 		return fc.repo.List(ctx, tx, database.ListFilesQuery{
 			AssetID:  query.AssetID,
 			Page:     query.Page,
@@ -72,7 +72,7 @@ func (fc *FileControl) List(ctx context.Context, query ListFilesQuery) (*entitie
 }
 
 func (fc *FileControl) WriteFile(ctx context.Context, file *entities.File) (*entities.File, error) {
-	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx bob.Tx) (*entities.File, error) {
+	return database.InTransaction(ctx, fc.db, func(ctx context.Context, tx database.Executor) (*entities.File, error) {
 		return fc.writeFile(ctx, tx, file)
 	})
 }
@@ -97,7 +97,7 @@ func (fc *FileControl) writeFile(ctx context.Context, exec bob.Executor, file *e
 }
 
 func (fc *FileControl) DeleteByPublicPath(ctx context.Context, publicPath string) error {
-	return fc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return fc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		file, err := fc.repo.GetByPublicPath(ctx, tx, publicPath)
 		if err != nil {
 			if errors.Is(err, sqlite.ErrFileNotFound) {
@@ -111,7 +111,7 @@ func (fc *FileControl) DeleteByPublicPath(ctx context.Context, publicPath string
 }
 
 func (fc *FileControl) Delete(ctx context.Context, id int64) error {
-	return fc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return fc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		file, err := fc.repo.Get(ctx, tx, id)
 		if err != nil {
 			return err
@@ -134,7 +134,7 @@ func (fc *FileControl) Delete(ctx context.Context, id int64) error {
 }
 
 func (fc *FileControl) DeleteAllForAsset(ctx context.Context, assetID int64) error {
-	return fc.db.InTransaction(ctx, func(ctx context.Context, tx bob.Tx) error {
+	return fc.db.InTransaction(ctx, func(ctx context.Context, tx database.Executor) error {
 		return fc.deleteAllForAsset(ctx, tx, assetID)
 	})
 }
