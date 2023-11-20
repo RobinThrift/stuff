@@ -10,7 +10,7 @@
         "autoprefixer": "10.4.16",
         "concurrently": "8.2.1",
         "cssnano": "^6.0.1",
-        "esbuild": "0.19.2",
+        "esbuild": "0.19.6",
         "openapi-typescript": "^6.7.0",
         "postcss": "^8.4.31",
         "postcss-cli": "10.1.0",
