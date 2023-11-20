@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
-	github.com/alexedwards/scs/v2 v2.5.1
+	github.com/alexedwards/scs/v2 v2.7.0
 	github.com/boombuler/barcode v1.0.1
 	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/go-chi/chi/v5 v5.0.10
