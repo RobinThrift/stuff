@@ -2,7 +2,6 @@
     "name": "Stuff",
     "short_name": "Stuff",
     "start_url": "/",
-    "theme_color": "#4A86E5",
     "background_color": "#ffffff",
     "display": "standalone",
     "icons": [
