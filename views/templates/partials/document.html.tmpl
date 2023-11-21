@@ -1,5 +1,6 @@
 {{ define "document_head" }}
 {{- $class := "" -}}
+{{- $isDark := false -}}
 
 {{- with $.Global.User -}}
 {{- if ne .Preferences.ThemeName "default" -}}
@@ -7,7 +8,11 @@
 {{- end -}}
 
 {{- if ne .Preferences.ThemeMode "" -}}
-{{- $class = concat $class " " .Preferences.ThemeMode  -}}
+{{- $class = concat $class " " .Preferences.ThemeMode -}}
+{{- end -}}
+
+{{- if eq .Preferences.ThemeMode "dark" -}}
+{{- $isDark = true -}}
 {{- end -}}
 {{- end -}}
 <!DOCTYPE html>
@@ -19,6 +24,7 @@
 		<link rel="manifest" href="/manifest/manifest.json" />
 		<link rel="apple-touch-icon" href="manifest/icon512_maskable.png" />
 		<link rel="apple-touch-icon" sizes="512x512" href="manifest/icon512_maskable.png" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="{{ if $isDark -}} black {{- else -}} default {{- end}}">
 		<meta name="csrf-token" content="{{ .Global.CSRFToken }}"/>
 		<title>Stuff – {{ .Global.Title }}</title>
 		<link rel="stylesheet" href="/static/styles.css" />

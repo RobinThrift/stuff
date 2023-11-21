@@ -8,6 +8,10 @@ class Theme {
     name: ThemeNames = "default"
     mode: ThemeModes = "system"
 
+    statusBar: HTMLMetaElement | null = document.querySelector(
+        `meta[name="apple-mobile-web-app-status-bar-style"]`,
+    )
+
     private api: API = new API({ baseURL: `${location.origin}` })
 
     get dark(): boolean {
@@ -49,8 +53,14 @@ class Theme {
     _onChange() {
         if (this.dark) {
             document.documentElement.classList.add("dark")
+            if (this.statusBar) {
+                this.statusBar.content = "black"
+            }
         } else {
             document.documentElement.classList.remove("dark")
+            if (this.statusBar) {
+                this.statusBar.content = "default"
+            }
         }
 
         if (this.name === "retro") {
