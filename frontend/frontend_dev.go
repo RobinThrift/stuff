@@ -15,3 +15,7 @@ func Files(prefix string) http.Handler {
 func PDFFont() ([]byte, error) {
 	return os.ReadFile("./frontend/build/fonts/OpenSans-Regular.ttf")
 }
+
+func Manifest() http.Handler {
+	return http.StripPrefix("/manifest/", http.FileServer(http.Dir("./frontend/manifest")))
+}

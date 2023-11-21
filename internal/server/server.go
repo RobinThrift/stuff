@@ -29,13 +29,14 @@ func NewServer(addr string, useSecureCookies bool, sm *scs.SessionManager) (*Ser
 	mux.Use(
 		requestIDMiddleware,
 		logReqMiddleware,
-		sessionMiddleware(sm, []string{"/static"}),
+		sessionMiddleware(sm, []string{"/static", "/manifest"}),
 		csrfMiddleware,
-		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/"}),
+		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/", "/manifest/"}),
 	)
 
 	mux.Get("/health", http.HandlerFunc(srv.handleHealth))
 	mux.Handle("/static/*", frontend.Files("/static/"))
+	mux.Handle("/manifest/*", frontend.Manifest())
 
 	return &Server{
 		Mux: mux,
