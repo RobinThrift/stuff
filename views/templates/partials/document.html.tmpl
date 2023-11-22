@@ -3,8 +3,8 @@
 {{- $themeName := "" -}}
 {{- $themeMode := "" -}}
 {{- with $.Global.User -}}
-{{- $themeName := .Preferences.ThemeName -}}
-{{- $themeMode := .Preferences.ThemeMode -}}
+{{- $themeName = .Preferences.ThemeName -}}
+{{- $themeMode = .Preferences.ThemeMode -}}
 {{- end -}}
 
 {{- $hasModeOverride := or (eq $themeMode "light") (eq $themeMode "dark") -}}
