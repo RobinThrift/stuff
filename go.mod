@@ -1,6 +1,6 @@
 module github.com/RobinThrift/stuff
 
-go 1.21.1
+go 1.21.4
 
 require (
 	github.com/aarondl/opt v0.0.0-20230114172057-b91f370c41f0
