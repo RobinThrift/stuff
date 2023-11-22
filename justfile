@@ -3,9 +3,9 @@ go_ldflgas     := env_var_or_default("GO_LDFLGAS", "") + " -X 'github.com/RobinT
 go_tags        := env_var_or_default("GO_TAGS", "")
 go_build_flags := env_var_or_default("GO_BUILD_FLAGS", "")
 oci_repo       := env_var_or_default("OCI_REPO", "ghcr.io/robinthrift/stuff")
+gobin          := absolute_path(".gobin")
 
-
-export PATH := "./frontend/node_modules/.bin:" + "./node_modules/.bin:" + env_var('PATH')
+export PATH := "./frontend/node_modules/.bin:" + "./node_modules/.bin:" + gobin + ":" + env_var('PATH')
 export STUFF_LOG_LEVEL := "debug"
 export STUFF_LOG_FORMAT := "console"
 export STUFF_ADDRESS := "localhost:8888"
@@ -34,7 +34,6 @@ test *flags="-failfast -v -timeout 5m":
 run: build-js build-icons _fonts
     mkdir -p .run
     go run -tags dev,sqlite_fts5 ./bin/stuff
-
 
 watch: _npm-install _fonts
     mkdir -p .run
@@ -126,22 +125,14 @@ _npm-install:
 _fonts:
     [ -f frontend/build/fonts/OpenSans-Regular.ttf ] || (mkdir -p frontend/build/fonts && curl -L https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf -o frontend/build/fonts/OpenSans-Regular.ttf)
 
-staticcheck_version := "2023.1.5"
-golangci_lint_version := "v1.55.1"
-goose_version := "v3.15.0"
-bobgen_version := "v0.22.0"
-wgo_version := "v0.5.4"
-git_chglog_version := "v0.15.4"
-oapicodegen_version := "v1.16.2"
 _go-tools:
-    @if ! type -p wgo > /dev/null ; then go install github.com/bokwoon95/wgo@{{wgo_version}} ; fi
-    @if ! type -p staticcheck > /dev/null ; then go install honnef.co/go/tools/cmd/staticcheck@{{staticcheck_version}} ; fi
-    @if ! type -p golangci-lint > /dev/null ; then go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{golangci_lint_version}} ; fi
-    @if ! type -p goose > /dev/null ; then go install github.com/pressly/goose/v3/cmd/goose@{{goose_version}} ; fi
-    @if ! type -p goose > /dev/null ; then go install github.com/pressly/goose/v3/cmd/goose@{{goose_version}} ; fi
-    @if ! type -p bobgen-sqlite > /dev/null ; then go install github.com/stephenafamo/bob/gen/bobgen-sqlite@{{bobgen_version}} ; fi
-    @if ! type -p git-chglog > /dev/null ; then go install github.com/git-chglog/git-chglog/cmd/git-chglog@{{bobgen_version}} ; fi
-    @if ! type -p oapi-codegen > /dev/null ; then go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@{{oapicodegen_version}} ; fi
+    @if ! type -p {{  gobin  }}/wgo > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/bokwoon95/wgo ; fi
+    @if ! type -p {{  gobin  }}/staticcheck > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly honnef.co/go/tools/cmd/staticcheck ; fi
+    @if ! type -p {{  gobin  }}/golangci-lint > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint ; fi
+    @if ! type -p {{  gobin  }}/goose > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/pressly/goose/v3/cmd/goose ; fi
+    @if ! type -p {{  gobin  }}/bobgen-sqlite > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/stephenafamo/bob/gen/bobgen-sqlite ; fi
+    @if ! type -p {{  gobin  }}/git-chglog > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/git-chglog/git-chglog/cmd/git-chglog ; fi
+    @if ! type -p {{  gobin  }}/oapi-codegen > /dev/null ; then GOBIN={{ gobin }} go install -mod=readonly github.com/deepmap/oapi-codegen/cmd/oapi-codegen ; fi
 
 
 clean:

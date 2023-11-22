@@ -4,6 +4,7 @@
 .idea
 
 node_modules
+.gobin
 
 build
 *.db
