@@ -10,10 +10,12 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path"
 	"regexp"
 	"sync"
+	"time"
 )
 
 var templateDir = path.Join("views", "templates")
@@ -24,6 +26,14 @@ var pagesDir = path.Join(templateDir, "pages")
 var templateFS = os.DirFS(".")
 
 var execTemplateMutex sync.Mutex
+
+func timing(tmplName string) func() {
+	start := time.Now()
+	return func() {
+		dur := time.Since(start)
+		slog.Debug(fmt.Sprintf("rendering time for %s: %v", tmplName, dur))
+	}
+}
 
 func execTemplate(w io.Writer, name string, data any) error {
 	execTemplateMutex.Lock()
@@ -48,6 +58,7 @@ func execTemplate(w io.Writer, name string, data any) error {
 		return enhanceErrorMessage(cfs, err)
 	}
 
+	defer timing(name)()
 	err = templates.ExecuteTemplate(w, name+".html.tmpl", data)
 	if err != nil {
 		return enhanceErrorMessage(cfs, err)

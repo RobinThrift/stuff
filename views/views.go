@@ -126,6 +126,10 @@ func Render[D any](w io.Writer, name string, data Model[D]) error {
 		return fmt.Errorf("error rendering template %s: %w", name, err)
 	}
 
+	if hw, ok := w.(http.ResponseWriter); ok {
+		hw.Header().Set("content-type", "text/html; charset=utf-8")
+	}
+
 	_, err = b.WriteTo(w)
 	if err != nil {
 		return fmt.Errorf("error writing template %s: %w", name, err)

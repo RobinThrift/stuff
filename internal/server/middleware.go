@@ -5,12 +5,14 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/RobinThrift/stuff/auth"
 	"github.com/RobinThrift/stuff/internal/requestid"
 	"github.com/RobinThrift/stuff/internal/server/session"
 	"github.com/RobinThrift/stuff/views"
 	"github.com/alexedwards/scs/v2"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/segmentio/ksuid"
 )
@@ -28,8 +30,21 @@ func logReqMiddleware(next http.Handler) http.Handler {
 		if r.URL.RawQuery != "" {
 			url += "?" + r.URL.RawQuery
 		}
-		slog.InfoContext(r.Context(), url, "method", r.Method)
-		next.ServeHTTP(w, r)
+
+		wrapped := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+		start := time.Now()
+		defer func() {
+			dur := float64(time.Since(start)) / float64(time.Millisecond)
+			var log = slog.InfoContext
+			if wrapped.Status() >= 400 {
+				log = slog.ErrorContext
+			}
+
+			log(r.Context(), url, "method", r.Method, "status", wrapped.Status(), "response_time_ms", dur, "bytes_written", wrapped.BytesWritten())
+		}()
+
+		next.ServeHTTP(wrapped, r)
 	})
 }
 

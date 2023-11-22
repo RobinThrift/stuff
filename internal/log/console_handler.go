@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"log/slog"
+
+	"github.com/RobinThrift/stuff/internal/requestid"
 )
 
 type consoleHandler struct {
@@ -31,8 +33,12 @@ func (h *consoleHandler) Enabled(_ context.Context, l slog.Level) bool {
 	return l >= h.level
 }
 
-func (h *consoleHandler) Handle(_ context.Context, record slog.Record) error {
+func (h *consoleHandler) Handle(ctx context.Context, record slog.Record) error {
 	out := h.out
+
+	if reqID, ok := requestid.FromCtx(ctx); ok {
+		record.AddAttrs(slog.String("request_id", reqID))
+	}
 
 	if record.Level >= slog.LevelError {
 		out = h.errout
