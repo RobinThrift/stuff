@@ -38,24 +38,20 @@ run: build-js build-icons _fonts
 
 watch: _npm-install _fonts
     mkdir -p .run
-    concurrently "just _watch-go" "just _watch-styles" "just _watch-icons" "just _watch-js"
-
-_watch-go:
     wgo \
         -file '.*\.go' \
         -xfile '.*_test\.go' \
-        go run -tags dev,sqlite_fts5 ./bin/stuff
-
-_watch-styles:
-    postcss ./frontend/src/styles.css -o ./frontend/build/styles.css --watch
-
-_watch-js:
-    cd frontend && esbuild src/index.ts --format=esm --target=es2020 --bundle --outfile=build/bundle.min.js --watch
-
-_watch-icons:
+        go run -tags dev,sqlite_fts5 ./bin/stuff :: \
     wgo \
         -file 'frontend/src/icons/.*\.svg' \
-        just build-icons
+        just build-icons :: \
+    wgo \
+        -file frontend/package.json \
+        ./frontend/node_modules/.bin/postcss --verbose ./frontend/src/styles.css -o ./frontend/build/styles.css --watch :: \
+    wgo \
+        -cd frontend \
+        -file frontend/package.json \
+        ./node_modules/.bin/esbuild src/index.ts --format=esm --target=es2020 --bundle --outfile=build/bundle.min.js --watch=forever
 
 build: build-js build-js build-styles build-icons _fonts
     just _build-go
@@ -134,7 +130,7 @@ staticcheck_version := "2023.1.5"
 golangci_lint_version := "v1.55.1"
 goose_version := "v3.15.0"
 bobgen_version := "v0.22.0"
-wgo_version := "v0.5.3"
+wgo_version := "v0.5.4"
 git_chglog_version := "v0.15.4"
 oapicodegen_version := "v1.16.2"
 _go-tools:

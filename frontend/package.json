@@ -8,7 +8,6 @@
         "@tailwindcss/forms": "0.5.7",
         "@types/alpinejs": "3.7.2",
         "autoprefixer": "10.4.16",
-        "concurrently": "8.2.1",
         "cssnano": "^6.0.1",
         "esbuild": "0.19.6",
         "openapi-typescript": "^6.7.0",
