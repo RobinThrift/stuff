@@ -9,6 +9,7 @@ import (
 	"github.com/RobinThrift/stuff/frontend"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {
@@ -32,6 +33,7 @@ func NewServer(addr string, useSecureCookies bool, sm *scs.SessionManager) (*Ser
 		sessionMiddleware(sm, []string{"/static", "/manifest"}),
 		csrfMiddleware,
 		loginRedirectMiddleware([]string{"/login", "/auth/changepassword", "/static/", "/manifest/"}),
+		middleware.Compress(5),
 	)
 
 	mux.Get("/health", http.HandlerFunc(srv.handleHealth))
