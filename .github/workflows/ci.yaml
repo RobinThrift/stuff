@@ -16,13 +16,13 @@ jobs:
         go-version: 1.21.1
     - uses: actions/setup-node@v3
       with:
-    - name: Install just 1.14.0
         node-version: '21'
+    - name: Install just 1.16.0
       uses: kodeshack/action-install-gh-release@v1.4.2
       with:
         owner: casey
         repo: just
-        version: '1.13.0'
+        version: '1.16.0'
         test: just --version
     - name: Check out code
       uses: actions/checkout@v4
