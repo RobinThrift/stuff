@@ -1,20 +1,27 @@
 {{ define "document_head" }}
 {{- $class := "" -}}
-{{- $isDark := false -}}
-
+{{- $themeName := "" -}}
+{{- $themeMode := "" -}}
 {{- with $.Global.User -}}
-{{- if ne .Preferences.ThemeName "default" -}}
-{{- $class = .Preferences.ThemeName  -}}
+{{- $themeName := .Preferences.ThemeName -}}
+{{- $themeMode := .Preferences.ThemeMode -}}
 {{- end -}}
 
-{{- if ne .Preferences.ThemeMode "" -}}
-{{- $class = concat $class " " .Preferences.ThemeMode -}}
+{{- $hasModeOverride := or (eq $themeMode "light") (eq $themeMode "dark") -}}
+
+{{- $themeColourLight := "#ffffff" -}}
+{{- $themeColourDark := "#050b14" -}}
+
+{{- if eq $themeName "retro" -}}
+{{- $class = $themeName  -}}
+{{- $themeColourLight = "#ffffff" -}}
+{{- $themeColourDark = "#f2f2f2" -}}
 {{- end -}}
 
-{{- if eq .Preferences.ThemeMode "dark" -}}
-{{- $isDark = true -}}
+{{- if $hasModeOverride -}}
+{{- $class = concat $class " " $themeMode -}}
 {{- end -}}
-{{- end -}}
+
 <!DOCTYPE html>
 <html lang="en" {{ if ne $class "" -}} class="{{ $class }}" {{- end }}>
 	<head>
@@ -24,7 +31,17 @@
 		<link rel="manifest" href="/manifest/manifest.json" />
 		<link rel="apple-touch-icon" href="manifest/icon512_maskable.png" />
 		<link rel="apple-touch-icon" sizes="512x512" href="manifest/icon512_maskable.png" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="{{ if $isDark -}} black {{- else -}} default {{- end}}">
+		<meta name="mobile-web-app-capable" content="yes" />
+		{{ if not $hasModeOverride -}}
+		<meta name="theme-color" content="{{ $themeColourLight }}" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="{{ $themeColourDark }}" media="(prefers-color-scheme: dark)" />
+		{{- else }}
+		{{ if eq $themeMode "dak" -}}
+		<meta name="theme-color" content="{{ $themeColourDark }}" />
+		{{- else }}
+		<meta name="theme-color" content="{{ $themeColourLight }}" />
+		{{- end }}
+		{{- end }}
 		<meta name="csrf-token" content="{{ .Global.CSRFToken }}"/>
 		<title>Stuff – {{ .Global.Title }}</title>
 		<link rel="stylesheet" href="/static/styles.css" />

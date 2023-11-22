@@ -1,5 +1,13 @@
 @layer base {
     :root {
+        --theme-colour-default-light: #ffffff;
+        --theme-colour-default-dark: #050b14;
+
+        --theme-colour-retro-light: #f2f2f2;
+        --theme-colour-retro-dark: #050b14;
+    }
+
+    :root {
         --colour-background-default: 255 255 255;
         --colour-background-accent: 248 248 250;
         --colour-background-hover: 239 239 239;
