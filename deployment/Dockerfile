@@ -10,7 +10,7 @@ WORKDIR /stuff
 
 RUN just build-js build-js build-styles build-icons _fonts
 
-FROM --platform=$BUILDPLATFORM golang:1.21.2-alpine3.18 as builder
+FROM --platform=$BUILDPLATFORM golang:1.21.4-alpine3.18 as builder
 
 COPY --from=xx / /
 
