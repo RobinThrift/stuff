@@ -188,6 +188,10 @@ func listAssets(ctx context.Context, exec bob.Executor, query database.ListAsset
 		qmods = append(qmods, models.SelectWhere.Assets.ID.In(query.IDs...))
 	}
 
+	if query.AssetType != "" {
+		qmods = append(qmods, models.SelectWhere.Assets.Type.EQ(query.AssetType))
+	}
+
 	count, err := models.Assets.Query(ctx, exec, qmods...).Count()
 	if err != nil {
 		return nil, 0, fmt.Errorf("error counting assets: %w", err)
@@ -207,10 +211,6 @@ func listAssets(ctx context.Context, exec bob.Executor, query database.ListAsset
 
 	if query.IncludeFiles {
 		qmods = append(qmods, models.PreloadAssetFileAsset())
-	}
-
-	if query.AssetType != "" {
-		qmods = append(qmods, models.SelectWhere.Assets.Type.EQ(query.AssetType))
 	}
 
 	if query.OrderBy != "" {

@@ -73,6 +73,95 @@ func TestAssetRepo_CRUD(t *testing.T) {
 	assert.ErrorIs(t, err, ErrAssetNotFound)
 }
 
+func TestAssetRepo_ListPagination(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+
+	repo, exec := newTestAssetRepo(t)
+
+	types := []entities.AssetType{entities.AssetTypeAsset, entities.AssetTypeComponent, entities.AssetTypeConsumable}
+
+	for i := 0; i < 100; i++ {
+		asset := newTestAsset(t)
+		asset.Name = fmt.Sprintf("%s %d", asset.Name, i)
+		asset.Type = types[i%3]
+		err := repo.Create(ctx, exec, asset)
+		assert.NoError(t, err)
+	}
+
+	type exp struct {
+		len      int
+		total    int
+		page     int
+		pageSize int
+		numPages int
+	}
+
+	tt := []struct {
+		name string
+		q    database.ListAssetsQuery
+		exp  exp
+	}{
+		{
+			"List all",
+			database.ListAssetsQuery{},
+			exp{
+				len:      100,
+				total:    100,
+				page:     0,
+				pageSize: 100,
+				numPages: 1,
+			},
+		},
+		{
+			"Page size 25",
+			database.ListAssetsQuery{PageSize: 25},
+			exp{
+				len:      25,
+				total:    100,
+				page:     0,
+				pageSize: 25,
+				numPages: 4,
+			},
+		},
+		{
+			"All filtered",
+			database.ListAssetsQuery{AssetType: string(entities.AssetTypeAsset)},
+			exp{
+				len:      34,
+				total:    34,
+				page:     0,
+				pageSize: 34,
+				numPages: 1,
+			},
+		},
+		{
+			"Filtered by FTS",
+			database.ListAssetsQuery{SearchRaw: "name:Test Asset 1*", SearchFields: map[string]string{"name": "Test Asset 1*"}},
+			exp{
+				len:      11,
+				total:    11,
+				page:     0,
+				pageSize: 11,
+				numPages: 1,
+			},
+		},
+	}
+
+	for _, tt := range tt {
+		t.Run(tt.name, func(t *testing.T) {
+			list, err := repo.List(ctx, exec, tt.q)
+			assert.NoError(t, err)
+
+			assert.Len(t, list.Items, tt.exp.len, "len of items")
+			assert.Equal(t, tt.exp.total, list.Total, "total num of items")
+			assert.Equal(t, tt.exp.page, list.Page, "page num")
+			assert.Equal(t, tt.exp.pageSize, list.PageSize, "page size")
+			assert.Equal(t, tt.exp.numPages, list.NumPages, "num of pages")
+		})
+	}
+}
+
 func newTestAssetRepo(t *testing.T) (*AssetRepo, bob.Executor) {
 	db, err := NewSQLiteDB(&Config{File: ":memory:", Timeout: time.Millisecond * 500})
 	if err != nil {
