@@ -27,6 +27,12 @@ lint: _npm-install
     golangci-lint run ./...
     cd frontend && biome check src/*.ts
 
+lint-ci: _npm-install
+    @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
+    golangci-lint run --out-format=junit-xml ./... > lint.junit.xml
+    staticcheck ./...
+    cd frontend && biome check src/*.ts
+
 test *flags="-failfast -v -timeout 5m":
     @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
     if type -p gotestsum > /dev/null ; then \
@@ -34,6 +40,10 @@ test *flags="-failfast -v -timeout 5m":
     else \
         go test -tags sqlite_fts5 {{ flags }} ./...; \
     fi
+
+test-ci:
+    @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
+    gotestsum --format short-verbose --junitfile=test.junit.xml -- -tags sqlite_fts5 -timeout 10m ./...
 
 alias tw := test-watch
 test-watch *flags="-failfast -timeout 5m":

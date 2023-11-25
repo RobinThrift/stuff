@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  issues: read
+  checks: write
+  pull-requests: write
+
 jobs:
   LintAndTest:
     runs-on: ubuntu-latest
@@ -34,15 +40,34 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-    - name: Install staticcheck
+    - name: Install gotestsum
+      run: |
+        go install -mod=readonly gotest.tools/gotestsum
+    - name: Install staticcheck and golangci-lint
       run: |
         go install -mod=readonly honnef.co/go/tools/cmd/staticcheck
-    - name: Install golangci-lint
-      run: |
         go install -mod=readonly github.com/golangci/golangci-lint/cmd/golangci-lint
+
     - name: "Lint"
       run: |
-        just lint
+        just lint-ci
+
     - name: "Test"
       run: |
-        just test
+        just test-ci
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: "Test Results"
+        files: |
+          test.junit.xml
+
+    - name: Publish Lint Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        check_name: "Lint Results"
+        files: |
+          lint.junit.xml
