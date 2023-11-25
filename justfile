@@ -27,9 +27,15 @@ lint: _npm-install
     golangci-lint run ./...
     cd frontend && biome check src/*.ts
 
+testrunner := if `type -p gotestsum || echo ""` != "" { "gotestsum --format short-verbose --" } else { "go test" }
 test *flags="-failfast -v -timeout 5m":
     @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
-    go test -tags sqlite_fts5 {{ flags }} ./...
+    {{  testrunner  }} -tags sqlite_fts5 {{ flags }} ./...
+
+alias tw := test-watch
+test-watch *flags="-failfast -timeout 5m":
+    @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
+    gotestsum --watch --format short-verbose -- -tags sqlite_fts5 {{ flags }}
 
 run: build-js build-icons _fonts
     mkdir -p .run
