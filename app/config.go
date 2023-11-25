@@ -87,7 +87,7 @@ func NewConfigFromEnv() (*Config, error) {
 		Auth: Auth{
 			Local: LocalAuth{
 				InitialAdminPassword: getEnvDefault("STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD", ""),
-				// Recommended setting can be found at https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03#section-4
+				// Recommended settings can be found at https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03#section-4
 				Argon2Params: Argon2Params{
 					KeyLen:  uint32(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_KEYLEN", 32)),
 					Memory:  uint32(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_MEMORY", 131072)), // 4GiB
