@@ -89,10 +89,10 @@ func NewConfigFromEnv() (*Config, error) {
 				InitialAdminPassword: getEnvDefault("STUFF_AUTH_LOCAL_INITIAL_ADMIN_PASSWORD", ""),
 				// Recommended settings can be found at https://tools.ietf.org/html/draft-irtf-cfrg-argon2-03#section-4
 				Argon2Params: Argon2Params{
-					KeyLen:  uint32(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_KEYLEN", 32)),
-					Memory:  uint32(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_MEMORY", 131072)), // 4GiB
-					Threads: uint8(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_THREADS", 4)),
-					Time:    uint32(getEnvIntDefault("STUFF_AUTH_LOCAL_ARGON2_TIME", 1)),
+					KeyLen:  getEnvUint32Default("STUFF_AUTH_LOCAL_ARGON2_KEYLEN", 32),
+					Memory:  getEnvUint32Default("STUFF_AUTH_LOCAL_ARGON2_MEMORY", 131072), // 4GiB
+					Threads: getEnvUint8Default("STUFF_AUTH_LOCAL_ARGON2_THREADS", 4),
+					Time:    getEnvUint32Default("STUFF_AUTH_LOCAL_ARGON2_TIME", 1),
 					Version: 0x13, // constant
 				},
 			},
@@ -112,18 +112,32 @@ func getEnvDefault(key string, d string) string {
 	return v
 }
 
-func getEnvIntDefault(key string, d int) int {
+func getEnvUint8Default(key string, d uint8) uint8 {
 	v, ok := os.LookupEnv(key)
 	if !ok {
 		return d
 	}
 
-	i, err := strconv.Atoi(v)
+	i, err := strconv.ParseUint(v, 10, 8)
 	if err != nil {
 		return d
 	}
 
-	return i
+	return uint8(i)
+}
+
+func getEnvUint32Default(key string, d uint32) uint32 {
+	v, ok := os.LookupEnv(key)
+	if !ok {
+		return d
+	}
+
+	i, err := strconv.ParseUint(v, 10, 32)
+	if err != nil {
+		return d
+	}
+
+	return uint32(i)
 }
 
 func getEnvBoolDefault(key string, d bool) bool {
