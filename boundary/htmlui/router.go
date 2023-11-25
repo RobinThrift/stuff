@@ -182,18 +182,18 @@ func newDecoder(decimalSeparator string) *form.Decoder {
 			return entities.MonetaryAmount(0), nil
 		}
 
-		base := 0
-		fractional := 0
+		var base int64
+		var fractional int64
 		var err error
 
 		split := strings.SplitN(s[0], decimalSeparator, 2)
-		base, err = strconv.Atoi(split[0])
+		base, err = strconv.ParseInt(split[0], 10, 64)
 		if err != nil {
 			return nil, err
 		}
 
 		if len(split) == 2 {
-			fractional, err = strconv.Atoi(split[1])
+			fractional, err = strconv.ParseInt(split[1], 10, 64)
 			if err != nil {
 				return nil, err
 			}

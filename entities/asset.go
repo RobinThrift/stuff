@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type MonetaryAmount int
+type MonetaryAmount int64
 
 func (c MonetaryAmount) Format(decimalSeparator string) string {
 	fraction := c % 100
