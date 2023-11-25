@@ -6,7 +6,7 @@
     "formatter": {
         "enabled": true,
         "indentStyle": "space",
-        "indentSize": 4
+        "indentWidth": 4
     },
     "linter": {
         "enabled": true,
@@ -14,6 +14,9 @@
             "recommended": true,
             "style": {
                 "useConst": "off"
+            },
+            "complexity": {
+                "noForEach": "off"
             }
         }
     },
