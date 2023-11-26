@@ -1,5 +1,6 @@
 import _Alpine from "alpinejs"
 import { plugin as autocomplete } from "./autocompleter"
+import { plugin as barcodeScanner } from "./barcode_scanner"
 import { plugin as commandpalette } from "./command_palette"
 import { plugin as labels } from "./labels"
 import { plugin as settings } from "./settings"
@@ -14,6 +15,7 @@ declare global {
 }
 
 _Alpine.plugin(autocomplete)
+_Alpine.plugin(barcodeScanner)
 _Alpine.plugin(commandpalette)
 _Alpine.plugin(settings)
 _Alpine.plugin(uploader)

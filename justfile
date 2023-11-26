@@ -138,8 +138,25 @@ install:
     just _npm-install
     just _go-tools
 
-_npm-install:
+_npm-install: 
     [ -d frontend/node_modules ] || (cd frontend && npm i --no-audit --no-fund)
+    just --quiet _get-zxing-wasm
+
+zxing_version := "v2.1.0"
+_get-zxing-wasm:
+    -mkdir -p frontend/build
+    [ -f frontend/node_modules/zxing-{{ zxing_version }}/zxing.js ] || (\
+        rm -rf frontend/node_modules/zxing-* && \
+        curl -L https://github.com/zxing-cpp/zxing-cpp/releases/download/{{ zxing_version }}/wasm-artifacts.zip -o frontend/node_modules/.wasm-artifacts.zip && \
+        unzip frontend/node_modules/.wasm-artifacts.zip -d frontend/node_modules/.zxing-wasm && \
+        mkdir -p frontend/node_modules/zxing-{{ zxing_version }} && \
+        mv frontend/node_modules/.zxing-wasm/zxing_reader.js frontend/node_modules/zxing-{{ zxing_version }}/zxing.js && \
+        mv frontend/node_modules/.zxing-wasm/zxing_reader.wasm frontend/build/zxing-{{ zxing_version }}.wasm && \
+        sed -i'' -e "s/var ZXing =/export const ZXing =/" frontend/node_modules/zxing-{{ zxing_version }}/zxing.js && \
+        sed -i'' -e 's#"zxing_reader.wasm"#"/static/zxing-{{ zxing_version }}.wasm"#' frontend/node_modules/zxing-{{ zxing_version }}/zxing.js && \
+        curl -L https://raw.githubusercontent.com/zxing-cpp/zxing-cpp/v2.1.0/LICENSE -o frontend/build/zxing-{{ zxing_version }}.LICENSE && \
+        rm -rf frontend/node_modules/.wasm-artifacts.zip frontend/node_modules/.zxing-wasm \
+    )
 
 _fonts:
     [ -f frontend/build/fonts/OpenSans-Regular.ttf ] || (mkdir -p frontend/build/fonts && curl -L https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf -o frontend/build/fonts/OpenSans-Regular.ttf)

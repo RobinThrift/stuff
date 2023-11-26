@@ -1,12 +1,21 @@
 import type _Alpine from "alpinejs"
 import { hasMatch } from "fzy.js"
 
-interface Cmd {
+interface BaseCmd {
     name: string
     icon: string
-    url: string
     tags: string[]
 }
+
+interface LinkCmd extends BaseCmd {
+    url: string
+}
+
+interface ActionCmd extends BaseCmd {
+    action: (data: { showBarcodeScanner: boolean; search: string }) => void
+}
+
+type Cmd = LinkCmd | ActionCmd
 
 type CmdCategroy = [string, Cmd[]]
 
@@ -51,6 +60,20 @@ export function plugin(Alpine: typeof _Alpine) {
                 ],
             ],
             [
+                "Barcode",
+                [
+                    {
+                        name: "Scan Barcode",
+                        icon: "barcode",
+                        action: (data) => {
+                            data.showBarcodeScanner = true
+                            data.search = ""
+                        },
+                        tags: ["qr-code"],
+                    },
+                ],
+            ],
+            [
                 "Tags",
                 [
                     {
@@ -89,12 +112,28 @@ export function plugin(Alpine: typeof _Alpine) {
                 this.$watch("search", () => this.onSearch())
             },
 
-            show: false,
-
             commands,
             shown: [] as CmdCategroy[],
             curr: [0, 0] as [number, number] | undefined,
             search: "",
+
+            isOpen: false,
+            showBarcodeScanner: false,
+
+            open() {
+                this.isOpen = true
+                this.showBarcodeScanner = false
+                setTimeout(() => {
+                    this.$refs.input.focus()
+                }, 100)
+            },
+
+            close() {
+                this.isOpen = false
+                this.search = ""
+                this.curr = [0, 0]
+                this.showBarcodeScanner = false
+            },
 
             onSearch() {
                 if (this.search.length === 0) {
@@ -102,6 +141,7 @@ export function plugin(Alpine: typeof _Alpine) {
                     this.shown = this.commands
                     return
                 }
+                this.showBarcodeScanner = false
 
                 this.shown = this.commands
                     .map((cmds: CmdCategroy): [string, ScoredCmd[]] => [
@@ -165,8 +205,13 @@ export function plugin(Alpine: typeof _Alpine) {
 
                 let [cat, cmd] = this.curr
                 let execCmd = this.shown[cat][1][cmd]
-                if (execCmd) {
+                if (execCmd && "url" in execCmd) {
                     window.location.href = location.origin + execCmd.url
+                    return
+                }
+
+                if (execCmd && "action" in execCmd) {
+                    execCmd.action(this)
                 }
             },
 
