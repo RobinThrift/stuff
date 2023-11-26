@@ -93,7 +93,7 @@ export function plugin(Alpine: typeof _Alpine) {
 
             commands,
             shown: [] as CmdCategroy[],
-            curr: [0, 0] as [number, number],
+            curr: [0, 0] as [number, number] | undefined,
             search: "",
 
             onSearch() {
@@ -104,20 +104,10 @@ export function plugin(Alpine: typeof _Alpine) {
                 }
 
                 this.shown = this.commands
-                    .map((cmds: CmdCategroy) => [
+                    .map((cmds: CmdCategroy): [string, ScoredCmd[]] => [
                         cmds[0],
                         cmds[1]
-                            .map((c) => {
-                                let score = hasMatch(
-                                    this.search,
-                                    c.tags.join(" ") + c.name,
-                                )
-                                return {
-                                    ...c,
-                                    name: c.name,
-                                    score,
-                                }
-                            })
+                            .map((c) => scoreCmd(this.search, c))
                             .filter(({ score }) => score > 0),
                     ])
                     .filter((cmds: CmdCategroy) => cmds[1].length)
@@ -204,4 +194,13 @@ export function plugin(Alpine: typeof _Alpine) {
             },
         }
     })
+}
+
+type ScoredCmd = Cmd & { score: number }
+
+function scoreCmd(input: string, cmd: Cmd): ScoredCmd {
+    return {
+        ...cmd,
+        score: hasMatch(input, cmd.tags.join(" ") + cmd.name),
+    }
 }
