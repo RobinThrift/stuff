@@ -29,7 +29,7 @@ lint: _npm-install
 
 lint-ci: _npm-install
     @[ -d frontend/build ] || (mkdir frontend/build && touch frontend/build/styles.css)
-    golangci-lint run --out-format=junit-xml ./... > lint.junit.xml
+    golangci-lint run --timeout 5m --out-format=junit-xml ./... > lint.junit.xml
     staticcheck ./...
     cd frontend && biome check src/*.ts
 
