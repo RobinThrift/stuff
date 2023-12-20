@@ -24,7 +24,7 @@ require (
 	github.com/stephenafamo/scan v0.5.0
 	github.com/stretchr/testify v1.8.4
 	github.com/yuin/goldmark v1.4.13
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/net v0.19.0
 	gotest.tools/gotestsum v1.11.0
 	honnef.co/go/tools v0.4.6
