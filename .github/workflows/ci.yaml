@@ -63,3 +63,27 @@ jobs:
         check_name: "Lint Results"
         files: |
           lint.junit.xml
+
+  Buld:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v4
+      with:
+        go-version: 1.21.4
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '21'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    - name: Install just 1.16.0
+      uses: kodeshack/action-install-gh-release@v1.4.2
+      with:
+        owner: casey
+        repo: just
+        version: '1.16.0'
+        test: just --version
+
+    - name: "Build"
+      run: |
+        just build
