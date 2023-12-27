@@ -91,18 +91,20 @@ export function plugin(Alpine: typeof _Alpine) {
             let init = evaluateLater(expression)
 
             effect(() => {
-                // biome-ignore lint/suspicious/noExplicitAny: The alpine types are bad
-                init(({ source, itemsAt, valueAt, labelAt, debounce }: any) => {
-                    state.autocompleter = new AutoCompleter({
-                        source,
-                        itemsAt,
-                        valueAt,
-                        labelAt: labelAt,
-                    })
-                    if (debounce) {
-                        state.debounce = debounce
-                    }
-                })
+                init(
+                    // biome-ignore lint/suspicious/noExplicitAny: The alpine types are bad
+                    ({ source, itemsAt, valueAt, labelAt, debounce }: any) => {
+                        state.autocompleter = new AutoCompleter({
+                            source,
+                            itemsAt,
+                            valueAt,
+                            labelAt: labelAt,
+                        })
+                        if (debounce) {
+                            state.debounce = debounce
+                        }
+                    },
+                )
             })
 
             effect(() => {
