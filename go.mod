@@ -9,7 +9,7 @@ require (
 	github.com/boombuler/barcode v1.0.1
 	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/git-chglog/git-chglog v0.15.4
-	github.com/go-chi/chi/v5 v5.0.10
+	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/google/uuid v1.5.0
