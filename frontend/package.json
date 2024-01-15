@@ -11,7 +11,7 @@
         "cssnano": "^6.0.3",
         "esbuild": "^0.19.8",
         "openapi-typescript": "^6.7.1",
-        "postcss": "^8.4.32",
+        "postcss": "^8.4.33",
         "postcss-cli": "11.0.0",
         "postcss-import": "15.1.0",
         "svg-sprite": "2.0.2",
