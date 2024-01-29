@@ -19,7 +19,7 @@
         "tailwindcss-theme-variants": "^2.0.0-beta.0"
     },
     "dependencies": {
-        "alpinejs": "^3.13.3",
+        "alpinejs": "^3.13.5",
         "fzy.js": "0.4.1"
     }
 }
